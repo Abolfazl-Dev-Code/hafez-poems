@@ -1,0 +1,71 @@
+name: hafez_poems
+description: "Poems of Hafez"
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  audioplayers: ^6.6.0
+  carousel_slider: ^5.1.2
+  curved_navigation_bar: ^1.0.6
+  flutter:
+    sdk: flutter
+  funky_icons: ^1.0.2
+  get: ^4.7.3
+  glassmorphism: ^3.0.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  hive_generator: ^2.0.1
+  iconify_flutter: ^0.0.7
+  shared_preferences: ^2.5.5
+  image_picker: ^1.1.2
+  image_cropper: ^8.0.2
+  path_provider: ^2.1.4
+  path: ^1.9.0
+  package_info_plus: ^10.1.0
+  timezone: ^0.11.0
+  permission_handler: ^12.0.1
+  crop_your_image: ^2.0.0
+  share_plus: ^13.1.0
+  url_launcher: ^6.3.2
+  flutter_local_notifications: ^21.0.0
+  http: ^1.6.0
+  skeletonizer: ^2.1.3
+  cupertino_icons: ^1.0.9
+  collection: ^1.19.1
+  connectivity_plus: ^7.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.13.1
+  build_runner: ^2.4.13
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/hafez.png"
+  min_sdk_android: 21
+  remove_alpha_ios_icons: true
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/icon/
+    - assets/json/hafez_fal.json
+    - assets/json/hafez_ghazals.json
+    - assets/json/hafez_ghataat.json
+    - assets/json/hafez_qasaid.json
+    - assets/json/hafez_robaee.json
+    - assets/json/hafez_montasab.json
+  fonts:
+    - family: morvarid
+      fonts:
+        - asset: fonts/morvarid.ttf
+    - family: vazir
+      fonts:
+        - asset: fonts/vazir.ttf
