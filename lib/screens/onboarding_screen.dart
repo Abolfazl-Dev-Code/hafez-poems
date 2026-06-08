@@ -27,7 +27,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   static const _slides = [
     _SlideData(
       icon: Icons.menu_book_rounded,
-      title: 'دیوان حافظ',
+      title: 'اشعار حافظ',
       subtitle: 'تمام غزل‌ها، قصاید و رباعیات\nدر یک برنامه، همیشه در دسترس',
       lightBg: Color(0xFFE8D5B7),
       darkBg: Color(0xFF2C1F0E),

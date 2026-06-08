@@ -97,7 +97,7 @@ class _GhazalDisplayWidgetState extends State<GhazalDisplayWidget> {
             left: 0,
             bottom: 0,
             child: SizedBox(
-              width: 140,
+              width: 120,
               child: ClipRRect(
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(20),

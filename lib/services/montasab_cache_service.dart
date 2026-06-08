@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:http/http.dart' as http;
 import '../models/montasab_model.dart';
 import '../services/montasab_local_service.dart';
 
@@ -32,6 +34,29 @@ class MontasabCacheService extends GetxService {
       cachedMontasabRx.assignAll(items);
     }
     return this;
+  }
+
+  // در GhataatCacheService — بعد از getGhataatDetail
+  Future<String> getAudioUrl(String id) async {
+    try {
+      final url = Uri.parse(
+        'https://api.ganjoor.net/api/ganjoor/poem/$id/recitations',
+      );
+      final response = await http
+          .get(url, headers: {'Accept': 'application/json'})
+          .timeout(const Duration(seconds: 12));
+
+      if (response.statusCode == 200) {
+        final List data = jsonDecode(response.body);
+        if (data.isNotEmpty) {
+          return data[0]['mp3Url'] ?? data[0]['audioUrl'] ?? '';
+        }
+      }
+      return '';
+    } catch (e) {
+      debugPrint('🎵 [CACHE] getAudioUrl error ($id): $e');
+      return '';
+    }
   }
 
   Future<void> preload() async {

@@ -231,19 +231,23 @@ class _SettingPageState extends State<SettingPage>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
         return Directionality(
           textDirection: TextDirection.rtl,
           child: AlertDialog(
             title: Text(
               'حذف تمامی داده‌های محلی',
-              style: AppTextStyles.bodyMediumSetting.copyWith(fontSize: 19),
+              style: AppTextStyles.bodyMediumSetting.copyWith(
+                fontSize: 19,
+                color: colorScheme.onSurface,
+              ),
               textAlign: TextAlign.right,
             ),
             content: Text.rich(
               TextSpan(
                 style: AppTextStyles.titleMediumSetting.copyWith(
                   fontSize: 13,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                   height: 1.8,
                 ),
                 children: [
@@ -505,6 +509,7 @@ class _SettingPageState extends State<SettingPage>
     required BuildContext context,
     required String title,
     required List<Widget> children,
+    IconData? icon, // ← اضافه کن
   }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -529,12 +534,21 @@ class _SettingPageState extends State<SettingPage>
         children: [
           Align(
             alignment: Alignment.centerRight,
-            child: Text(
-              title,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.w700,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: 20, color: colorScheme.onSurface),
+                  const SizedBox(width: 6),
+                ],
+                Text(
+                  title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 12),
@@ -967,6 +981,7 @@ class _SettingPageState extends State<SettingPage>
               _buildSectionCard(
                 context: context,
                 title: 'درباره برنامه',
+                icon: Icons.android,
                 children: [
                   _buildTile(
                     context: context,
@@ -994,6 +1009,7 @@ class _SettingPageState extends State<SettingPage>
               _buildSectionCard(
                 context: context,
                 title: 'اشتراک‌گذاری و حمایت',
+                icon: Icons.share_rounded,
                 children: [
                   _buildTile(
                     context: context,

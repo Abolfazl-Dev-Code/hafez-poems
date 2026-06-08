@@ -3,7 +3,7 @@ import 'package:hafez_poems/theme/text_style.dart';
 import 'package:hive/hive.dart';
 
 mixin SelectionMixin<T extends StatefulWidget> on State<T> {
-  final Set<dynamic> selectedKeys = {};
+  Set<dynamic> selectedKeys = {};
 
   bool get selectionMode => selectedKeys.isNotEmpty;
 

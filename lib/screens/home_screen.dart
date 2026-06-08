@@ -202,6 +202,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 fetchText: (id) => GhataatLocalService.instance
                                     .fetchGhataatById(id)
                                     .then((d) => d.text),
+                                fetchAudioUrl: (id) =>
+                                    Get.find<GhataatCacheService>().getAudioUrl(
+                                      id,
+                                    ),
                               ),
                             ),
                           ),
@@ -253,6 +257,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Get.find<GhasayedCacheService>()
                                         .getGhasayedDetail(id)
                                         .then((d) => d.text),
+                                fetchAudioUrl: (id) =>
+                                    Get.find<GhasayedCacheService>()
+                                        .getAudioUrl(id),
                               ),
                             ),
                           ),
@@ -290,6 +297,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Get.find<RobaeyatCacheService>()
                                         .getRobaeyatDetail(id)
                                         .then((d) => d.text),
+                                fetchAudioUrl: (id) =>
+                                    Get.find<RobaeyatCacheService>()
+                                        .getAudioUrl(id),
                               ),
                             ),
                           ),
@@ -327,6 +337,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Get.find<MontasabCacheService>()
                                         .getMontasabDetail(id)
                                         .then((d) => d.text),
+                                fetchAudioUrl: (id) =>
+                                    Get.find<MontasabCacheService>()
+                                        .getAudioUrl(id),
                               ),
                             ),
                           ),

@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:hafez_poems/screens/poem_screen.dart';
+import 'package:hafez_poems/services/ghazal_cache_service_offline.dart';
+import 'package:hafez_poems/services/ghazal_local_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hafez_poems/models/saved_item.dart';
 import 'package:hafez_poems/controllers/ghazal_action_controller.dart';
@@ -190,14 +196,14 @@ class _FalScreenState extends State<FalScreen>
           toolbarHeight: 80,
           leadingWidth: 60,
           leading: Padding(
-            padding: const EdgeInsets.only(top: 50.0, right: 8.0),
+            padding: const EdgeInsets.only(top: 30.0, right: 8.0),
             child: IconButton(
               icon: const Icon(Icons.arrow_back_rounded),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ),
           title: Padding(
-            padding: const EdgeInsets.only(top: 50.0),
+            padding: const EdgeInsets.only(top: 30.0),
             child: Text(widget.title, style: textTheme.headlineMedium),
           ),
         ),
@@ -227,9 +233,7 @@ class _FalScreenState extends State<FalScreen>
                   ),
                 ),
               ),
-
               const SizedBox(height: 24),
-
               if (_isLoading)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 32),
@@ -247,6 +251,15 @@ class _FalScreenState extends State<FalScreen>
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
+                          _currentFal!.title,
+                          style: textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: colorScheme.primary,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
                           _currentFal!.poem,
                           style: textTheme.bodyLarge?.copyWith(
                             height: 2.0,
@@ -254,7 +267,6 @@ class _FalScreenState extends State<FalScreen>
                           ),
                           textAlign: TextAlign.center,
                         ),
-
                         const Divider(height: 36),
                         Row(
                           children: [
@@ -331,10 +343,7 @@ class _FalScreenState extends State<FalScreen>
                           icon: const Icon(Icons.refresh_rounded, size: 24),
                           label: const Text(
                             'فال مجدد',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: TextStyle(fontSize: 14),
                           ),
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
@@ -350,7 +359,6 @@ class _FalScreenState extends State<FalScreen>
                         height: 56,
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 280),
-                          curve: Curves.easeInOut,
                           child: OutlinedButton.icon(
                             onPressed: _isSaved ? null : _saveFal,
                             icon: AnimatedSwitcher(
@@ -362,13 +370,7 @@ class _FalScreenState extends State<FalScreen>
                                 key: ValueKey(_isSaved),
                               ),
                             ),
-                            label: Text(
-                              _isSaved ? 'ذخیره شد' : 'ذخیره',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                            label: Text(_isSaved ? 'ذخیره شد' : 'ذخیره'),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: _isSaved
                                   ? Colors.white
@@ -390,9 +392,44 @@ class _FalScreenState extends State<FalScreen>
                         ),
                       ),
                     ),
+                    const SizedBox(width: 12),
+                    SizedBox(
+                      height: 56,
+                      width: 56,
+                      child: OutlinedButton(
+                        onPressed: () async {
+                          final ghazalId = (_currentFal!.id + 2129).toString();
+                          final ghazal = await GhazalLocalService.instance
+                              .fetchGhazalById(ghazalId);
+                          if (!mounted) return;
+                          Get.to(
+                            () => PoemScreen(
+                              args: PoemScreenArgs(
+                                id: ghazal.id,
+                                title: ghazal.title,
+                                text: ghazal.text,
+                                fetchText: (id) => GhazalLocalService.instance
+                                    .fetchGhazalById(id)
+                                    .then((g) => g.text),
+                                fetchAudioUrl: (id) =>
+                                    Get.find<GhazalCacheService>().getAudioUrl(
+                                      id,
+                                    ),
+                              ),
+                            ),
+                          );
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: const Icon(Icons.menu_book_rounded),
+                      ),
+                    ),
                   ],
                 ),
-
               const SizedBox(height: 20),
             ],
           ),

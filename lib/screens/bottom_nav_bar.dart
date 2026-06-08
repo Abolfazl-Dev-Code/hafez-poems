@@ -15,12 +15,13 @@ class BottomNavBar extends StatefulWidget {
 class _BottomNavBarState extends State<BottomNavBar> {
   int _currentIndex = 2;
 
-  final List<Widget> _pages = const [
-    SettingPage(title: 'تنظیمات'),
-    CollectionScreen(initialTab: 0, showTabs: false),
-    HomeScreen(),
-    CollectionScreen(initialTab: 1, showTabs: false),
-    CollectionScreen(initialTab: 2, showTabs: false),
+  // به جای final list، هر بار fresh بساز
+  List<Widget> get _pages => [
+    const SettingPage(title: 'تنظیمات'),
+    const CollectionScreen(initialTab: 0, showTabs: false),
+    const HomeScreen(),
+    const CollectionScreen(initialTab: 1, showTabs: false),
+    const CollectionScreen(initialTab: 2, showTabs: false),
   ];
 
   @override
