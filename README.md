@@ -2,7 +2,7 @@
 
 <div align="center">
 
-# 📖 اشعار حافظ
+# <img src="assets/icon/hafez-logo.png" width="40" alt="logo"> اشعار حافظ
 
 ### اپلیکیشن موبایل برای مطالعه اشعار خواجه شمس‌الدین محمد حافظ شیرازی
 
@@ -10,7 +10,6 @@
 ![Dart](https://img.shields.io/badge/Dart-3.11-0175C2?style=flat-square&logo=dart)
 ![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?style=flat-square&logo=android)
 ![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-red?style=flat-square)
-<img src="assets/icon/hafez-main-logo.png" width="120" alt="اشعار حافظ">
 
 </div>
 
