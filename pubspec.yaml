@@ -1,7 +1,7 @@
 name: hafez_poems
 description: "Poems of Hafez"
 publish_to: "none"
-version: 0.1.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.11.0
@@ -47,7 +47,7 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/icon/hafez.png"
+  image_path: "assets/icon/hafez-logo.png"
   min_sdk_android: 21
   remove_alpha_ios_icons: true
 

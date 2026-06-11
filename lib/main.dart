@@ -21,7 +21,7 @@ import 'package:hafez_poems/services/theme_reveal_service.dart';
 import 'package:hafez_poems/theme/app_theme.dart';
 import 'package:hafez_poems/theme/theme_controller.dart';
 import 'package:get/get.dart';
-import 'package:hive_flutter/hive_flutter.dart'; 
+import 'package:hive_flutter/hive_flutter.dart';
 
 Future<Box<T>> openBoxSafely<T>(String name) async {
   try {

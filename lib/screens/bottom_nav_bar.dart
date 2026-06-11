@@ -14,15 +14,36 @@ class BottomNavBar extends StatefulWidget {
 
 class _BottomNavBarState extends State<BottomNavBar> {
   int _currentIndex = 2;
+  final PageController _pageController = PageController(initialPage: 2);
+  final GlobalKey<CurvedNavigationBarState> _navBarKey = GlobalKey();
 
-  // به جای final list، هر بار fresh بساز
-  List<Widget> get _pages => [
-    const SettingPage(title: 'تنظیمات'),
-    const CollectionScreen(initialTab: 0, showTabs: false),
-    const HomeScreen(),
-    const CollectionScreen(initialTab: 1, showTabs: false),
-    const CollectionScreen(initialTab: 2, showTabs: false),
+  final List<Widget> _pages = const [
+    SettingPage(title: 'تنظیمات'),
+    CollectionScreen(initialTab: 0, showTabs: false),
+    HomeScreen(),
+    CollectionScreen(initialTab: 1, showTabs: false),
+    CollectionScreen(initialTab: 2, showTabs: false),
   ];
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _onNavTap(int index) {
+    setState(() => _currentIndex = index);
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOut,
+    );
+  }
+
+  void _onPageChanged(int index) {
+    setState(() => _currentIndex = index);
+    _navBarKey.currentState?.setPage(index);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +52,14 @@ class _BottomNavBarState extends State<BottomNavBar> {
     final iconColor = isDark ? AppColors.darkIcon : Colors.white;
 
     return Scaffold(
-      body: _pages[_currentIndex],
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: _onPageChanged,
+        reverse: false,
+        children: _pages,
+      ),
       bottomNavigationBar: CurvedNavigationBar(
+        key: _navBarKey,
         index: _currentIndex,
         height: 60,
         animationCurve: Curves.linear,
@@ -47,7 +74,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
         buttonBackgroundColor: AppColors.icon,
         backgroundColor: theme.scaffoldBackgroundColor,
         animationDuration: const Duration(milliseconds: 400),
-        onTap: (index) => setState(() => _currentIndex = index),
+        onTap: _onNavTap,
       ),
     );
   }

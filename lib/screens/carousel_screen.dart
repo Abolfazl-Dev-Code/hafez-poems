@@ -76,7 +76,7 @@ class _GhazalDisplayWidgetState extends State<GhazalDisplayWidget> {
           Positioned(
             top: 12,
             right: 12,
-            left: 120,
+            left: 135,
             bottom: 44,
             child: SingleChildScrollView(
               physics: const NeverScrollableScrollPhysics(),
@@ -97,7 +97,7 @@ class _GhazalDisplayWidgetState extends State<GhazalDisplayWidget> {
             left: 0,
             bottom: 0,
             child: SizedBox(
-              width: 120,
+              width: 130,
               child: ClipRRect(
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(20),
@@ -116,7 +116,7 @@ class _GhazalDisplayWidgetState extends State<GhazalDisplayWidget> {
                             colorScheme.surface,
                             colorScheme.surface.withValues(alpha: 0.0),
                           ],
-                          stops: const [0.0, 0.45],
+                          stops: const [0.0, 0.50],
                         ),
                       ),
                     ),
@@ -130,8 +130,8 @@ class _GhazalDisplayWidgetState extends State<GhazalDisplayWidget> {
             ),
           ),
           Positioned(
-            bottom: 16,
-            right: 19,
+            bottom: 10,
+            right: 15,
             child: Material(
               color: Colors.transparent,
               child: InkWell(

@@ -332,8 +332,8 @@ class _LogoWidget extends StatelessWidget {
     return Column(
       children: [
         Container(
-          width: 110,
-          height: 110,
+          width: 150,
+          height: 150,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: primaryColor.withValues(alpha: 0.1),
@@ -349,7 +349,11 @@ class _LogoWidget extends StatelessWidget {
               ),
             ],
           ),
-          child: Icon(Icons.menu_book_rounded, size: 52, color: primaryColor),
+          child: Image.asset(
+            'assets/icon/hafez-logo.png',
+            width: 100,
+            height: 100,
+          ),
         ),
         const SizedBox(height: 20),
         Text(
