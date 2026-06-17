@@ -3,8 +3,9 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:hafez_poems/screens/poem_screen.dart';
-import 'package:hafez_poems/services/ghazal_cache_service_offline.dart';
-import 'package:hafez_poems/services/ghazal_local_service.dart';
+import 'package:hafez_poems/services/poem_cache_services.dart';
+import 'package:hafez_poems/services/poem_local_services.dart';
+import 'package:hafez_poems/widgets/persian_numbers.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hafez_poems/models/saved_item.dart';
 import 'package:hafez_poems/controllers/ghazal_action_controller.dart';
@@ -165,7 +166,7 @@ class _FalScreenState extends State<FalScreen>
         '${_currentFal!.poem}\n\n📖 تفسیر:\n${_currentFal!.tabir}';
 
     final savedItem = SavedItem(
-      id: 'fal_${DateTime.now().millisecondsSinceEpoch}',
+      id: 'fal_${_currentFal!.id}',
       title: _currentFal!.title,
       text: textToSave,
       audioUrl: '',
@@ -250,15 +251,31 @@ class _FalScreenState extends State<FalScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text(
-                          _currentFal!.title,
-                          style: textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: colorScheme.primary,
+                        // شماره فال
+                        Align(
+                          alignment: Alignment.center,
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colorScheme.primary.withValues(
+                                alpha: 0.08,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              'غزل ${_currentFal!.id}'.toPersianNumbers(),
+                              style: textTheme.labelMedium?.copyWith(
+                                color: colorScheme.primary,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
-                          textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 16),
                         Text(
                           _currentFal!.poem,
                           style: textTheme.bodyLarge?.copyWith(

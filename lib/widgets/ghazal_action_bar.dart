@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/color_style.dart';
 import '../services/app_snackbar_service.dart';
 
 class GhazalActionBar extends StatelessWidget {
@@ -27,20 +28,11 @@ class GhazalActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(
-          begin: Alignment.bottomCenter,
-          end: Alignment.topCenter,
-          colors: [
-            theme.colorScheme.primary.withValues(alpha: 0.42),
-            theme.colorScheme.primary.withValues(alpha: 0.42),
-          ],
-        ),
+        color: AppColors.primary,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -49,7 +41,7 @@ class GhazalActionBar extends StatelessWidget {
             icon: isLiked ? Icons.favorite : Icons.favorite_border,
             label: 'لایک',
             isActive: isLiked,
-            activeColor: Colors.red.shade900,
+            activeColor: Colors.red.shade400,
             onTap: onLikeTap,
           ),
 
@@ -71,7 +63,7 @@ class GhazalActionBar extends StatelessWidget {
               if (!canHighlight) {
                 AppSnackBarService.warning(
                   scaffoldContext,
-                  'لطفاً ابتدا یک بیت را انتخاب کنید',
+                  'لطفاً ابتدا یک مصرع را انتخاب کنید',
                 );
                 return;
               }
@@ -105,12 +97,11 @@ class ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final baseColor = theme.colorScheme.onSurface;
+    Theme.of(context);
 
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 200),
-      opacity: isDimmed ? 0.55 : 1,
+      opacity: isDimmed ? 0.8 : 1,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -132,20 +123,16 @@ class ActionButton extends StatelessWidget {
                 Icon(
                   icon,
                   size: 20,
-                  color: isActive
-                      ? activeColor
-                      : baseColor.withValues(alpha: 0.75),
+                  color: isActive ? activeColor : Colors.white,
                 ),
-
                 const SizedBox(width: 8),
-
                 Text(
                   label,
                   style: TextStyle(
                     fontFamily: 'Vazir',
                     fontSize: 14,
                     fontWeight: FontWeight.w900,
-                    color: isActive ? activeColor : baseColor,
+                    color: isActive ? activeColor : Colors.white,
                   ),
                 ),
               ],

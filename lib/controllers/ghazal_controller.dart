@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:get/get.dart';
+import 'package:hafez_poems/services/poem_cache_services.dart';
 import '../models/ghazal_model.dart';
-import '../services/ghazal_cache_service_offline.dart';
 import 'package:hafez_poems/services/api_services.dart';
 
 class GhazalController extends GetxController {

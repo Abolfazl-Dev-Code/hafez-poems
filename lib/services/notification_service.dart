@@ -17,7 +17,7 @@ class NotificationService {
   static const String channelId = 'daily_hafez_reminder';
   static const String channelName = 'یادآوری روزانه حافظ';
   static const String channelDescription =
-      'نوتیف یادآوری روزانه برای خواندن غزل حافظ';
+      'اعلان یادآوری روزانه برای خواندن غزل حافظ';
 
   Future<void> init() async {
     tz.initializeTimeZones();

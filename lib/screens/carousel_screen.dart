@@ -74,30 +74,11 @@ class _GhazalDisplayWidgetState extends State<GhazalDisplayWidget> {
       child: Stack(
         children: [
           Positioned(
-            top: 12,
-            right: 12,
-            left: 135,
-            bottom: 44,
-            child: SingleChildScrollView(
-              physics: const NeverScrollableScrollPhysics(),
-              child: Text(
-                _displayedGhazal,
-                textAlign: TextAlign.right,
-                softWrap: true,
-                overflow: TextOverflow.visible,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: colorScheme.onSurface,
-                  height: 1.8,
-                ),
-              ),
-            ),
-          ),
-          Positioned(
             top: 0,
             left: 0,
             bottom: 0,
             child: SizedBox(
-              width: 130,
+              width: 145,
               child: ClipRRect(
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(20),
@@ -116,7 +97,7 @@ class _GhazalDisplayWidgetState extends State<GhazalDisplayWidget> {
                             colorScheme.surface,
                             colorScheme.surface.withValues(alpha: 0.0),
                           ],
-                          stops: const [0.0, 0.50],
+                          stops: const [0.0, 0.5],
                         ),
                       ),
                     ),
@@ -125,6 +106,27 @@ class _GhazalDisplayWidgetState extends State<GhazalDisplayWidget> {
                         color: const Color(0xFF2A211B).withValues(alpha: 0.18),
                       ),
                   ],
+                ),
+              ),
+            ),
+          ),
+          //* text edit
+          Positioned(
+            top: 12,
+            right: 12,
+            left: 140,
+            bottom: 0,
+            child: SingleChildScrollView(
+              physics: const NeverScrollableScrollPhysics(),
+              child: Text(
+                _displayedGhazal,
+                textAlign: TextAlign.right,
+                softWrap: true,
+                overflow: TextOverflow.visible,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: colorScheme.onSurface,
+                  height: 1.5,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),

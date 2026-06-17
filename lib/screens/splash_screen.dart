@@ -399,17 +399,17 @@ class _StatusWidget extends StatelessWidget {
     final (icon, message, color) = switch (status) {
       _ConnectionStatus.online => (
         Icons.check_circle_outline_rounded,
-        'اتصال برقرار است',
+        'اتصال شما به اینترنت برقرار است',
         const Color(0xFF2E7D32),
       ),
       _ConnectionStatus.offline => (
         Icons.wifi_off_rounded,
-        'بدون اینترنت — اشعار آفلاین در دسترس‌اند',
+        'اتصال شما به اینترنت برقرار نیست \n اشعار آفلاین در دسترس هستند',
         const Color(0xFFE65100),
       ),
       _ConnectionStatus.vpn => (
         Icons.vpn_lock_rounded,
-        'برای کارکرد صحیح برنامه لطفا VPN خود را خاموش کنید',
+        'برای کارکرد صحیح برنامه و پخش شدن اشعار\n لطفا VPN خود را خاموش کنید',
         const Color(0xFF1565C0),
       ),
     };

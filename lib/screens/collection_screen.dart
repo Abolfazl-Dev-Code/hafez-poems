@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/screens/favorites_list.dart';
-import 'package:hafez_poems/services/ghazal_cache_service_offline.dart';
+import 'package:hafez_poems/services/poem_cache_services.dart';
+import 'package:hafez_poems/services/poem_local_services.dart';
+import 'package:hafez_poems/widgets/persian_numbers.dart';
 import 'package:hafez_poems/widgets/selection_mixin.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -9,7 +11,6 @@ import 'package:hafez_poems/models/highlight_item.dart';
 import 'package:hafez_poems/models/liked_item.dart';
 import 'package:hafez_poems/models/saved_item.dart';
 import 'package:hafez_poems/screens/poem_screen.dart';
-import 'package:hafez_poems/services/ghazal_local_service.dart';
 
 class CollectionScreen extends StatefulWidget {
   final int initialTab;
@@ -156,7 +157,6 @@ class _LikedTabState extends State<_LikedTab> with SelectionMixin {
                 subtitle: firstLine,
                 icon: Icons.favorite,
                 iconColor: colorScheme.error,
-                onIconTap: () => box.delete(ghazal.key),
                 onTap: () => Get.to(
                   () => PoemScreen(
                     args: PoemScreenArgs(
@@ -190,7 +190,7 @@ class _LikedTabState extends State<_LikedTab> with SelectionMixin {
           children: [
             TextButton(
               onPressed: () => selectAll(allKeys),
-              child: const Text('همه'),
+              child: const Text('انتخاب همه'),
             ),
             IconButton(
               onPressed: selectedKeys.isEmpty
@@ -260,61 +260,49 @@ class _SavedTabState extends State<_SavedTab> with SelectionMixin {
             onLongPress: selectOnly,
             items: items.map((item) {
               final isFal = item.id.startsWith('fal_');
-              final firstLine = item.text
-                  .split('\n')
-                  .firstWhere(
-                    (l) => l.trim().isNotEmpty,
-                    orElse: () => item.text,
-                  );
+              final falNumber = isFal ? item.id.replaceFirst('fal_', '') : '';
+              final isValidFalId =
+                  falNumber.isNotEmpty &&
+                  int.tryParse(falNumber) != null &&
+                  int.parse(falNumber) < 10000;
+              final subtitle = isFal
+                  ? (isValidFalId ? 'غزل $falNumber' : 'فال حافظ')
+                        .toPersianNumbers()
+                  : item.text
+                        .split('\n')
+                        .firstWhere(
+                          (l) => l.trim().isNotEmpty,
+                          orElse: () => item.text,
+                        );
               return FavoriteItem(
                 hiveKey: item.key,
                 id: item.id,
                 title: item.title,
-                subtitle: firstLine,
+                subtitle: subtitle,
                 icon: isFal ? Icons.auto_awesome_rounded : Icons.bookmark,
                 iconColor: isFal ? Colors.green : colorScheme.primary,
-                onIconTap: () => box.delete(item.key),
                 onTap: () {
                   if (isFal) {
+                    final parts = item.text.split('\n\n📖 تفسیر:\n');
+                    final poemText = parts.isNotEmpty
+                        ? parts[0].trim()
+                        : item.text;
+                    final tabirText = parts.length > 1 ? parts[1].trim() : '';
+                    final falNumber = item.id.replaceFirst('fal_', '');
+                    final isValid =
+                        int.tryParse(falNumber) != null &&
+                        int.parse(falNumber) < 10000;
+
                     Get.dialog(
-                      Directionality(
-                        textDirection: TextDirection.rtl,
-                        child: AlertDialog(
-                          title: Text(item.title),
-                          content: SingleChildScrollView(
-                            child: Text(
-                              item.text,
-                              style: Theme.of(
-                                context,
-                              ).textTheme.bodyLarge?.copyWith(height: 1.8),
-                            ),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: Get.back,
-                              child: const Text('بستن'),
-                            ),
-                          ],
-                        ),
+                      _FalDialog(
+                        title: item.title,
+                        poemText: poemText,
+                        tabirText: tabirText,
+                        falNumber: isValid ? falNumber : '',
                       ),
                     );
                     return;
                   }
-                  Get.to(
-                    () => PoemScreen(
-                      args: PoemScreenArgs(
-                        id: item.id,
-                        title: item.title,
-                        text: item.text,
-                        audioUrl: item.audioUrl,
-                        fetchText: (id) => GhazalLocalService.instance
-                            .fetchGhazalById(id)
-                            .then((g) => g.text),
-                        fetchAudioUrl: (id) =>
-                            Get.find<GhazalCacheService>().getAudioUrl(id),
-                      ),
-                    ),
-                  );
                 },
               );
             }).toList(),
@@ -334,7 +322,7 @@ class _SavedTabState extends State<_SavedTab> with SelectionMixin {
           children: [
             TextButton(
               onPressed: () => selectAll(allKeys),
-              child: const Text('همه'),
+              child: const Text('انتخاب همه'),
             ),
             IconButton(
               onPressed: selectedKeys.isEmpty
@@ -388,7 +376,7 @@ class _HighlightsTabState extends State<_HighlightsTab> with SelectionMixin {
 
           if (b.isEmpty) {
             return const Center(
-              child: Text('هنوز هیچ بیتی را هایلایت نکرده‌اید.'),
+              child: Text('هنوز هیچ مصرعی را هایلایت نکرده‌اید.'),
             );
           }
 
@@ -409,11 +397,10 @@ class _HighlightsTabState extends State<_HighlightsTab> with SelectionMixin {
                     id: item.ghazalId,
                     title: item.ghazalTitle,
                     subtitle: item.highlightedLine,
-                    badge: 'بیت ${item.lineIndex + 1}',
+                    badge: 'مصرع ${item.lineIndex + 1}',
                     icon: Icons.highlight,
                     iconColor: Colors.amber.shade700,
                     highlightBg: Color(item.colorValue),
-                    onIconTap: () => box.delete(item.key),
                     onTap: () => Get.to(
                       () => PoemScreen(
                         args: PoemScreenArgs(
@@ -421,6 +408,7 @@ class _HighlightsTabState extends State<_HighlightsTab> with SelectionMixin {
                           title: item.ghazalTitle,
                           text: item.ghazalText,
                           audioUrl: item.audioUrl,
+                          highlightLineIndex: item.lineIndex, // ← اضافه
                           fetchText: (id) => GhazalLocalService.instance
                               .fetchGhazalById(id)
                               .then((g) => g.text),
@@ -448,7 +436,7 @@ class _HighlightsTabState extends State<_HighlightsTab> with SelectionMixin {
           children: [
             TextButton(
               onPressed: () => selectAll(allKeys),
-              child: const Text('همه'),
+              child: const Text('انتخاب همه'),
             ),
             IconButton(
               onPressed: selectedKeys.isEmpty
@@ -459,6 +447,288 @@ class _HighlightsTabState extends State<_HighlightsTab> with SelectionMixin {
           ],
         );
       },
+    );
+  }
+}
+
+class _FalDialog extends StatefulWidget {
+  final String title;
+  final String poemText;
+  final String tabirText;
+  final String falNumber; // ← اضافه
+  const _FalDialog({
+    required this.title,
+    required this.poemText,
+    required this.tabirText,
+    required this.falNumber, // ← اضافه
+  });
+
+  @override
+  State<_FalDialog> createState() => _FalDialogState();
+}
+
+class _FalDialogState extends State<_FalDialog> {
+  late final ScrollController _scrollController;
+  bool _showScrollHint = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (_scrollController.position.maxScrollExtent > 0) {
+        setState(() => _showScrollHint = true);
+      }
+      _scrollController.addListener(() {
+        if (!mounted) return;
+        final atBottom =
+            _scrollController.offset >=
+            _scrollController.position.maxScrollExtent - 16;
+        setState(() => _showScrollHint = !atBottom);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // ── Header ──
+              Container(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Theme.of(
+                        context,
+                      ).dividerColor.withValues(alpha: 0.4),
+                    ),
+                  ),
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // غزل و شماره — وسط
+                    if (widget.falNumber.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'غزل ${widget.falNumber}'.toPersianNumbers(),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                    // فال حافظ — گوشه راست
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Text(
+                          'فال حافظ',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1FA855),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // ── Scrollable body + fade ──
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.6,
+                ),
+                child: Stack(
+                  children: [
+                    SingleChildScrollView(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            widget.poemText,
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(height: 2.2, fontSize: 16),
+                            textAlign: TextAlign.center,
+                          ),
+                          if (widget.tabirText.isNotEmpty) ...[
+                            const SizedBox(height: 20),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.auto_awesome_rounded,
+                                  size: 14,
+                                  color: Color(0xFFA0783A),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'تفسیر',
+                                  style: Theme.of(context).textTheme.labelMedium
+                                      ?.copyWith(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurface,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Divider(
+                                    height: 1,
+                                    color: Theme.of(
+                                      context,
+                                    ).dividerColor.withValues(alpha: 0.35),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.primary.withValues(alpha: 0.06),
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.primary.withValues(alpha: 0.15),
+                                ),
+                              ),
+                              child: Text(
+                                widget.tabirText,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  height: 1.9,
+                                  color:
+                                      Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.white
+                                      : Colors.black87,
+                                ),
+                                textAlign: TextAlign.justify,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                        ],
+                      ),
+                    ),
+
+                    // ── fade + arrow ──
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: AnimatedOpacity(
+                        opacity: _showScrollHint ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 250),
+                        child: IgnorePointer(
+                          child: Container(
+                            height: 64,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Theme.of(context).scaffoldBackgroundColor
+                                      .withValues(alpha: 0.0),
+                                  Theme.of(context).scaffoldBackgroundColor
+                                      .withValues(alpha: 0.95),
+                                ],
+                              ),
+                            ),
+                            alignment: Alignment.bottomCenter,
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withValues(alpha: 0.7),
+                              size: 22,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // ── Footer ──
+              Container(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: Theme.of(
+                        context,
+                      ).dividerColor.withValues(alpha: 0.4),
+                    ),
+                  ),
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 44,
+                  child: TextButton(
+                    onPressed: Get.back,
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('بستن'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

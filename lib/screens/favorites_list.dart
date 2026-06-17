@@ -10,7 +10,6 @@ class FavoriteItem {
   final Color iconColor;
   final Color? highlightBg;
   final VoidCallback onTap;
-  final VoidCallback onIconTap;
 
   const FavoriteItem({
     required this.hiveKey,
@@ -20,7 +19,6 @@ class FavoriteItem {
     required this.icon,
     required this.iconColor,
     required this.onTap,
-    required this.onIconTap,
     this.badge,
     this.highlightBg,
   });
@@ -126,10 +124,7 @@ class _FavoriteCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
               ],
-              IconButton(
-                onPressed: selectionMode ? onToggleSelect : item.onIconTap,
-                icon: Icon(item.icon, color: item.iconColor),
-              ),
+              Icon(item.icon, color: item.iconColor),
               const SizedBox(width: 8),
               Expanded(
                 child: Column(

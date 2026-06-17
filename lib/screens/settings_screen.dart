@@ -32,8 +32,8 @@ class _SettingPageState extends State<SettingPage>
   static const String _fontColorKey = 'reading_font_color';
   static const String _dailyReminderKey = 'daily_ghazal_reminder_enabled';
 
-  double _fontSize = 20;
-  double _lineHeight = 1.9;
+  double _fontSize = 13; //edit
+  double _lineHeight = 1; //edit
   String _fontFamily = 'vazir';
   int _fontColorValue = 0xFF000000;
   bool _dailyReminderEnabled = false;
@@ -95,8 +95,8 @@ class _SettingPageState extends State<SettingPage>
     if (!mounted) return;
 
     setState(() {
-      _fontSize = prefs.getDouble(_fontSizeKey) ?? 20;
-      _lineHeight = prefs.getDouble(_lineHeightKey) ?? 1.9;
+      _fontSize = prefs.getDouble(_fontSizeKey) ?? 13; //EDIT
+      _lineHeight = prefs.getDouble(_lineHeightKey) ?? 1; //edit
       _fontFamily = validFonts.contains(savedFont) ? savedFont : 'vazir';
       _fontColorValue = prefs.getInt(_fontColorKey) ?? 0xFF000000;
       _dailyReminderEnabled = reminderEnabled;
@@ -182,7 +182,7 @@ class _SettingPageState extends State<SettingPage>
         if (!granted) {
           if (!mounted) return;
           setState(() => _dailyReminderEnabled = false);
-          AppSnackBarService.error(context, 'اجازه ارسال نوتیفیکیشن داده نشد');
+          AppSnackBarService.error(context, 'اجازه ارسال اعلان‌ها داده نشد');
           return;
         }
 
@@ -472,7 +472,7 @@ class _SettingPageState extends State<SettingPage>
               child: Text(
                 'اطلاعات شخصی شما در این برنامه به‌صورت محلی نگهداری می‌شود و بدون رضایت شما '
                 'به جایی ارسال نخواهد شد.\n\n'
-                'تنظیمات مطالعه، داده‌های ذخیره‌شده و وضعیت نوتیفیکیشن‌ها فقط برای بهبود تجربه کاربری '
+                'تنظیمات مطالعه، داده‌های ذخیره‌شده و وضعیت اعلان‌ها فقط برای بهبود تجربه کاربری '
                 'در داخل دستگاه شما استفاده می‌شوند.',
                 textAlign: TextAlign.right,
                 style: AppTextStyles.titleMediumSetting.copyWith(
@@ -691,7 +691,7 @@ class _SettingPageState extends State<SettingPage>
                   Align(
                     alignment: Alignment.centerRight,
                     child: Text(
-                      'اندازه فونت: ${_fontSize.toStringAsFixed(0)}',
+                      'اندازه قلم: ${_fontSize.toStringAsFixed(0)}',
                       style: textTheme.bodyMedium,
                     ),
                   ),
@@ -707,9 +707,9 @@ class _SettingPageState extends State<SettingPage>
                     ),
                     child: Slider(
                       value: _fontSize,
-                      min: 14,
+                      min: 10,
                       max: 25,
-                      divisions: 11,
+                      divisions: 15,
                       label: _fontSize.toStringAsFixed(0),
                       onChanged: (value) => _saveFontSize(value),
                     ),
@@ -719,7 +719,7 @@ class _SettingPageState extends State<SettingPage>
                   Align(
                     alignment: Alignment.centerRight,
                     child: Text(
-                      'فاصله خطوط بیت‌ها: ${_lineHeight.toStringAsFixed(1)}',
+                      'فاصله خطوط مصرع‌ها: ${_lineHeight.toStringAsFixed(1)}',
                       style: textTheme.bodyMedium,
                     ),
                   ),
@@ -735,9 +735,9 @@ class _SettingPageState extends State<SettingPage>
                     ),
                     child: Slider(
                       value: _lineHeight,
-                      min: 1.2,
+                      min: 1.0,
                       max: 2.2,
-                      divisions: 10,
+                      divisions: 12,
                       label: _lineHeight.toStringAsFixed(1),
                       onChanged: (value) => _saveLineHeight(value),
                     ),
@@ -746,7 +746,7 @@ class _SettingPageState extends State<SettingPage>
                   Align(
                     alignment: Alignment.centerRight,
                     child: Text(
-                      'انتخاب فونت',
+                      'انتخاب نوع قلم',
                       style: textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -845,7 +845,7 @@ class _SettingPageState extends State<SettingPage>
                   Align(
                     alignment: Alignment.centerRight,
                     child: Text(
-                      'رنگ فونت',
+                      'رنگ قلم',
                       style: textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -917,7 +917,7 @@ class _SettingPageState extends State<SettingPage>
                     value: _dailyReminderEnabled,
                     onChanged: _isTogglingReminder ? null : _toggleReminder,
                     title: Text(
-                      'فعال‌سازی نوتیف',
+                      'فعال‌سازی اعلان‌ها',
                       style: textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),

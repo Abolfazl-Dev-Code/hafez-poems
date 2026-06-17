@@ -2,14 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/models/search_result.dart';
 import 'package:hafez_poems/screens/poem_screen.dart';
-import 'package:hafez_poems/services/ghazal_cache_service_offline.dart';
-import 'package:hafez_poems/services/ghasayed_cache_service.dart';
-import 'package:hafez_poems/services/ghataat_cache_service.dart';
-import 'package:hafez_poems/services/montasab_cache_service.dart';
-import 'package:hafez_poems/services/robaeyat_cache_service.dart';
-import 'package:hafez_poems/services/ghazal_local_service.dart';
-import 'package:hafez_poems/services/ghataat_local_service.dart';
 import 'package:get/get.dart';
+import 'package:hafez_poems/services/poem_cache_services.dart';
+import 'package:hafez_poems/services/poem_local_services.dart';
 
 String normalize(String text) {
   return text
@@ -126,7 +121,7 @@ class _SearchScreenState extends State<SearchScreen>
               id: g.id,
               title: g.title,
               text: g.text,
-              audioUrl: g.audioUrl,
+              audioUrl: g.audioUrl, // ← اگه خالیه مشکل از اینجاست
               type: SearchResultType.ghazal,
             ),
           ),
@@ -210,18 +205,22 @@ class _SearchScreenState extends State<SearchScreen>
         fetchText = (id) => GhataatLocalService.instance
             .fetchGhataatById(id)
             .then((g) => g.text);
+        fetchAudioUrl = (id) => _ghataatCache.getAudioUrl(id);
         break;
       case SearchResultType.qasaid:
         fetchText = (id) =>
             _ghasayedCache.getGhasayedDetail(id).then((g) => g.text);
+        fetchAudioUrl = (id) => _ghasayedCache.getAudioUrl(id);
         break;
       case SearchResultType.robaeyat:
         fetchText = (id) =>
             _robaeyatCache.getRobaeyatDetail(id).then((g) => g.text);
+        fetchAudioUrl = (id) => _robaeyatCache.getAudioUrl(id);
         break;
       case SearchResultType.montasab:
         fetchText = (id) =>
             _montasabCache.getMontasabDetail(id).then((g) => g.text);
+        fetchAudioUrl = (id) => _montasabCache.getAudioUrl(id);
         break;
     }
 

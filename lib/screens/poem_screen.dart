@@ -1,6 +1,9 @@
-import 'dart:async';
-import 'package:audioplayers/audioplayers.dart';
+// lib/screens/poem_screen.dart
+
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/controllers/audio_player_controller.dart';
+import 'package:hafez_poems/controllers/verse_sync_controller.dart';
+import 'package:hafez_poems/widgets/audio_player_widget.dart';
 import 'package:hafez_poems/widgets/ghazal_action_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../controllers/ghazal_action_controller.dart';
@@ -12,6 +15,7 @@ class PoemScreenArgs {
   final String audioUrl;
   final Future<String> Function(String id) fetchText;
   final Future<String> Function(String id)? fetchAudioUrl;
+  final int? highlightLineIndex; // ← اضافه
 
   const PoemScreenArgs({
     required this.id,
@@ -20,6 +24,7 @@ class PoemScreenArgs {
     required this.fetchText,
     this.audioUrl = '',
     this.fetchAudioUrl,
+    this.highlightLineIndex, // ← اضافه
   });
 
   bool get hasAudio => audioUrl.isNotEmpty || fetchAudioUrl != null;
@@ -35,9 +40,14 @@ class PoemScreen extends StatefulWidget {
 }
 
 class _PoemScreenState extends State<PoemScreen> {
+  late final AudioPlayerController _audioCtrl = AudioPlayerController();
+  late final VerseSyncController _verseSyncCtrl = VerseSyncController();
+  final Map<int, GlobalKey> _lineKeys = {};
+  int? _flashingLineIndex;
   String _poemText = '';
   bool _isTextLoading = true;
   String _textError = '';
+  final ScrollController _scrollController = ScrollController();
   static const String _fontSizeKey = 'reading_font_size';
   static const String _lineHeightKey = 'reading_line_height';
   static const String _fontFamilyKey = 'reading_font_family';
@@ -47,26 +57,23 @@ class _PoemScreenState extends State<PoemScreen> {
   double _lineHeight = 1.9;
   String _fontFamily = 'Vazir';
   Color _fontColor = Colors.black;
+
   final GhazalActionController _actionController = GhazalActionController();
   bool _isLiked = false;
   bool _isSaved = false;
   int? _selectedLineIndex;
   final Set<int> _highlightedLineIndexes = {};
-  AudioPlayer? _audioPlayer;
-  StreamSubscription<PlayerState>? _playerStateSub;
-  StreamSubscription<Duration>? _durationSub;
-  StreamSubscription<Duration>? _positionSub;
-  StreamSubscription<void>? _completeSub;
 
-  PlayerState _playerState = PlayerState.stopped;
-  Duration _duration = Duration.zero;
-  Duration _position = Duration.zero;
-  bool _isAudioLoaded = false;
-  bool _isLoadingAudio = false;
   PoemScreenArgs get _args => widget.args;
 
   List<String> get _poemLines => _poemText
       .split('\n')
+      .expand((line) {
+        if (line.contains(' / ')) {
+          return line.split(' / ');
+        }
+        return [line];
+      })
       .map((e) => e.trim())
       .where((e) => e.isNotEmpty)
       .toList();
@@ -74,24 +81,28 @@ class _PoemScreenState extends State<PoemScreen> {
   bool get _isSelectedLineHighlighted =>
       _selectedLineIndex != null &&
       _highlightedLineIndexes.contains(_selectedLineIndex);
+
   @override
   void initState() {
     super.initState();
+    _audioCtrl.addListener(_syncPosition);
     _loadReadingSettings();
     _loadInitialActionsState();
     _initText();
+  }
 
-    if (_args.hasAudio || _args.fetchAudioUrl != null) {
-      _audioPlayer = AudioPlayer();
-      _setupAudioListeners();
-      _loadAudio();
-    }
+  void _syncPosition() {
+    debugPrint(
+      '🎵 position: ${_audioCtrl.position}, hasSyncData: ${_verseSyncCtrl.hasSyncData}, activeOrder: ${_verseSyncCtrl.activeVerseOrder}',
+    );
+    _verseSyncCtrl.updatePosition(_audioCtrl.position);
   }
 
   void _initText() {
     if (_args.text.isNotEmpty) {
       _poemText = _args.text;
       _isTextLoading = false;
+      _scheduleScrollToHighlight();
     } else {
       _fetchPoemText();
     }
@@ -101,8 +112,8 @@ class _PoemScreenState extends State<PoemScreen> {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
     setState(() {
-      _fontSize = prefs.getDouble(_fontSizeKey) ?? 20;
-      _lineHeight = prefs.getDouble(_lineHeightKey) ?? 1.9;
+      _fontSize = prefs.getDouble(_fontSizeKey) ?? 13;
+      _lineHeight = prefs.getDouble(_lineHeightKey) ?? 1;
       _fontFamily = prefs.getString(_fontFamilyKey) ?? 'Vazir';
       _fontColor = Color(prefs.getInt(_fontColorKey) ?? 0xFF000000);
     });
@@ -120,6 +131,7 @@ class _PoemScreenState extends State<PoemScreen> {
         _poemText = text;
         _isTextLoading = false;
       });
+      _scheduleScrollToHighlight();
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -127,6 +139,55 @@ class _PoemScreenState extends State<PoemScreen> {
         _isTextLoading = false;
       });
     }
+  }
+
+  void _scheduleScrollToHighlight() {
+    final targetIndex = _args.highlightLineIndex;
+    if (targetIndex == null) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final key = _lineKeys[targetIndex];
+      final ctx = key?.currentContext;
+      final box = ctx?.findRenderObject() as RenderBox?;
+      final scrollBox = _scrollController.hasClients
+          ? _scrollController.position.context.storageContext.findRenderObject()
+                as RenderBox?
+          : null;
+
+      await Future.delayed(const Duration(milliseconds: 350));
+      if (!mounted) return;
+
+      if (box != null &&
+          _scrollController.hasClients &&
+          scrollBox != null &&
+          scrollBox.attached) {
+        final tileOffset = box.localToGlobal(Offset.zero, ancestor: scrollBox);
+        final screenHeight = scrollBox.size.height;
+        final targetOffset =
+            (_scrollController.offset + tileOffset.dy - screenHeight / 3).clamp(
+              0.0,
+              _scrollController.position.maxScrollExtent,
+            );
+
+        await _scrollController.animateTo(
+          targetOffset,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      }
+
+      if (!mounted) return;
+      setState(() => _flashingLineIndex = targetIndex);
+      await Future.delayed(const Duration(milliseconds: 600));
+      if (!mounted) return;
+      setState(() => _flashingLineIndex = null);
+      await Future.delayed(const Duration(milliseconds: 400));
+      if (!mounted) return;
+      setState(() => _flashingLineIndex = targetIndex);
+      await Future.delayed(const Duration(milliseconds: 600));
+      if (!mounted) return;
+      setState(() => _flashingLineIndex = null);
+    });
   }
 
   void _loadInitialActionsState() {
@@ -137,93 +198,6 @@ class _PoemScreenState extends State<PoemScreen> {
     );
   }
 
-  void _setupAudioListeners() {
-    final player = _audioPlayer!;
-
-    _playerStateSub = player.onPlayerStateChanged.listen((state) {
-      if (!mounted) return;
-      setState(() => _playerState = state);
-    });
-
-    _durationSub = player.onDurationChanged.listen((d) {
-      if (!mounted) return;
-      setState(() => _duration = d);
-    });
-
-    _positionSub = player.onPositionChanged.listen((p) {
-      if (!mounted) return;
-      setState(() => _position = p);
-    });
-
-    _completeSub = player.onPlayerComplete.listen((_) {
-      if (!mounted) return;
-      setState(() {
-        _playerState = PlayerState.stopped;
-        _position = Duration.zero;
-      });
-    });
-  }
-
-  Future<void> _loadAudio() async {
-    setState(() {
-      _isLoadingAudio = true;
-      _isAudioLoaded = false;
-    });
-
-    try {
-      await _audioPlayer!.stop();
-      await _audioPlayer!.release();
-      // ignore: empty_catches
-    } catch (e) {}
-
-    String url = _args.audioUrl;
-
-    if (url.isEmpty && _args.fetchAudioUrl != null) {
-      try {
-        url = await _args.fetchAudioUrl!(_args.id).timeout(
-          const Duration(seconds: 10),
-          onTimeout: () {
-            return '';
-          },
-        );
-        // ignore: empty_catches
-      } catch (e) {}
-    }
-
-    if (url.isEmpty) {
-      if (!mounted) return;
-      setState(() => _isLoadingAudio = false);
-      return;
-    }
-
-    try {
-      await _audioPlayer!.setSourceUrl(url);
-      if (!mounted) return;
-      setState(() {
-        _isAudioLoaded = true;
-        _isLoadingAudio = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _isLoadingAudio = false);
-    }
-  }
-
-  Future<void> _stopAudio() async {
-    if (_audioPlayer == null) return;
-    await _audioPlayer!.stop();
-    if (!mounted) return;
-    setState(() {
-      _playerState = PlayerState.stopped;
-      _position = Duration.zero;
-    });
-  }
-
-  Future<void> _seekAudio(Duration position) async {
-    if (!_isAudioLoaded) return;
-    await _audioPlayer!.seek(position);
-  }
-
   Future<void> _toggleLike() async {
     await _actionController.toggleLike(
       ghazalId: _args.id,
@@ -231,7 +205,9 @@ class _PoemScreenState extends State<PoemScreen> {
       text: _poemText,
       audioUrl: _args.audioUrl,
     );
-    if (mounted) setState(() => _isLiked = _actionController.isLiked(_args.id));
+    if (mounted) {
+      setState(() => _isLiked = _actionController.isLiked(_args.id));
+    }
   }
 
   Future<void> _toggleSave() async {
@@ -241,13 +217,15 @@ class _PoemScreenState extends State<PoemScreen> {
       text: _poemText,
       audioUrl: _args.audioUrl,
     );
-    if (mounted) setState(() => _isSaved = _actionController.isSaved(_args.id));
+    if (mounted) {
+      setState(() => _isSaved = _actionController.isSaved(_args.id));
+    }
   }
 
   Future<void> _toggleHighlight() async {
     if (_selectedLineIndex == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('لطفاً ابتدا یک بیت را انتخاب کنید')),
+        const SnackBar(content: Text('لطفاً ابتدا یک مصرع را انتخاب کنید')),
       );
       return;
     }
@@ -277,11 +255,10 @@ class _PoemScreenState extends State<PoemScreen> {
 
   @override
   void dispose() {
-    _playerStateSub?.cancel();
-    _durationSub?.cancel();
-    _positionSub?.cancel();
-    _completeSub?.cancel();
-    _audioPlayer?.dispose();
+    _scrollController.dispose(); // ← اضافه
+    _audioCtrl.removeListener(_syncPosition);
+    _audioCtrl.dispose();
+    _verseSyncCtrl.dispose();
     super.dispose();
   }
 
@@ -290,8 +267,7 @@ class _PoemScreenState extends State<PoemScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
-    final isDark = theme.brightness == Brightness.dark;
-    final double bottomPadding = _args.hasAudio ? 250 : 110;
+    final double bottomPadding = _args.hasAudio ? 258 : 110;
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -302,13 +278,14 @@ class _PoemScreenState extends State<PoemScreen> {
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_rounded),
             onPressed: () async {
-              if (_args.hasAudio) await _stopAudio();
+              if (_args.hasAudio) await _audioCtrl.stop();
               if (context.mounted) Navigator.of(context).pop();
             },
           ),
         ),
         body: Stack(
           children: [
+            // ── متن شعر ──────────────────────────────────────────
             Positioned.fill(
               child: _isTextLoading
                   ? const Center(child: CircularProgressIndicator())
@@ -330,10 +307,11 @@ class _PoemScreenState extends State<PoemScreen> {
                       ),
                     )
                   : SingleChildScrollView(
+                      controller: _scrollController, // ← اضافه
                       padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPadding),
                       child: Card(
                         color: colorScheme.surface,
-                        elevation: isDark ? 0 : 2,
+                        elevation: theme.brightness == Brightness.dark ? 0 : 2,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18),
                           side: BorderSide(
@@ -342,36 +320,81 @@ class _PoemScreenState extends State<PoemScreen> {
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(16),
-                          child: Column(
-                            children: List.generate(_poemLines.length, (i) {
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: _PoemLineTile(
-                                  text: _poemLines[i],
-                                  isSelected: _selectedLineIndex == i,
-                                  isHighlighted: _highlightedLineIndexes
-                                      .contains(i),
-                                  fontSize: _fontSize,
-                                  lineHeight: _lineHeight,
-                                  fontFamily: _fontFamily,
-                                  fontColor: _fontColor,
-                                  onTap: () => setState(() {
-                                    _selectedLineIndex = _selectedLineIndex == i
-                                        ? null
-                                        : i;
-                                  }),
-                                ),
+                          child: ListenableBuilder(
+                            listenable: _verseSyncCtrl,
+                            builder: (context, _) {
+                              final activeOrder =
+                                  _verseSyncCtrl.activeVerseOrder;
+                              return Column(
+                                children: List.generate(_poemLines.length, (i) {
+                                  final isActive =
+                                      _verseSyncCtrl.hasSyncData &&
+                                      activeOrder == i;
+                                  final isFlashing =
+                                      _flashingLineIndex == i; // ← اضافه کن
+                                  return Padding(
+                                    key: _lineKeys[i] ??=
+                                        GlobalKey(), // ← key اینجا باشه
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: Stack(
+                                      children: [
+                                        _PoemLineTile(
+                                          text: _poemLines[i],
+                                          isSelected: _selectedLineIndex == i,
+                                          isHighlighted: _highlightedLineIndexes
+                                              .contains(i),
+                                          fontSize: _fontSize,
+                                          lineHeight: _lineHeight,
+                                          isFlashing: isFlashing, // ← اضافه
+                                          fontFamily: _fontFamily,
+                                          fontColor: _fontColor,
+                                          onTap: () => setState(() {
+                                            _selectedLineIndex =
+                                                _selectedLineIndex == i
+                                                ? null
+                                                : i;
+                                          }),
+                                        ),
+                                        // ── نشانگر مصراع فعال ──
+                                        if (isActive) //edit
+                                          Positioned(
+                                            right: 4,
+                                            top: 0,
+                                            bottom: 0,
+                                            child: Center(
+                                              child: AnimatedOpacity(
+                                                opacity: isActive ? 1.0 : 0.0,
+                                                duration: const Duration(
+                                                  milliseconds: 0,
+                                                ),
+                                                child: Transform.flip(
+                                                  flipX: true,
+                                                  child: Icon(
+                                                    Icons.arrow_back_rounded,
+                                                    size: 20,
+                                                    color: colorScheme.primary,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  );
+                                }),
                               );
-                            }),
+                            },
                           ),
                         ),
                       ),
                     ),
             ),
+
+            // ── نوار اکشن ─────────────────────────────────────────
             Positioned(
-              left: 16,
-              right: 16,
-              bottom: _args.hasAudio ? 180 : 30,
+              left: 28,
+              right: 28,
+              bottom: _args.hasAudio ? 190 : 30,
               child: GhazalActionBar(
                 isLiked: _isLiked,
                 isSaved: _isSaved,
@@ -383,172 +406,37 @@ class _PoemScreenState extends State<PoemScreen> {
                 scaffoldContext: context,
               ),
             ),
+
+            // ── پلیر صدا ──────────────────────────────────────────
             if (_args.hasAudio)
-              _buildAudioPlayer(theme, colorScheme, textTheme),
+              Positioned(
+                left: 12,
+                right: 12,
+                bottom: 10,
+                child: AudioPlayerWidget(
+                  id: _args.id,
+                  audioUrl: _args.audioUrl,
+                  fetchAudioUrl: _args.fetchAudioUrl,
+                  controller: _audioCtrl,
+                  title: _args.title,
+                  verseSyncController: _verseSyncCtrl,
+                  onRecitationChanged: (recitation) {
+                    if (recitation.xmlText.isNotEmpty) {
+                      _verseSyncCtrl.loadSyncPoints(
+                        recitation.xmlText,
+                      ); // ← به جای id
+                    }
+                  },
+                ),
+              ),
           ],
         ),
       ),
     );
   }
-
-  Widget _buildAudioPlayer(
-    ThemeData theme,
-    ColorScheme colorScheme,
-    TextTheme textTheme,
-  ) {
-    final double maxSliderValue = _duration.inMilliseconds > 0
-        ? _duration.inMilliseconds.toDouble()
-        : 1.0;
-
-    final double currentSliderValue = _position.inMilliseconds.toDouble().clamp(
-      0.0,
-      maxSliderValue,
-    );
-
-    return Positioned(
-      left: 12,
-      right: 12,
-      bottom: 12,
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: theme.dividerColor.withValues(alpha: 0.4),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: theme.shadowColor.withValues(
-                  alpha: theme.brightness == Brightness.dark ? 0.18 : 0.08,
-                ),
-                blurRadius: 14,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SliderTheme(
-                data: SliderTheme.of(context).copyWith(
-                  trackHeight: 4.0,
-                  activeTrackColor: colorScheme.primary,
-                  inactiveTrackColor: theme.dividerColor.withValues(alpha: 0.6),
-                  thumbColor: colorScheme.primary,
-                  overlayColor: colorScheme.primary.withValues(alpha: 0.15),
-                  thumbShape: const RoundSliderThumbShape(
-                    enabledThumbRadius: 7.0,
-                  ),
-                  overlayShape: const RoundSliderOverlayShape(
-                    overlayRadius: 16.0,
-                  ),
-                ),
-                child: Slider(
-                  min: 0.0,
-                  max: maxSliderValue,
-                  value: currentSliderValue,
-                  onChanged: !_isAudioLoaded
-                      ? null
-                      : (v) => _seekAudio(Duration(milliseconds: v.toInt())),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _formatDuration(_position),
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurface.withValues(alpha: 0.75),
-                      ),
-                    ),
-                    Text(
-                      _formatDuration(_duration),
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurface.withValues(alpha: 0.75),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-              Directionality(
-                textDirection: TextDirection.rtl,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.stop_circle_outlined),
-                      iconSize: 46,
-                      color: colorScheme.error,
-                      onPressed: _isAudioLoaded ? _stopAudio : null,
-                    ),
-                    const SizedBox(width: 22),
-                    Container(
-                      height: 46,
-                      width: 46,
-                      decoration: BoxDecoration(
-                        color: _isAudioLoaded
-                            ? colorScheme.primary
-                            : theme.disabledColor,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: colorScheme.primary.withValues(alpha: 0.25),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: IconButton(
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        icon: _isLoadingAudio
-                            ? SizedBox(
-                                height: 22,
-                                width: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.4,
-                                  color: colorScheme.onPrimary,
-                                ),
-                              )
-                            : Icon(
-                                _playerState == PlayerState.playing
-                                    ? Icons.pause_rounded
-                                    : Icons.play_arrow_rounded,
-                                size: 32,
-                              ),
-                        color: colorScheme.onPrimary,
-                        onPressed: !_isAudioLoaded
-                            ? null
-                            : () {
-                                if (_playerState == PlayerState.playing) {
-                                  _audioPlayer!.pause();
-                                } else {
-                                  _audioPlayer!.resume();
-                                }
-                              },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _formatDuration(Duration duration) {
-    String two(int n) => n.toString().padLeft(2, '0');
-    return '${two(duration.inMinutes.remainder(60))}:${two(duration.inSeconds.remainder(60))}';
-  }
 }
+
+// ── کاشی مصراع — دست نخورده نسبت به نسخه اصلی ────────────────────────────
 
 class _PoemLineTile extends StatelessWidget {
   const _PoemLineTile({
@@ -560,6 +448,7 @@ class _PoemLineTile extends StatelessWidget {
     required this.fontFamily,
     required this.fontColor,
     required this.onTap,
+    required this.isFlashing, // ← اضافه
   });
 
   final String text;
@@ -570,6 +459,7 @@ class _PoemLineTile extends StatelessWidget {
   final String fontFamily;
   final Color fontColor;
   final VoidCallback onTap;
+  final bool isFlashing;
 
   @override
   Widget build(BuildContext context) {
@@ -580,7 +470,10 @@ class _PoemLineTile extends StatelessWidget {
     Color border = Colors.transparent;
     Color textColor = colorScheme.onSurface;
 
-    if (isHighlighted) {
+    if (isFlashing) {
+      bg = Colors.amber.withValues(alpha: 0.45);
+      border = Colors.amber;
+    } else if (isHighlighted) {
       bg = const Color(0xFFFFF3B0);
       border = const Color(0xFFFFC107);
       textColor = Colors.black87;

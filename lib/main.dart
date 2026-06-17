@@ -1,3 +1,4 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hafez_poems/controllers/ghazal_action_controller.dart';
@@ -11,17 +12,16 @@ import 'package:hafez_poems/models/montasab_model.dart';
 import 'package:hafez_poems/models/robaeyat_model.dart';
 import 'package:hafez_poems/models/saved_item.dart';
 import 'package:hafez_poems/screens/splash_screen.dart';
-import 'package:hafez_poems/services/ghasayed_cache_service.dart';
-import 'package:hafez_poems/services/ghataat_cache_service.dart';
-import 'package:hafez_poems/services/ghazal_cache_service_offline.dart';
-import 'package:hafez_poems/services/montasab_cache_service.dart';
+import 'package:hafez_poems/services/audio_handler_service.dart';
 import 'package:hafez_poems/services/notification_service.dart';
-import 'package:hafez_poems/services/robaeyat_cache_service.dart';
+import 'package:hafez_poems/services/poem_cache_services.dart';
 import 'package:hafez_poems/services/theme_reveal_service.dart';
 import 'package:hafez_poems/theme/app_theme.dart';
 import 'package:hafez_poems/theme/theme_controller.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+
+late HafezAudioHandler audioHandler;
 
 Future<Box<T>> openBoxSafely<T>(String name) async {
   try {
@@ -33,8 +33,23 @@ Future<Box<T>> openBoxSafely<T>(String name) async {
   }
 }
 
+//todo: صفحه نمایش تغییرات نسخه جدید برنامه
+//todo: ویرایش صفحه پروفایل
+//todo: ویرایش حالت نمایش مصرع درحال خوانش
+//todo: افزودن متن به نوبار
+//todo: معادل سازی کلمات فارسی در برنامه
+//todo: ساخت صفحه زندگی نامه حافظ
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  audioHandler = await AudioService.init(
+    builder: () => HafezAudioHandler(),
+    config: const AudioServiceConfig(
+      androidNotificationChannelId: 'com.hafez.poems.audio',
+      androidNotificationChannelName: 'Hafez Audio',
+      androidNotificationOngoing: true,
+    ),
+  );
   await NotificationService.instance.init();
   final themeController = ThemeController();
   await themeController.loadTheme();
