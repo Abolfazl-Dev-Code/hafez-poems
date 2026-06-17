@@ -132,8 +132,8 @@ class _GhazalDisplayWidgetState extends State<GhazalDisplayWidget> {
             ),
           ),
           Positioned(
-            bottom: 10,
-            right: 15,
+            bottom: 8,
+            right: 11,
             child: Material(
               color: Colors.transparent,
               child: InkWell(
@@ -150,8 +150,8 @@ class _GhazalDisplayWidgetState extends State<GhazalDisplayWidget> {
                   }
                 },
                 child: Container(
-                  width: 35,
-                  height: 35,
+                  width: 30,
+                  height: 30,
                   decoration: BoxDecoration(
                     color: colorScheme.primary,
                     borderRadius: BorderRadius.circular(50),

@@ -97,9 +97,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
 // class _BottomNavBarState extends State<BottomNavBar> {
 //   int _currentIndex = 2;
 
-//   final PageController _pageController = PageController(
-//     initialPage: 2,
-//   );
+//   final PageController _pageController = PageController(initialPage: 2);
 
 //   final List<Widget> _pages = const [
 //     SettingPage(title: 'تنظیمات'),
@@ -144,29 +142,25 @@ class _BottomNavBarState extends State<BottomNavBar> {
 //         data: NavigationBarThemeData(
 //           height: 72,
 
-//           indicatorColor: AppColors.icon.withOpacity(0.15),
+//           indicatorColor: AppColors.darkIcon.withOpacity(0.15),
 
-//           labelTextStyle: WidgetStateProperty.resolveWith(
-//             (states) {
-//               return TextStyle(
-//                 fontSize: 12,
-//                 fontWeight: states.contains(WidgetState.selected)
-//                     ? FontWeight.w700
-//                     : FontWeight.w500,
-//               );
-//             },
-//           ),
+//           labelTextStyle: WidgetStateProperty.resolveWith((states) {
+//             return TextStyle(
+//               fontSize: 12,
+//               fontWeight: states.contains(WidgetState.selected)
+//                   ? FontWeight.w700
+//                   : FontWeight.w500,
+//             );
+//           }),
 
-//           iconTheme: WidgetStateProperty.resolveWith(
-//             (states) {
-//               return IconThemeData(
-//                 size: 24,
-//                 color: states.contains(WidgetState.selected)
-//                     ? AppColors.icon
-//                     : theme.iconTheme.color?.withOpacity(0.7),
-//               );
-//             },
-//           ),
+//           iconTheme: WidgetStateProperty.resolveWith((states) {
+//             return IconThemeData(
+//               size: 24,
+//               color: states.contains(WidgetState.selected)
+//                   ? AppColors.icon
+//                   : theme.iconTheme.color?.withOpacity(0.7),
+//             );
+//           }),
 //         ),
 
 //         child: NavigationBar(
