@@ -8,7 +8,7 @@ import 'package:hafez_poems/services/poem_local_services.dart';
 import 'package:hafez_poems/widgets/persian_numbers.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hafez_poems/models/saved_item.dart';
-import 'package:hafez_poems/controllers/ghazal_action_controller.dart';
+import 'package:hafez_poems/controllers/user_actions_controller.dart';
 import '../services/fal_local_service.dart';
 
 class FalScreen extends StatefulWidget {
@@ -160,7 +160,7 @@ class _FalScreenState extends State<FalScreen>
   Future<void> _saveFal() async {
     if (_currentFal == null || _isSaved) return;
 
-    final box = Hive.box<SavedItem>(GhazalActionController.savedBoxName);
+    final box = Hive.box<SavedItem>(UserActionsController.savedBoxName);
 
     final textToSave =
         '${_currentFal!.poem}\n\n📖 تفسیر:\n${_currentFal!.tabir}';

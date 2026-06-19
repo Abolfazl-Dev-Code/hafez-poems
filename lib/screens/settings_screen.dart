@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hafez_poems/controllers/ghazal_action_controller.dart';
+import 'package:hafez_poems/controllers/user_actions_controller.dart';
 import 'package:hafez_poems/models/highlight_item.dart';
 import 'package:hafez_poems/models/liked_item.dart';
 import 'package:hafez_poems/models/saved_item.dart';
@@ -318,10 +318,10 @@ class _SettingPageState extends State<SettingPage>
   Future<void> _deleteAllLocalData() async {
     try {
       // پاک کردن همه box ها با name های صحیح
-      await Hive.box<LikedItem>(GhazalActionController.likedBoxName).clear();
-      await Hive.box<SavedItem>(GhazalActionController.savedBoxName).clear();
+      await Hive.box<LikedItem>(UserActionsController.likedBoxName).clear();
+      await Hive.box<SavedItem>(UserActionsController.savedBoxName).clear();
       await Hive.box<HighlightItem>(
-        GhazalActionController.highlightBoxName,
+        UserActionsController.highlightBoxName,
       ).clear();
 
       // پاک کردن تنظیمات

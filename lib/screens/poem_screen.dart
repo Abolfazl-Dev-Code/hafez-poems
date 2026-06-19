@@ -7,7 +7,7 @@ import 'package:hafez_poems/widgets/active_verse_indicator_widget.dart';
 import 'package:hafez_poems/widgets/audio_player_widget.dart';
 import 'package:hafez_poems/widgets/ghazal_action_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../controllers/ghazal_action_controller.dart';
+import '../controllers/user_actions_controller.dart';
 
 class PoemScreenArgs {
   final String id;
@@ -59,7 +59,7 @@ class _PoemScreenState extends State<PoemScreen> {
   String _fontFamily = 'Vazir';
   Color _fontColor = Colors.black;
 
-  final GhazalActionController _actionController = GhazalActionController();
+  final UserActionsController _actionController = UserActionsController();
   bool _isLiked = false;
   bool _isSaved = false;
   int? _selectedLineIndex;

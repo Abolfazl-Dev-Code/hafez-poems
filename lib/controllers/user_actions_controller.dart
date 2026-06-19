@@ -4,7 +4,7 @@ import '../models/highlight_item.dart';
 import '../models/liked_item.dart';
 import '../models/saved_item.dart';
 
-class GhazalActionController {
+class UserActionsController {
   static const String likedBoxName = 'liked_ghazals';
   static const String savedBoxName = 'saved_ghazals';
   static const String highlightBoxName = 'highlighted_lines';

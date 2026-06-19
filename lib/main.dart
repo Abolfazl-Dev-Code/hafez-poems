@@ -1,8 +1,8 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hafez_poems/controllers/ghazal_action_controller.dart';
-import 'package:hafez_poems/controllers/ghazal_controller.dart';
+import 'package:hafez_poems/controllers/user_actions_controller.dart';
+// import 'package:hafez_poems/controllers/ghazal_controller.dart';
 import 'package:hafez_poems/controllers/profile_controller.dart';
 import 'package:hafez_poems/models/ghasayed_model.dart';
 import 'package:hafez_poems/models/ghazal_model.dart';
@@ -57,9 +57,9 @@ void main() async {
 
   // 3. همه Boxها را قبل از ساخت کنترلرها باز کن
   await Future.wait<Box>([
-    openBoxSafely<LikedItem>(GhazalActionController.likedBoxName),
-    openBoxSafely<SavedItem>(GhazalActionController.savedBoxName),
-    openBoxSafely<HighlightItem>(GhazalActionController.highlightBoxName),
+    openBoxSafely<LikedItem>(UserActionsController.likedBoxName),
+    openBoxSafely<SavedItem>(UserActionsController.savedBoxName),
+    openBoxSafely<HighlightItem>(UserActionsController.highlightBoxName),
 
     // فقط یکی برای پروفایل نگه دار
     openBoxSafely<dynamic>('profile_box'),
@@ -117,8 +117,8 @@ void main() async {
   Get.put<MontasabCacheService>(montasabCache, permanent: true);
   await montasabCache.init();
 
-  Get.put<GhazalController>(GhazalController(), permanent: true);
-  Get.put<GhazalActionController>(GhazalActionController(), permanent: true);
+  // Get.put<GhazalController>(GhazalController(), permanent: true);
+  Get.put<UserActionsController>(UserActionsController(), permanent: true);
 
   ghazalCache.preload();
   ghataatCache.preload();

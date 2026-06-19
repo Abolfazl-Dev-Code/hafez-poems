@@ -6,7 +6,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
-import 'package:hafez_poems/controllers/ghazal_action_controller.dart';
+import 'package:hafez_poems/controllers/user_actions_controller.dart';
 import 'package:hafez_poems/models/highlight_item.dart';
 import 'package:hafez_poems/models/liked_item.dart';
 import 'package:hafez_poems/models/saved_item.dart';
@@ -49,10 +49,10 @@ class ProfileController extends GetxController {
 
     avatarPath.value = (profileBox.get(_kAvatarPath) as String?)?.trim();
 
-    likedBox = Hive.box<LikedItem>(GhazalActionController.likedBoxName);
-    savedBox = Hive.box<SavedItem>(GhazalActionController.savedBoxName);
+    likedBox = Hive.box<LikedItem>(UserActionsController.likedBoxName);
+    savedBox = Hive.box<SavedItem>(UserActionsController.savedBoxName);
     highlightBox = Hive.box<HighlightItem>(
-      GhazalActionController.highlightBoxName,
+      UserActionsController.highlightBoxName,
     );
 
     _loadData();

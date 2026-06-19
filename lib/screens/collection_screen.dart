@@ -6,7 +6,7 @@ import 'package:hafez_poems/widgets/persian_numbers.dart';
 import 'package:hafez_poems/widgets/selection_mixin.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:hafez_poems/controllers/ghazal_action_controller.dart';
+import 'package:hafez_poems/controllers/user_actions_controller.dart';
 import 'package:hafez_poems/models/highlight_item.dart';
 import 'package:hafez_poems/models/liked_item.dart';
 import 'package:hafez_poems/models/saved_item.dart';
@@ -103,7 +103,7 @@ class _LikedTab extends StatefulWidget {
 class _LikedTabState extends State<_LikedTab> with SelectionMixin {
   @override
   Widget build(BuildContext context) {
-    final box = Hive.box<LikedItem>(GhazalActionController.likedBoxName);
+    final box = Hive.box<LikedItem>(UserActionsController.likedBoxName);
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -215,7 +215,7 @@ class _SavedTab extends StatefulWidget {
 class _SavedTabState extends State<_SavedTab> with SelectionMixin {
   @override
   Widget build(BuildContext context) {
-    final box = Hive.box<SavedItem>(GhazalActionController.savedBoxName);
+    final box = Hive.box<SavedItem>(UserActionsController.savedBoxName);
     final colorScheme = Theme.of(context).colorScheme;
 
     int extractId(String id) =>
@@ -347,9 +347,7 @@ class _HighlightsTab extends StatefulWidget {
 class _HighlightsTabState extends State<_HighlightsTab> with SelectionMixin {
   @override
   Widget build(BuildContext context) {
-    final box = Hive.box<HighlightItem>(
-      GhazalActionController.highlightBoxName,
-    );
+    final box = Hive.box<HighlightItem>(UserActionsController.highlightBoxName);
 
     return Scaffold(
       appBar: AppBar(
