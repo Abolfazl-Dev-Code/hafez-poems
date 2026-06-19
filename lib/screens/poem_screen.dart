@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/controllers/audio_player_controller.dart';
 import 'package:hafez_poems/controllers/verse_sync_controller.dart';
+import 'package:hafez_poems/widgets/active_verse_indicator_widget.dart';
 import 'package:hafez_poems/widgets/audio_player_widget.dart';
 import 'package:hafez_poems/widgets/ghazal_action_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -277,9 +278,14 @@ class _PoemScreenState extends State<PoemScreen> {
           title: Text(_args.title, style: textTheme.headlineMedium),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_rounded),
-            onPressed: () async {
-              if (_args.hasAudio) await _audioCtrl.stop();
-              if (context.mounted) Navigator.of(context).pop();
+            onPressed: () {
+              // pop فوری و synchronous — بدون منتظر ماندن برای stop شدن صدا
+              Navigator.of(context).pop();
+
+              // توقف صدا در پس‌زمینه — کاربر منتظرش نمی‌ماند
+              if (_args.hasAudio) {
+                _audioCtrl.stop();
+              }
             },
           ),
         ),
@@ -355,26 +361,16 @@ class _PoemScreenState extends State<PoemScreen> {
                                                 : i;
                                           }),
                                         ),
-                                        // ── نشانگر مصراع فعال ──
-                                        if (isActive) //edit
+                                        if (isActive)
                                           Positioned(
                                             right: 4,
                                             top: 0,
                                             bottom: 0,
                                             child: Center(
-                                              child: AnimatedOpacity(
-                                                opacity: isActive ? 1.0 : 0.0,
-                                                duration: const Duration(
-                                                  milliseconds: 0,
-                                                ),
-                                                child: Transform.flip(
-                                                  flipX: true,
-                                                  child: Icon(
-                                                    Icons.arrow_back_rounded,
-                                                    size: 20,
-                                                    color: colorScheme.primary,
-                                                  ),
-                                                ),
+                                              child: ActiveVerseIndicator(
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
                                               ),
                                             ),
                                           ),

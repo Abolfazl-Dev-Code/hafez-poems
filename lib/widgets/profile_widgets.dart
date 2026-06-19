@@ -1,48 +1,109 @@
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/controllers/profile_controller.dart';
+import 'package:hafez_poems/theme/color_style.dart';
 import 'package:hafez_poems/theme/text_style.dart';
 
 Future<void> showEditNameDialog(
   BuildContext context,
   ProfileController controller,
 ) async {
-  final textController = TextEditingController(text: controller.userName.value);
+  // اگه اسم فعلی همون placeholder پیش‌فرضه، فیلد رو خالی شروع می‌کنیم
+  const defaultPlaceholder = 'نام خود را وارد کنید';
+  final currentName = controller.userName.value;
+  final initialText = (currentName.isEmpty || currentName == defaultPlaceholder)
+      ? ''
+      : currentName;
+
+  final textController = TextEditingController(text: initialText);
 
   await showDialog(
     context: context,
     builder: (dialogContext) => Directionality(
       textDirection: TextDirection.rtl,
-      child: AlertDialog(
-        title: Text('ویرایش نام', style: AppTextStyles.titleMediumSetting),
-        content: TextField(
-          controller: textController,
-          maxLength: 20,
-          decoration: const InputDecoration(
-            hintText: 'نام جدید را وارد کنید',
-            counterText: '',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-            },
-            child: const Text('انصراف'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final newName = textController.text.trim();
-              if (newName.isEmpty) return;
+      child: StatefulBuilder(
+        builder: (_, setState) {
+          final text = textController.text;
+          final isEmpty = text.isNotEmpty;
+          final isTooShort = text.length < 4;
+          final isTooLong = text.length > 20;
+          final hasError = isTooShort || isTooLong;
 
-              await controller.updateName(newName);
+          String? errorMsg;
+          if (isEmpty) errorMsg = 'نام نمیتواند خالی باشد';
+          if (isTooShort) errorMsg = 'نام باید حداقل ۴ کاراکتر باشد';
+          if (isTooLong) errorMsg = 'نام نمی‌تواند بیشتر از ۲۰ کاراکتر باشد';
 
-              if (dialogContext.mounted) {
-                Navigator.pop(dialogContext);
-              }
-            },
-            child: const Text('ذخیره'),
-          ),
-        ],
+          return AlertDialog(
+            title: Text('ویرایش نام', style: AppTextStyles.titleMediumSetting),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: textController,
+                  maxLength: 20,
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    labelText: 'نام خود را وارد کنید',
+                    counterText: '',
+                    border: const OutlineInputBorder(),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.error, width: 2),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.error, width: 2),
+                    ),
+                  ),
+                ),
+                // پیام خطا با رنگ نارنجی و آیکون هشدار
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 200),
+                  child: hasError
+                      ? Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.warning_amber_rounded,
+                                color: AppColors.error,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  errorMsg!,
+                                  style: TextStyle(
+                                    color: AppColors.error,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('انصراف'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final newName = textController.text.trim();
+                  // ذخیره فقط اگه معتبر باشه
+                  if (newName.length < 4 || newName.length > 20) return;
+
+                  await controller.updateName(newName);
+                  if (dialogContext.mounted) Navigator.pop(dialogContext);
+                },
+                child: const Text('ذخیره'),
+              ),
+            ],
+          );
+        },
       ),
     ),
   );

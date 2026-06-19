@@ -296,7 +296,9 @@ class _ProfileHeader extends StatelessWidget {
             const SizedBox(height: 10),
             Obx(
               () => EditableProfileName(
-                name: controller.userName.value,
+                name: controller.userName.value.isEmpty
+                    ? 'کاربر عزیز'
+                    : controller.userName.value,
                 onEdit: () => showEditNameDialog(context, controller),
               ),
             ),

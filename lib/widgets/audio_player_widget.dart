@@ -4,6 +4,7 @@
 //   ۱. Dropdown انتخاب خواننده بالای اسلایدر
 //   ۲. دکمه‌های سرعت پخش (0.5 / 1.0 / 1.5 / 2.0)
 //   ۳. نشانگر «فایل صوتی موجود نیست» وقتی recitations خالی باشد
+//   ۴. اصلاح راست‌چین شدن لیست خوانندگان هنگام باز شدن Dropdown
 //
 // ── بقیه منطق (اسلایدر، play/pause، stop) دست نخورده است ──
 
@@ -257,7 +258,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   }
 }
 
-// ── Dropdown خواننده ─────────────────────────────────────────────────────────
+// ── Dropdown خواننده — راست‌چین صحیح در حالت باز و بسته ──────────────────
 
 class _RecitationDropdown extends StatelessWidget {
   final AudioPlayerController ctrl;
@@ -370,19 +371,51 @@ class _RecitationDropdown extends StatelessWidget {
           child: DropdownButton<RecitationInfo>(
             value: ctrl.selectedRecitation,
             isExpanded: true,
-            icon: Icon(
-              Icons.keyboard_arrow_down_rounded,
-              size: 18,
-              color: cs.primary,
+            alignment: AlignmentDirectional.centerEnd, // ← راست‌چین دکمه‌ی بسته
+            icon: Padding(
+              padding: const EdgeInsetsDirectional.only(start: 4),
+              child: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 18,
+                color: cs.primary,
+              ),
             ),
             style: theme.textTheme.bodySmall?.copyWith(color: cs.onSurface),
             dropdownColor: cs.surface,
             borderRadius: BorderRadius.circular(12),
+            // ── نمایش مقدار انتخاب‌شده در حالت بسته (راست‌چین) ──
+            selectedItemBuilder: (context) {
+              return ctrl.recitations.map((r) {
+                return Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.mic_rounded,
+                        size: 14,
+                        color: cs.primary.withValues(alpha: 0.7),
+                      ),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          r.audioArtist,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList();
+            },
+            // ── آیتم‌های لیست باز شده (راست‌چین) ──
             items: ctrl.recitations.map((r) {
               return DropdownMenuItem<RecitationInfo>(
-                alignment: AlignmentGeometry.center,
+                alignment: AlignmentDirectional.centerEnd, // ← راست‌چین هر آیتم
                 value: r,
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       Icons.mic_rounded,
@@ -394,6 +427,7 @@ class _RecitationDropdown extends StatelessWidget {
                       child: Text(
                         r.audioArtist,
                         overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.right,
                       ),
                     ),
                   ],
@@ -414,7 +448,7 @@ class _RecitationDropdown extends StatelessWidget {
   }
 }
 
-// ── دکمه‌های سرعت پخش — جایگزین کلاس _SpeedButtons ──────────────────────
+// ── دکمه‌های سرعت پخش ──────────────────────────────────────────────────
 
 class _SpeedButtons extends StatelessWidget {
   final AudioPlayerController ctrl;

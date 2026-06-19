@@ -42,10 +42,10 @@ class SquareActionBox extends StatelessWidget {
                 ),
               ),
             ),
-            child: SizedBox(width: 64, height: 64, child: Center(child: icon)),
+            child: SizedBox(width: 59, height: 59, child: Center(child: icon)),
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Text(
             title,
             style: textTheme.bodyMedium?.copyWith(

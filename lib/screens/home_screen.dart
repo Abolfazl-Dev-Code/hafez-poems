@@ -2,6 +2,8 @@ import 'dart:math';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hafez_poems/controllers/profile_controller.dart';
+import 'package:hafez_poems/screens/hafez_biography_screen.dart';
 import 'package:hafez_poems/screens/poem_list_sheet.dart';
 import 'package:hafez_poems/screens/poem_screen.dart';
 import 'package:hafez_poems/services/poem_cache_services.dart';
@@ -103,20 +105,29 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   // ── Greeting card ──────────────────────────────────────────────────────────
-  String get _greetingText {
+  String _greetingText({String name = ''}) {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'صبح بخیر';
-    if (hour < 17) return 'ظهر بخیر';
-    if (hour < 21) return 'عصر بخیر';
-    return 'شب بخیر';
+    String base;
+
+    if (hour >= 6 && hour < 12) {
+      base = 'صبح بخیر';
+    } else if (hour >= 12 && hour < 17) {
+      base = 'ظهر بخیر';
+    } else if (hour >= 17 && hour < 21) {
+      base = 'عصر بخیر';
+    } else {
+      base = 'شب بخیر';
+    }
+
+    return name.trim().isEmpty ? base : '$base ${name.trim()}';
   }
 
   String get _greetingSubtitle {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'روزت رو با یه بیت حافظ شروع کن ☀️';
-    if (hour < 17) return 'یه لحظه استراحت با حافظ 🍃';
-    if (hour < 21) return 'عصرانه‌ات رو با شعر همراه کن 🌿';
-    return 'شبت رو با حافظ آروم کن 🌙';
+    if (hour >= 6 && hour < 12) return 'روزت رو با یه بیت حافظ شروع کن ☀️';
+    if (hour >= 12 && hour < 17) return 'یه لحظه استراحت با حافظ 🍃';
+    if (hour >= 17 && hour < 21) return 'عصرانه‌ات رو با شعر همراه کن 🌿';
+    return 'شبت رو با حافظ آروم کن 🌙'; // 21 تا 24 و 0 تا 6
   }
 
   IconData get _greetingIcon {
@@ -131,27 +142,27 @@ class _HomeScreenState extends State<HomeScreen>
     final hour = DateTime.now().hour;
 
     if (isLight) {
-      if (hour < 12) {
+      if (hour >= 6 && hour < 12) {
         return [const Color(0xFFFFF8EE), const Color(0xFFFFEDD5)];
       }
-      if (hour < 17) {
+      if (hour >= 12 && hour < 17) {
         return [const Color(0xFFEFFAF0), const Color(0xFFD4F0D8)];
       }
-      if (hour < 21) {
+      if (hour >= 17 && hour < 21) {
         return [const Color(0xFFFFF0F3), const Color(0xFFFFD6E0)];
       }
-      return [const Color(0xFFF0ECFC), const Color(0xFFE0D5F5)];
+      return [const Color(0xFFF0ECFC), const Color(0xFFE0D5F5)]; // شب
     } else {
-      if (hour < 12) {
+      if (hour >= 6 && hour < 12) {
         return [const Color(0xFF2A1F10), const Color(0xFF1E1508)];
       }
-      if (hour < 17) {
+      if (hour >= 12 && hour < 17) {
         return [const Color(0xFF0F1F12), const Color(0xFF0A1A0C)];
       }
-      if (hour < 21) {
+      if (hour >= 17 && hour < 21) {
         return [const Color(0xFF221018), const Color(0xFF180A10)];
       }
-      return [const Color(0xFF14102A), const Color(0xFF0D0A1E)];
+      return [const Color(0xFF14102A), const Color(0xFF0D0A1E)]; // شب
     }
   }
 
@@ -159,15 +170,15 @@ class _HomeScreenState extends State<HomeScreen>
     final hour = DateTime.now().hour;
 
     if (isLight) {
-      if (hour < 12) return const Color(0xFFE67E22);
-      if (hour < 17) return const Color(0xFF27AE60);
-      if (hour < 21) return const Color(0xFFE91E8C);
-      return const Color(0xFF7C4DFF);
+      if (hour >= 6 && hour < 12) return const Color(0xFFE67E22);
+      if (hour >= 12 && hour < 17) return const Color(0xFF27AE60);
+      if (hour >= 17 && hour < 21) return const Color(0xFFE91E8C);
+      return const Color(0xFF7C4DFF); // شب
     } else {
-      if (hour < 12) return const Color(0xFFFFB74D);
-      if (hour < 17) return const Color(0xFF81C784);
-      if (hour < 21) return const Color(0xFFF48FB1);
-      return const Color(0xFFB39DDB);
+      if (hour >= 6 && hour < 12) return const Color(0xFFFFB74D);
+      if (hour >= 12 && hour < 17) return const Color(0xFF81C784);
+      if (hour >= 17 && hour < 21) return const Color(0xFFF48FB1);
+      return const Color(0xFFB39DDB); // شب
     }
   }
 
@@ -176,72 +187,80 @@ class _HomeScreenState extends State<HomeScreen>
     final gradColors = _greetingGradientForTheme(isLight);
     final iconColor = _greetingIconColor(isLight);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: gradColors,
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-          ),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: iconColor.withValues(alpha: 0.15),
-            width: 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(_greetingIcon, color: iconColor, size: 22),
+    final ProfileController profileController = Get.find<ProfileController>();
+
+    return Obx(() {
+      final String userName = profileController.userName.value;
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: gradColors,
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _greetingText,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontFamily: 'vazir',
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onSurface.withValues(
-                        alpha: 0.85,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: iconColor.withValues(alpha: 0.15),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(_greetingIcon, color: iconColor, size: 22),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _greetingText(name: userName),
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontFamily: 'vazir',
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.85,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    _greetingSubtitle,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontFamily: 'vazir',
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                      height: 1.4,
+                    const SizedBox(height: 3),
+                    Text(
+                      _greetingSubtitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontFamily: 'vazir',
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.5,
+                        ),
+                        height: 1.4,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   // ── Grid یکدست برای ۵ باکس ────────────────────────────────────────────────
   Widget _buildPoemGrid(ThemeData theme) {
     final items = [
       _ActionItem(
-        icon: Image.asset("assets/icon/ghazaliat.png", width: 61, height: 61),
+        icon: Image.asset("assets/icon/ghazaliat.png", width: 56, height: 56),
         title: "غزلیات",
         subtitle: "۴۹۵ غزل",
         onTap: () => _showSheet(
@@ -273,7 +292,7 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       ),
       _ActionItem(
-        icon: Image.asset("assets/icon/ghasayed.png", width: 53, height: 53),
+        icon: Image.asset("assets/icon/ghasayed.png", width: 49, height: 49),
         title: "قصاید",
         subtitle: "۳ قصیده",
         onTap: () => _showSheet(
@@ -305,7 +324,7 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       ),
       _ActionItem(
-        icon: Image.asset("assets/icon/robaeiyat.png", width: 64, height: 64),
+        icon: Image.asset("assets/icon/robaeiyat.png", width: 59, height: 59),
         title: "رباعیات",
         subtitle: "۴۲ رباعی",
         onTap: () => _showSheet(
@@ -337,7 +356,7 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       ),
       _ActionItem(
-        icon: Image.asset("assets/icon/divan.png", width: 55, height: 55),
+        icon: Image.asset("assets/icon/divan.png", width: 50, height: 50),
         title: "قطعات",
         subtitle: "34 قطعه".toPersianNumbers(),
         onTap: () => _showSheet(
@@ -369,7 +388,7 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       ),
       _ActionItem(
-        icon: Image.asset("assets/icon/taabir.png", width: 61, height: 61),
+        icon: Image.asset("assets/icon/taabir.png", width: 59, height: 59),
         title: "اشعار منتسب",
         subtitle: "اشعار دیگر",
         onTap: () => _showSheet(
@@ -409,10 +428,10 @@ class _HomeScreenState extends State<HomeScreen>
     ];
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          const gap = 4.0;
+          const gap = 0.0;
           final itemWidth = (constraints.maxWidth - gap * 2) / 3;
 
           Widget buildCell(_ActionItem item) {
@@ -430,7 +449,7 @@ class _HomeScreenState extends State<HomeScreen>
                   buildCell(items[2]),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -491,10 +510,13 @@ class _HomeScreenState extends State<HomeScreen>
                         enableInfiniteScroll: false,
                       ),
                       itemCount: 1,
-                      itemBuilder: (context, index, _) => GhazalDisplayWidget(
+                      itemBuilder: (context, index, _) => CarouselScreenWidget(
                         key: ValueKey(_carouselTexts[index]),
                         initialGhazal: _carouselTexts[index],
-                        imagePath: 'assets/icon/hafez.png',
+                        imagePath: 'assets/icon/hafez-light.png',
+                        darkImagePath: 'assets/icon/hafez-dark.png',
+                        lightColor: const Color.fromARGB(255, 255, 255, 255),
+                        darkColor: const Color.fromARGB(255, 41, 28, 14),
                         changeButtonIcon: 'rotate',
                         onChangeGhazal: () => _refreshSlide(index),
                       ),
@@ -503,16 +525,17 @@ class _HomeScreenState extends State<HomeScreen>
                   const SizedBox(height: 26),
                   // ── بخش دیوان ──
                   _buildSectionHeader(theme, 'دیوان حافظ'),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 16),
 
                   _buildPoemGrid(theme),
-
+                  const SizedBox(height: 8),
                   // ── بخش فال — جدا و برجسته ──
-                  _buildSectionHeader(theme, 'ویژه'),
-                  const SizedBox(height: 14),
+                  _buildSectionHeader(theme, 'ویژ‌ه‌ها'),
+                  const SizedBox(height: 16),
                   _buildFalBanner(theme),
-
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 14),
+                  _buildBiographyBanner(theme),
+                  const SizedBox(height: 70),
                 ],
               ),
             ),
@@ -550,6 +573,53 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
+  Widget _buildBiographyBanner(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.mediumImpact();
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const HafezBiographyScreen()),
+            );
+          },
+          borderRadius: BorderRadius.circular(20),
+          child: Ink(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: const Color(0xFFD4AF37).withValues(alpha: 0.38),
+                width: 1,
+              ),
+              // ── تصویر پس‌زمینه ──
+              image: DecorationImage(
+                image: AssetImage('assets/icon/hafez-banner.png'),
+                fit: BoxFit.cover,
+                opacity: 1,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 39),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  // فلش
+                  Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: Colors.white,
+                    size: 17,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   // ── فال banner ─────────────────────────────────────────────────────────────
   Widget _buildFalBanner(ThemeData theme) {
     return Padding(
@@ -558,62 +628,37 @@ class _HomeScreenState extends State<HomeScreen>
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            HapticFeedback.lightImpact();
-            _showSheet(FalScreen());
+            HapticFeedback.mediumImpact();
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const FalScreen()));
           },
           borderRadius: BorderRadius.circular(20),
           child: Ink(
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  theme.colorScheme.primary.withValues(alpha: 0.85),
-                  theme.colorScheme.primary.withValues(alpha: 0.55),
-                ],
-                begin: Alignment.centerRight,
-                end: Alignment.centerLeft,
-              ),
               borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.25),
-                  blurRadius: 16,
-                  offset: const Offset(0, 6),
-                ),
-              ],
+              border: Border.all(
+                color: const Color(0xFFD4AF37).withValues(alpha: 0.38),
+                width: 1,
+              ),
+              // ── تصویر پس‌زمینه ──
+              image: DecorationImage(
+                image: AssetImage(
+                  'assets/icon/faal-banner.png',
+                ), // نام فایل رو عوض کن
+                fit: BoxFit.fitWidth,
+                opacity: 1,
+              ),
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 40),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Image.asset("assets/icon/faal.png", width: 52, height: 52),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'فال حافظ',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontFamily: 'vazir',
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'نیتی بکن و فالت را بگیر',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontFamily: 'vazir',
-                            color: Colors.white.withValues(alpha: 0.8),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                   Icon(
                     Icons.arrow_back_ios_new_rounded,
-                    color: Colors.white.withValues(alpha: 0.7),
-                    size: 18,
+                    color: Colors.white,
+                    size: 17,
                   ),
                 ],
               ),
@@ -719,7 +764,7 @@ class _ActionItem extends StatelessWidget {
       child: Column(
         children: [
           SquareActionBox(icon: icon, title: title, onTap: onTap),
-          const SizedBox(height: 5),
+          const SizedBox(height: 0),
           Text(
             subtitle,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(

@@ -17,7 +17,7 @@ class ProfileController extends GetxController {
   late final Box<HighlightItem> highlightBox;
   late final Box profileBox;
 
-  final userName = 'کاربر عزیز'.obs;
+  final userName = ''.obs;
   final avatarPath = RxnString();
 
   static const _kName = 'name';
@@ -45,7 +45,7 @@ class ProfileController extends GetxController {
     userName.value =
         (profileBox.get(_kName) as String?)?.trim().isNotEmpty == true
         ? (profileBox.get(_kName) as String).trim()
-        : 'کاربر عزیز';
+        : '';
 
     avatarPath.value = (profileBox.get(_kAvatarPath) as String?)?.trim();
 

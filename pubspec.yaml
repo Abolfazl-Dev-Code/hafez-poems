@@ -39,6 +39,7 @@ dependencies:
   audio_service: ^0.18.18
   just_audio: ^0.10.5
   xml: ^7.0.1
+  video_player: ^2.11.1
 
 dev_dependencies:
   flutter_test:
@@ -58,6 +59,8 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/videos/hafez_flip.mp4
+    - assets/sounds/page_flip.mp3
     - assets/icon/
     - assets/json/hafez_fal.json
     - assets/json/hafez_ghazals.json

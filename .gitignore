@@ -64,3 +64,6 @@ local.properties
 
 # Fonts (license restrictions)
 fonts/
+
+assets/sounds/
+assets/videos/
