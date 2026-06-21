@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/widgets/poem_favorites_list_card_selector.dart';
 
 class FavoriteItem {
   final dynamic hiveKey;
@@ -118,7 +119,7 @@ class _FavoriteCard extends StatelessWidget {
           child: Row(
             children: [
               if (selectionMode) ...[
-                _SelectionCircle(
+                PoemFavoritesListCardSelector(
                   isSelected: isSelected,
                   colorScheme: colorScheme,
                 ),
@@ -191,31 +192,6 @@ class _FavoriteCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _SelectionCircle extends StatelessWidget {
-  final bool isSelected;
-  final ColorScheme colorScheme;
-
-  const _SelectionCircle({required this.isSelected, required this.colorScheme});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: isSelected ? colorScheme.primary : Colors.transparent,
-        border: Border.all(
-          color: isSelected ? colorScheme.primary : colorScheme.outline,
-        ),
-      ),
-      child: isSelected
-          ? const Icon(Icons.check, size: 16, color: Colors.white)
-          : null,
     );
   }
 }

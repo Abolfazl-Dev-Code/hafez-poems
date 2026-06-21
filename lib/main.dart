@@ -2,7 +2,6 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hafez_poems/controllers/user_actions_controller.dart';
-// import 'package:hafez_poems/controllers/ghazal_controller.dart';
 import 'package:hafez_poems/controllers/profile_controller.dart';
 import 'package:hafez_poems/models/ghasayed_model.dart';
 import 'package:hafez_poems/models/ghazal_model.dart';
@@ -10,6 +9,7 @@ import 'package:hafez_poems/models/ghataat_model.dart';
 import 'package:hafez_poems/models/highlight_item.dart';
 import 'package:hafez_poems/models/liked_item.dart';
 import 'package:hafez_poems/models/montasab_model.dart';
+import 'package:hafez_poems/models/other_poem_model.dart';
 import 'package:hafez_poems/models/robaeyat_model.dart';
 import 'package:hafez_poems/models/saved_item.dart';
 import 'package:hafez_poems/screens/splash_screen.dart';
@@ -34,11 +34,6 @@ Future<Box<T>> openBoxSafely<T>(String name) async {
   }
 }
 
-//todo: صفحه نمایش تغییرات نسخه جدید برنامه
-//todo: ویرایش صفحه پروفایل
-//todo: معادل سازی کلمات فارسی در برنامه
-//todo: افزودن انیمیشن به تصویر حافظ در کروسال اسکرین که وقتی کاربر دکمه رفرش را زد حفظ کتاب را یک صفحه ورق بزند
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -54,7 +49,8 @@ void main() async {
   Hive.registerAdapter(GhasayedModelAdapter());
   Hive.registerAdapter(RobaeyatModelAdapter());
   Hive.registerAdapter(MontasabModelAdapter());
-
+  Hive.registerAdapter(OtherPoemModelAdapter());
+  Hive.openBox(ProfileController.readBoxName);
   // 3. همه Boxها را قبل از ساخت کنترلرها باز کن
   await Future.wait<Box>([
     openBoxSafely<LikedItem>(UserActionsController.likedBoxName),
@@ -63,12 +59,12 @@ void main() async {
 
     // فقط یکی برای پروفایل نگه دار
     openBoxSafely<dynamic>('profile_box'),
-
     openBoxSafely<Ghazal>('ghazals_box'),
     openBoxSafely<GhataatModel>('ghataat_box'),
     openBoxSafely<GhasayedModel>('qasaid_box'),
     openBoxSafely<RobaeyatModel>('robaeyat_box'),
     openBoxSafely<MontasabModel>('montasab_box'),
+    openBoxSafely<OtherPoemModel>('other_poems_box'),
   ]);
 
   // 4. حالا سرویس‌ها و کنترلرهایی که ممکن است Hive بخواهند
@@ -117,6 +113,11 @@ void main() async {
   Get.put<MontasabCacheService>(montasabCache, permanent: true);
   await montasabCache.init();
 
+  // Other Poems (مثنوی + ساقی‌نامه)
+  final otherPoemCache = OtherPoemCacheService();
+  Get.put<OtherPoemCacheService>(otherPoemCache, permanent: true);
+  await otherPoemCache.init();
+
   // Get.put<GhazalController>(GhazalController(), permanent: true);
   Get.put<UserActionsController>(UserActionsController(), permanent: true);
 
@@ -125,6 +126,7 @@ void main() async {
   ghasayedCache.preload();
   robaeyatCache.preload();
   montasabCache.preload();
+  otherPoemCache.preload();
 
   runApp(const MainApp());
 }

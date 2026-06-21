@@ -1,33 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:hafez_poems/models/base_poem_model.dart';
-import 'package:hafez_poems/screens/poem_screen.dart';
 import 'package:get/get.dart';
-
-class PoemListConfig {
-  final String headerTitle;
-  final String loadingText;
-  final String emptyText;
-  final String? tilePrefix;
-  final RxList items;
-  final RxBool isIndexing;
-  final RxDouble loadingProgress;
-  final Future<void> Function(String id) prefetch;
-  final PoemScreenArgs Function(BasePoem item) buildArgs;
-  final VoidCallback onRetry;
-
-  const PoemListConfig({
-    required this.headerTitle,
-    required this.loadingText,
-    required this.emptyText,
-    required this.items,
-    required this.isIndexing,
-    required this.loadingProgress,
-    required this.prefetch,
-    required this.buildArgs,
-    required this.onRetry,
-    this.tilePrefix,
-  });
-}
+import 'package:hafez_poems/models/base_poem_model.dart';
+import 'package:hafez_poems/models/poem_list_config.dart';
+import 'package:hafez_poems/screens/poem_screen.dart';
+import 'package:hafez_poems/widgets/poem_list_empty.dart';
+import 'package:hafez_poems/widgets/poem_list_loading.dart';
+import 'package:hafez_poems/widgets/poem_list_title.dart';
 
 class PoemListSheet extends StatefulWidget {
   final PoemListConfig config;
@@ -47,13 +25,17 @@ class _PoemListSheetState extends State<PoemListSheet> {
 
   void _maybePrefetch(int currentIndex) {
     const ahead = 5;
+
     final items = _items;
+
     final end = (currentIndex + ahead + 1).clamp(0, items.length);
 
     for (int i = currentIndex + 1; i < end; i++) {
       final next = items[i];
+
       if (!next.hasFullText && !_prefetching.contains(next.id)) {
         _prefetching.add(next.id);
+
         _cfg
             .prefetch(next.id)
             .then((_) => _prefetching.remove(next.id))
@@ -62,9 +44,24 @@ class _PoemListSheetState extends State<PoemListSheet> {
     }
   }
 
-  void _navigate(BasePoem item) {
+  void _navigate(BasePoem item, String displayTitle) {
     Get.back();
-    Get.to(() => PoemScreen(args: _cfg.buildArgs(item)));
+
+    final baseArgs = _cfg.buildArgs(item);
+
+    final args = _cfg.tilePrefix != null
+        ? PoemScreenArgs(
+            id: baseArgs.id,
+            title: displayTitle,
+            text: baseArgs.text,
+            audioUrl: baseArgs.audioUrl,
+            fetchText: baseArgs.fetchText,
+            fetchAudioUrl: baseArgs.fetchAudioUrl,
+            highlightLineIndex: baseArgs.highlightLineIndex,
+          )
+        : baseArgs;
+
+    Get.to(() => PoemScreen(args: args));
   }
 
   @override
@@ -95,7 +92,9 @@ class _PoemListSheetState extends State<PoemListSheet> {
                     borderRadius: BorderRadius.circular(100),
                   ),
                 ),
+
                 const SizedBox(height: 12),
+
                 Row(
                   children: [
                     IconButton(
@@ -105,7 +104,9 @@ class _PoemListSheetState extends State<PoemListSheet> {
                         color: colorScheme.onSurface,
                       ),
                     ),
+
                     const SizedBox(width: 8),
+
                     Text(
                       _cfg.headerTitle,
                       style: textTheme.titleMedium?.copyWith(
@@ -113,14 +114,16 @@ class _PoemListSheetState extends State<PoemListSheet> {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
+
                     const Spacer(),
+
                     Obx(() {
                       final indexing = _cfg.isIndexing.value;
                       final progress = _cfg.loadingProgress.value;
+
                       if (!indexing) return const SizedBox.shrink();
 
                       return Row(
-                        mainAxisSize: MainAxisSize.min,
                         children: [
                           SizedBox(
                             width: 14,
@@ -131,7 +134,9 @@ class _PoemListSheetState extends State<PoemListSheet> {
                               color: colorScheme.primary,
                             ),
                           ),
+
                           const SizedBox(width: 6),
+
                           Text(
                             '${(progress * 100).toInt()}٪',
                             style: textTheme.labelSmall?.copyWith(
@@ -145,6 +150,7 @@ class _PoemListSheetState extends State<PoemListSheet> {
                 ),
 
                 const SizedBox(height: 8),
+
                 Expanded(
                   child: Obx(() {
                     final items = _items;
@@ -152,8 +158,11 @@ class _PoemListSheetState extends State<PoemListSheet> {
 
                     if (items.isEmpty) {
                       return indexing
-                          ? _buildLoading(colorScheme, textTheme)
-                          : _buildEmpty(colorScheme, textTheme);
+                          ? PoemListLoading(text: _cfg.loadingText)
+                          : PoemListEmpty(
+                              text: _cfg.emptyText,
+                              onRetry: _cfg.onRetry,
+                            );
                     }
 
                     return ListView.builder(
@@ -161,6 +170,7 @@ class _PoemListSheetState extends State<PoemListSheet> {
                       itemCount: items.length,
                       itemBuilder: (context, index) {
                         final item = items[index];
+
                         _maybePrefetch(index);
 
                         final tileTitle = _cfg.tilePrefix != null
@@ -168,12 +178,14 @@ class _PoemListSheetState extends State<PoemListSheet> {
                             : item.title;
 
                         return Column(
-                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            _PoemListTile(
+                            PoemListTitle(
                               title: tileTitle,
                               hasFullText: item.hasFullText,
-                              onTap: () => _navigate(item),
+                              onTap: () => _navigate(
+                                item,
+                                tileTitle,
+                              ), // ← پاس دادن tileTitle
                             ),
                             if (index < items.length - 1)
                               Divider(
@@ -194,105 +206,6 @@ class _PoemListSheetState extends State<PoemListSheet> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildLoading(ColorScheme colorScheme, TextTheme textTheme) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircularProgressIndicator(color: colorScheme.primary),
-          const SizedBox(height: 16),
-          Text(
-            _cfg.loadingText,
-            style: textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmpty(ColorScheme colorScheme, TextTheme textTheme) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.wifi_off_rounded,
-            size: 48,
-            color: colorScheme.onSurface.withValues(alpha: 0.3),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            _cfg.emptyText,
-            style: textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurface.withValues(alpha: 0.5),
-            ),
-          ),
-          const SizedBox(height: 16),
-          FilledButton.tonal(
-            onPressed: _cfg.onRetry,
-            child: const Text('تلاش مجدد'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PoemListTile extends StatelessWidget {
-  const _PoemListTile({
-    required this.title,
-    required this.hasFullText,
-    required this.onTap,
-  });
-
-  final String title;
-  final bool hasFullText;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
-
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      leading: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(
-          color: colorScheme.primary.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(Icons.book_rounded, color: colorScheme.primary, size: 22),
-      ),
-      title: Text(
-        title,
-        style: textTheme.bodyMedium?.copyWith(
-          color: colorScheme.onSurface,
-          fontWeight: FontWeight.w600,
-        ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      subtitle: hasFullText
-          ? null
-          : Text(
-              'در حال دریافت...',
-              style: textTheme.labelSmall?.copyWith(
-                color: colorScheme.onSurface.withValues(alpha: 0.35),
-              ),
-            ),
-      trailing: Icon(
-        Icons.chevron_left_rounded,
-        color: colorScheme.onSurface.withValues(alpha: 0.45),
-      ),
-      onTap: onTap,
     );
   }
 }

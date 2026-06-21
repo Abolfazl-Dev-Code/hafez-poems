@@ -39,7 +39,7 @@ class GhazalActionBar extends StatelessWidget {
         children: [
           ActionButton(
             icon: isLiked ? Icons.favorite : Icons.favorite_border,
-            label: 'لایک',
+            label: 'علاقه‌مندی‌',
             isActive: isLiked,
             activeColor: Colors.red.shade400,
             onTap: onLikeTap,
@@ -55,7 +55,7 @@ class GhazalActionBar extends StatelessWidget {
 
           ActionButton(
             icon: isHighlightActive ? Icons.highlight : Icons.highlight,
-            label: 'هایلایت',
+            label: 'برگزیده‌',
             isDimmed: !canHighlight,
             isActive: isHighlightActive,
             activeColor: Colors.yellowAccent,

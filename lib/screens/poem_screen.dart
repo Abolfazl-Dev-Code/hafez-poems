@@ -1,11 +1,19 @@
 // lib/screens/poem_screen.dart
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hafez_poems/controllers/audio_player_controller.dart';
+import 'package:hafez_poems/controllers/profile_controller.dart';
 import 'package:hafez_poems/controllers/verse_sync_controller.dart';
+import 'package:hafez_poems/services/app_snackbar_service.dart';
 import 'package:hafez_poems/widgets/active_verse_indicator_widget.dart';
 import 'package:hafez_poems/widgets/audio_player_widget.dart';
 import 'package:hafez_poems/widgets/ghazal_action_bar.dart';
+import 'package:hafez_poems/widgets/poem_selected_text.dart';
+import 'package:hive/hive.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../controllers/user_actions_controller.dart';
 
@@ -48,6 +56,9 @@ class _PoemScreenState extends State<PoemScreen> {
   String _poemText = '';
   bool _isTextLoading = true;
   String _textError = '';
+  int? _lastAutoScrolledVerseOrder;
+  bool _userIsInteractingWithScroll = false;
+  Timer? _resumeAutoScrollTimer;
   final ScrollController _scrollController = ScrollController();
   static const String _fontSizeKey = 'reading_font_size';
   static const String _lineHeightKey = 'reading_line_height';
@@ -87,8 +98,10 @@ class _PoemScreenState extends State<PoemScreen> {
   void initState() {
     super.initState();
     _audioCtrl.addListener(_syncPosition);
+    _verseSyncCtrl.addListener(_onActiveVerseChanged); // ← اضافه
     _loadReadingSettings();
     _loadInitialActionsState();
+    _markAsRead();
     _initText();
   }
 
@@ -97,6 +110,89 @@ class _PoemScreenState extends State<PoemScreen> {
       '🎵 position: ${_audioCtrl.position}, hasSyncData: ${_verseSyncCtrl.hasSyncData}, activeOrder: ${_verseSyncCtrl.activeVerseOrder}',
     );
     _verseSyncCtrl.updatePosition(_audioCtrl.position);
+  }
+
+  // ── اسکرول خودکار بر اساس خطِ سینک‌شده ─────────────
+
+  void _onActiveVerseChanged() {
+    if (_userIsInteractingWithScroll) return;
+
+    final order = _verseSyncCtrl.activeVerseOrder;
+    if (order < 0) return;
+    if (order == _lastAutoScrolledVerseOrder) return;
+
+    _lastAutoScrolledVerseOrder = order;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToLineIndex(order);
+    });
+  }
+
+  /// اسکرول نرم به خطِ مشخص‌شده، با لنگرگاهِ تقریباً یک‌سومِ بالای صفحه
+  Future<void> _scrollToLineIndex(
+    int index, {
+    Duration duration = const Duration(milliseconds: 450),
+    double anchorFraction = 1 / 3,
+  }) async {
+    if (!mounted) return;
+
+    final key = _lineKeys[index];
+    final ctx = key?.currentContext;
+    if (ctx == null) return;
+
+    final box = ctx.findRenderObject() as RenderBox?;
+    if (box == null || !_scrollController.hasClients) return;
+
+    final scrollBox =
+        _scrollController.position.context.storageContext.findRenderObject()
+            as RenderBox?;
+    if (scrollBox == null || !scrollBox.attached) return;
+
+    final tileOffset = box.localToGlobal(Offset.zero, ancestor: scrollBox);
+    final screenHeight = scrollBox.size.height;
+    final targetOffset =
+        (_scrollController.offset +
+                tileOffset.dy -
+                screenHeight * anchorFraction)
+            .clamp(0.0, _scrollController.position.maxScrollExtent);
+
+    await _scrollController.animateTo(
+      targetOffset,
+      duration: duration,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _pauseAutoScroll() {
+    _resumeAutoScrollTimer?.cancel();
+    _userIsInteractingWithScroll = true;
+  }
+
+  void _scheduleResumeAutoScroll() {
+    _resumeAutoScrollTimer?.cancel();
+    _resumeAutoScrollTimer = Timer(const Duration(seconds: 4), () {
+      if (!mounted) return;
+      _userIsInteractingWithScroll = false;
+      // اجازه بده با موقعیت فعلیِ پخش دوباره سینک شه
+      _lastAutoScrolledVerseOrder = null;
+      _onActiveVerseChanged();
+    });
+  }
+
+  void _sharePoem() {
+    if (_isTextLoading || _poemText.isEmpty) return;
+
+    final buffer = StringBuffer();
+    buffer.writeln('📜 ${_args.title}');
+    buffer.writeln();
+    buffer.writeln(_poemText.trim());
+    buffer.writeln();
+    buffer.writeln('—');
+    buffer.writeln('اشعار حافظ - دیوان');
+    buffer.writeln(
+      'https://github.com/Abolfazl-Dev-Code/hafez-poems/releases/',
+    );
+
+    SharePlus.instance.share(ShareParams(text: buffer.toString()));
   }
 
   void _initText() {
@@ -147,35 +243,13 @@ class _PoemScreenState extends State<PoemScreen> {
     if (targetIndex == null) return;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final key = _lineKeys[targetIndex];
-      final ctx = key?.currentContext;
-      final box = ctx?.findRenderObject() as RenderBox?;
-      final scrollBox = _scrollController.hasClients
-          ? _scrollController.position.context.storageContext.findRenderObject()
-                as RenderBox?
-          : null;
-
       await Future.delayed(const Duration(milliseconds: 350));
       if (!mounted) return;
 
-      if (box != null &&
-          _scrollController.hasClients &&
-          scrollBox != null &&
-          scrollBox.attached) {
-        final tileOffset = box.localToGlobal(Offset.zero, ancestor: scrollBox);
-        final screenHeight = scrollBox.size.height;
-        final targetOffset =
-            (_scrollController.offset + tileOffset.dy - screenHeight / 3).clamp(
-              0.0,
-              _scrollController.position.maxScrollExtent,
-            );
-
-        await _scrollController.animateTo(
-          targetOffset,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-        );
-      }
+      await _scrollToLineIndex(
+        targetIndex,
+        duration: const Duration(milliseconds: 500),
+      );
 
       if (!mounted) return;
       setState(() => _flashingLineIndex = targetIndex);
@@ -197,6 +271,10 @@ class _PoemScreenState extends State<PoemScreen> {
     _highlightedLineIndexes.addAll(
       _actionController.getHighlightedLineIndexes(_args.id),
     );
+  }
+
+  void _markAsRead() {
+    Hive.box(ProfileController.readBoxName).put(_args.id, true);
   }
 
   Future<void> _toggleLike() async {
@@ -221,6 +299,12 @@ class _PoemScreenState extends State<PoemScreen> {
     if (mounted) {
       setState(() => _isSaved = _actionController.isSaved(_args.id));
     }
+  }
+
+  Future<void> _copyLine(String text) async {
+    await Clipboard.setData(ClipboardData(text: text));
+    if (!mounted) return;
+    AppSnackBarService.success(context, 'مصرع کپی شد');
   }
 
   Future<void> _toggleHighlight() async {
@@ -256,7 +340,9 @@ class _PoemScreenState extends State<PoemScreen> {
 
   @override
   void dispose() {
-    _scrollController.dispose(); // ← اضافه
+    _resumeAutoScrollTimer?.cancel(); // ← اضافه
+    _verseSyncCtrl.removeListener(_onActiveVerseChanged); // ← اضافه
+    _scrollController.dispose();
     _audioCtrl.removeListener(_syncPosition);
     _audioCtrl.dispose();
     _verseSyncCtrl.dispose();
@@ -276,18 +362,27 @@ class _PoemScreenState extends State<PoemScreen> {
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
           title: Text(_args.title, style: textTheme.headlineMedium),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_rounded),
-            onPressed: () {
-              // pop فوری و synchronous — بدون منتظر ماندن برای stop شدن صدا
-              Navigator.of(context).pop();
-
-              // توقف صدا در پس‌زمینه — کاربر منتظرش نمی‌ماند
-              if (_args.hasAudio) {
-                _audioCtrl.stop();
-              }
-            },
+          leading: Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_rounded),
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (_args.hasAudio) _audioCtrl.stop();
+              },
+            ),
           ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: IconButton(
+                icon: const Icon(Icons.share_rounded),
+                iconSize: 21,
+                onPressed: _isTextLoading ? null : _sharePoem,
+                tooltip: 'اشتراک‌گذاری',
+              ),
+            ),
+          ],
         ),
         body: Stack(
           children: [
@@ -312,80 +407,98 @@ class _PoemScreenState extends State<PoemScreen> {
                         ],
                       ),
                     )
-                  : SingleChildScrollView(
-                      controller: _scrollController, // ← اضافه
-                      padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPadding),
-                      child: Card(
-                        color: colorScheme.surface,
-                        elevation: theme.brightness == Brightness.dark ? 0 : 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          side: BorderSide(
-                            color: theme.dividerColor.withValues(alpha: 0.5),
+                  : NotificationListener<ScrollNotification>(
+                      // ← اضافه
+                      onNotification: (notification) {
+                        if (notification is ScrollStartNotification &&
+                            notification.dragDetails != null) {
+                          _pauseAutoScroll();
+                        } else if (notification is ScrollEndNotification) {
+                          _scheduleResumeAutoScroll();
+                        }
+                        return false;
+                      },
+                      child: SingleChildScrollView(
+                        controller: _scrollController, // ← اضافه
+                        padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPadding),
+                        child: Card(
+                          color: colorScheme.surface,
+                          elevation: theme.brightness == Brightness.dark
+                              ? 0
+                              : 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                            side: BorderSide(
+                              color: theme.dividerColor.withValues(alpha: 0.5),
+                            ),
                           ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: ListenableBuilder(
-                            listenable: _verseSyncCtrl,
-                            builder: (context, _) {
-                              final activeOrder =
-                                  _verseSyncCtrl.activeVerseOrder;
-                              return Column(
-                                children: List.generate(_poemLines.length, (i) {
-                                  final isActive =
-                                      _verseSyncCtrl.hasSyncData &&
-                                      activeOrder == i;
-                                  final isFlashing =
-                                      _flashingLineIndex == i; // ← اضافه کن
-                                  return Padding(
-                                    key: _lineKeys[i] ??=
-                                        GlobalKey(), // ← key اینجا باشه
-                                    padding: const EdgeInsets.only(bottom: 8),
-                                    child: Stack(
-                                      children: [
-                                        _PoemLineTile(
-                                          text: _poemLines[i],
-                                          isSelected: _selectedLineIndex == i,
-                                          isHighlighted: _highlightedLineIndexes
-                                              .contains(i),
-                                          fontSize: _fontSize,
-                                          lineHeight: _lineHeight,
-                                          isFlashing: isFlashing, // ← اضافه
-                                          fontFamily: _fontFamily,
-                                          fontColor: _fontColor,
-                                          onTap: () => setState(() {
-                                            _selectedLineIndex =
-                                                _selectedLineIndex == i
-                                                ? null
-                                                : i;
-                                          }),
-                                        ),
-                                        if (isActive)
-                                          Positioned(
-                                            right: 4,
-                                            top: 0,
-                                            bottom: 0,
-                                            child: Center(
-                                              child: ActiveVerseIndicator(
-                                                color: Theme.of(
-                                                  context,
-                                                ).colorScheme.primary,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: ListenableBuilder(
+                              listenable: _verseSyncCtrl,
+                              builder: (context, _) {
+                                final activeOrder =
+                                    _verseSyncCtrl.activeVerseOrder;
+                                return Column(
+                                  children: List.generate(_poemLines.length, (
+                                    i,
+                                  ) {
+                                    final isActive =
+                                        _verseSyncCtrl.hasSyncData &&
+                                        activeOrder == i;
+                                    final isFlashing =
+                                        _flashingLineIndex == i; // ← اضافه کن
+                                    return Padding(
+                                      key: _lineKeys[i] ??=
+                                          GlobalKey(), // ← key اینجا باشه
+                                      padding: const EdgeInsets.only(bottom: 8),
+                                      child: Stack(
+                                        children: [
+                                          PoemSelectedText(
+                                            text: _poemLines[i],
+                                            isSelected: _selectedLineIndex == i,
+                                            isHighlighted:
+                                                _highlightedLineIndexes
+                                                    .contains(i),
+                                            fontSize: _fontSize,
+                                            lineHeight: _lineHeight,
+                                            isFlashing: isFlashing,
+                                            fontFamily: _fontFamily,
+                                            fontColor: _fontColor,
+                                            onTap: () => setState(() {
+                                              _selectedLineIndex =
+                                                  _selectedLineIndex == i
+                                                  ? null
+                                                  : i;
+                                            }),
+                                            onLongPress: () =>
+                                                _copyLine(_poemLines[i]),
+                                          ),
+                                          if (isActive)
+                                            Positioned(
+                                              right: 4,
+                                              top: 0,
+                                              bottom: 0,
+                                              child: Center(
+                                                child: ActiveVerseIndicator(
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).colorScheme.primary,
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                      ],
-                                    ),
-                                  );
-                                }),
-                              );
-                            },
+                                        ],
+                                      ),
+                                    );
+                                  }),
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),
                     ),
             ),
-
             // ── نوار اکشن ─────────────────────────────────────────
             Positioned(
               left: 28,
@@ -402,7 +515,6 @@ class _PoemScreenState extends State<PoemScreen> {
                 scaffoldContext: context,
               ),
             ),
-
             // ── پلیر صدا ──────────────────────────────────────────
             if (_args.hasAudio)
               Positioned(
@@ -426,85 +538,6 @@ class _PoemScreenState extends State<PoemScreen> {
                 ),
               ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── کاشی مصراع — دست نخورده نسبت به نسخه اصلی ────────────────────────────
-
-class _PoemLineTile extends StatelessWidget {
-  const _PoemLineTile({
-    required this.text,
-    required this.isSelected,
-    required this.isHighlighted,
-    required this.fontSize,
-    required this.lineHeight,
-    required this.fontFamily,
-    required this.fontColor,
-    required this.onTap,
-    required this.isFlashing, // ← اضافه
-  });
-
-  final String text;
-  final bool isSelected;
-  final bool isHighlighted;
-  final double fontSize;
-  final double lineHeight;
-  final String fontFamily;
-  final Color fontColor;
-  final VoidCallback onTap;
-  final bool isFlashing;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    Color bg = Colors.transparent;
-    Color border = Colors.transparent;
-    Color textColor = colorScheme.onSurface;
-
-    if (isFlashing) {
-      bg = Colors.amber.withValues(alpha: 0.45);
-      border = Colors.amber;
-    } else if (isHighlighted) {
-      bg = const Color(0xFFFFF3B0);
-      border = const Color(0xFFFFC107);
-      textColor = Colors.black87;
-    } else if (isSelected) {
-      bg = colorScheme.primary.withValues(alpha: 0.08);
-      border = colorScheme.primary.withValues(alpha: 0.45);
-    }
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeInOut,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: border),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            child: Text(
-              text,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                fontSize: fontSize,
-                height: lineHeight,
-                fontFamily: fontFamily,
-                color: isHighlighted ? textColor : fontColor,
-              ),
-            ),
-          ),
         ),
       ),
     );

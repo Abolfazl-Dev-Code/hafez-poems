@@ -11,6 +11,7 @@ import '../models/ghataat_model.dart';
 import '../models/robaeyat_model.dart';
 import '../models/montasab_model.dart';
 import '../models/ghasayed_model.dart';
+import '../models/other_poem_model.dart';
 import 'poem_local_services.dart';
 
 // ══════════════════════════════════════════════════════════
@@ -416,4 +417,32 @@ class GhasayedCacheService extends BasePoemCacheService<GhasayedModel> {
   RxList<GhasayedModel> get cachedGhasayedRx => cachedItemsRx;
   Future<GhasayedModel> getQasaidDetail(String id) => getDetail(id);
   Future<GhasayedModel> getGhasayedDetail(String id) => getDetail(id);
+}
+
+// ══════════════════════════════════════════════════════════
+//  OTHER POEMS (مثنوی + ساقی‌نامه)
+// ══════════════════════════════════════════════════════════
+
+class OtherPoemCacheService extends BasePoemCacheService<OtherPoemModel> {
+  @override
+  String get boxName => 'other_poems_box';
+  @override
+  String idOf(OtherPoemModel o) => o.id;
+  @override
+  String titleOf(OtherPoemModel o) => o.title;
+  @override
+  String textOf(OtherPoemModel o) => o.text;
+  @override
+  bool hasFullTextOf(OtherPoemModel o) => o.hasFullText;
+  @override
+  void setFullText(OtherPoemModel o, String text) {
+    o.text = text;
+    o.hasFullText = true;
+  }
+
+  @override
+  OtherPoemLocalService get localService => OtherPoemLocalService.instance;
+
+  Future<OtherPoemModel> getOtherPoemDetail(String id) => getDetail(id);
+  RxList<OtherPoemModel> get cachedOtherPoemsRx => cachedItemsRx;
 }

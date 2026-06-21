@@ -7,11 +7,9 @@ class AppSnackBarService {
     required Color color,
     required IconData icon,
     Color textColor = Colors.white,
+    Duration duration = const Duration(milliseconds: 1800), // اضافه کن
   }) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-    const duration = Duration(milliseconds: 1800);
-
     final snackBar = SnackBar(
       behavior: SnackBarBehavior.floating,
       backgroundColor: Colors.transparent,
@@ -129,12 +127,13 @@ class AppSnackBarService {
     );
   }
 
-  static void info(BuildContext context, String message) {
+  static void info(BuildContext context, String message, {Duration? duration}) {
     _show(
       context: context,
       message: message,
       color: const Color(0xFF2563EB),
       icon: Icons.info_outline,
+      duration: duration ?? const Duration(milliseconds: 1800),
     );
   }
 }

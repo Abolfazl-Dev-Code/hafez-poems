@@ -68,6 +68,7 @@ flutter:
     - assets/json/hafez_qasaid.json
     - assets/json/hafez_robaee.json
     - assets/json/hafez_montasab.json
+    - assets/json/hafez_other.json
   fonts:
     - family: morvarid
       fonts:
@@ -75,3 +76,18 @@ flutter:
     - family: vazir
       fonts:
         - asset: fonts/vazir.ttf
+    - family: iran
+      fonts:
+        - asset: fonts/iran.ttf
+    - family: iranrounded
+      fonts:
+        - asset: fonts/iranrounded.ttf
+    - family: mahbobe
+      fonts:
+        - asset: fonts/mahbobe.ttf
+    - family: hoda
+      fonts:
+        - asset: fonts/hoda.ttf
+    - family: roosta
+      fonts:
+        - asset: fonts/roosta.ttf

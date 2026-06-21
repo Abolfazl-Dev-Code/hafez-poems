@@ -15,17 +15,44 @@ class ProfileController extends GetxController {
   late final Box<LikedItem> likedBox;
   late final Box<SavedItem> savedBox;
   late final Box<HighlightItem> highlightBox;
+  late final Box readBox;
   late final Box profileBox;
+  final streakCount = 0.obs;
+  static const _kStreakCount = 'streakCount';
+  static const _kLastStreakDate = 'lastStreakDate';
+  final bestStreak = 0.obs;
+  static const _kBestStreak = 'bestStreak';
+  final bio = ''.obs;
+  final customBios = <String>[].obs;
 
+  static const _kBio = 'bio';
+  static const _kCustomBios = 'customBios';
+
+  static const List<String> presetBios = [
+    'همراه غزل‌ها و بیت‌های ماندگار',
+    'در جست‌وجوی معنا میان ابیات حافظ',
+    'هر روز یک بیت، هر بیت یک دنیا',
+    'عاشق کلام حافظ و رندی شیرازی',
+    'دیوانه‌ی دیوان حافظ',
+  ];
   final userName = ''.obs;
   final avatarPath = RxnString();
 
   static const _kName = 'name';
   static const _kAvatarPath = 'avatarPath';
+  static const String readBoxName = 'read_poems_box';
+  static const int totalGhazals = 495; // 👈 پایین توضیح دادم
+  static const _kHasSeenEditHint = 'hasSeenEditHint';
 
   final likedCount = 0.obs;
   final savedCount = 0.obs;
   final highlightedCount = 0.obs;
+
+  final likedRatio = 0.0.obs;
+  final savedRatio = 0.0.obs;
+  final readCount = 0.obs;
+  final readRatio = 0.0.obs;
+  final showEditHint = false.obs;
 
   final recentLikedTitles = <String>[].obs;
   final recentSavedTitles = <String>[].obs;
@@ -33,9 +60,6 @@ class ProfileController extends GetxController {
 
   final mostReadTitle = ''.obs;
   final favoriteQuote = ''.obs;
-  final notifEnabled = false.obs;
-  final notifHour = 13.obs;
-  final notifMinute = 0.obs;
 
   @override
   void onInit() {
@@ -48,13 +72,22 @@ class ProfileController extends GetxController {
         : '';
 
     avatarPath.value = (profileBox.get(_kAvatarPath) as String?)?.trim();
+    bio.value = (profileBox.get(_kBio) as String?)?.trim().isNotEmpty == true
+        ? (profileBox.get(_kBio) as String).trim()
+        : presetBios.first;
 
+    final storedCustomBios = profileBox.get(_kCustomBios);
+    if (storedCustomBios is List) {
+      customBios.value = storedCustomBios.cast<String>();
+    }
     likedBox = Hive.box<LikedItem>(UserActionsController.likedBoxName);
     savedBox = Hive.box<SavedItem>(UserActionsController.savedBoxName);
     highlightBox = Hive.box<HighlightItem>(
       UserActionsController.highlightBoxName,
     );
-
+    readBox = Hive.box(readBoxName);
+    bestStreak.value = profileBox.get(_kBestStreak, defaultValue: 0) as int;
+    _updateStreak();
     _loadData();
 
     likedBox.listenable().addListener(_loadData);
@@ -67,6 +100,31 @@ class ProfileController extends GetxController {
     if (name.isEmpty) return;
     userName.value = name;
     await profileBox.put(_kName, name);
+  }
+
+  Future<void> updateBio(String newBio) async {
+    final trimmed = newBio.trim();
+    if (trimmed.isEmpty) return;
+    bio.value = trimmed;
+    await profileBox.put(_kBio, trimmed);
+  }
+
+  Future<void> addCustomBio(String newBio) async {
+    final trimmed = newBio.trim();
+    if (trimmed.isEmpty) return;
+    if (!customBios.contains(trimmed)) {
+      customBios.add(trimmed);
+      await profileBox.put(_kCustomBios, customBios.toList());
+    }
+    await updateBio(trimmed);
+  }
+
+  Future<void> removeCustomBio(String bioText) async {
+    customBios.remove(bioText);
+    await profileBox.put(_kCustomBios, customBios.toList());
+    if (bio.value == bioText) {
+      await updateBio(presetBios.first);
+    }
   }
 
   Future<void> pickAndSaveAvatar() async {
@@ -101,9 +159,47 @@ class ProfileController extends GetxController {
     } catch (e) {}
   }
 
+  Future<void> _updateStreak() async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    final lastStr = profileBox.get(_kLastStreakDate) as String?;
+    final savedStreak = profileBox.get(_kStreakCount, defaultValue: 0) as int;
+
+    if (lastStr == null) {
+      streakCount.value = 1;
+    } else {
+      final last = DateTime.parse(lastStr);
+      final lastDay = DateTime(last.year, last.month, last.day);
+      final diff = today.difference(lastDay).inDays;
+
+      if (diff == 0) {
+        streakCount.value = savedStreak;
+      } else if (diff == 1) {
+        streakCount.value = savedStreak + 1;
+      } else {
+        streakCount.value = 1;
+      }
+    }
+
+    await profileBox.put(_kStreakCount, streakCount.value);
+    await profileBox.put(_kLastStreakDate, today.toIso8601String());
+
+    if (streakCount.value > bestStreak.value) {
+      bestStreak.value = streakCount.value;
+      await profileBox.put(_kBestStreak, bestStreak.value);
+    }
+  }
+
   Future<void> removeAvatar() async {
     avatarPath.value = null;
     await profileBox.delete(_kAvatarPath);
+  }
+
+  Future<void> dismissEditHint() async {
+    if (!showEditHint.value) return;
+    showEditHint.value = false;
+    await profileBox.put(_kHasSeenEditHint, true);
   }
 
   @override
@@ -111,6 +207,7 @@ class ProfileController extends GetxController {
     likedBox.listenable().removeListener(_loadData);
     savedBox.listenable().removeListener(_loadData);
     highlightBox.listenable().removeListener(_loadData);
+    readBox.listenable().removeListener(_loadData);
     super.onClose();
   }
 
@@ -122,6 +219,10 @@ class ProfileController extends GetxController {
     likedCount.value = likedItems.length;
     savedCount.value = savedItems.length;
     highlightedCount.value = highlightItems.length;
+    likedRatio.value = totalGhazals > 0 ? likedCount.value / totalGhazals : 0.0;
+    savedRatio.value = totalGhazals > 0 ? savedCount.value / totalGhazals : 0.0;
+    readCount.value = readBox.keys.length;
+    readRatio.value = totalGhazals > 0 ? readCount.value / totalGhazals : 0.0;
 
     recentLikedTitles.value = likedItems
         .map((e) => e.title.trim())
@@ -149,7 +250,7 @@ class ProfileController extends GetxController {
 
     favoriteQuote.value = recentHighlightTexts.isNotEmpty
         ? recentHighlightTexts.first
-        : 'هنوز هایلایتی ثبت نشده است';
+        : 'هنوز برگزیده‌ی ثبت نشده است';
   }
 
   String _getMostRepeatedTitle(List<String> titles) {

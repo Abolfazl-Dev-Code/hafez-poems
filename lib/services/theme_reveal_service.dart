@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 class ThemeRevealService {
   ThemeRevealService._();
@@ -15,11 +18,38 @@ class ThemeRevealService {
   }) async {
     if (_entry != null) return;
 
+    final boundary =
+        repaintKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+
+    if (boundary == null) {
+      onSwitch();
+      return;
+    }
+
     final overlay = Overlay.of(context);
+    final size = MediaQuery.of(context).size;
+    final pixelRatio = MediaQuery.of(context).devicePixelRatio;
+
+    // ۱) عکس از وضعیتِ فعلی (تمِ قدیمی) قبل از هر تغییری
+    final ui.Image oldImage = await boundary.toImage(pixelRatio: pixelRatio);
+    final ByteData? byteData = await oldImage.toByteData(
+      format: ui.ImageByteFormat.png,
+    );
+    if (byteData == null) {
+      onSwitch();
+      return;
+    }
+    final Uint8List oldImageBytes = byteData.buffer.asUint8List();
+
     onSwitch();
 
+    final maxRadius = _maxRadiusFromOrigin(origin, size);
+
     _entry = OverlayEntry(
-      builder: (_) => _FadeRevealOverlay(
+      builder: (_) => _CircleRevealOverlay(
+        oldImageBytes: oldImageBytes,
+        origin: origin,
+        maxRadius: maxRadius,
         toDark: toDark,
         onComplete: () {
           _entry?.remove();
@@ -30,24 +60,49 @@ class ThemeRevealService {
 
     overlay.insert(_entry!);
   }
+
+  double _maxRadiusFromOrigin(Offset origin, Size size) {
+    final corners = [
+      Offset.zero,
+      Offset(size.width, 0),
+      Offset(0, size.height),
+      Offset(size.width, size.height),
+    ];
+
+    double maxDist = 0;
+    for (final corner in corners) {
+      final dist = (origin - corner).distance;
+      if (dist > maxDist) maxDist = dist;
+    }
+    return maxDist;
+  }
 }
 
 // ── Overlay ───────────────────────────────────────────────────────────────────
 
-class _FadeRevealOverlay extends StatefulWidget {
-  const _FadeRevealOverlay({required this.toDark, required this.onComplete});
+class _CircleRevealOverlay extends StatefulWidget {
+  const _CircleRevealOverlay({
+    required this.oldImageBytes,
+    required this.origin,
+    required this.maxRadius,
+    required this.toDark,
+    required this.onComplete,
+  });
 
+  final Uint8List oldImageBytes;
+  final Offset origin;
+  final double maxRadius;
   final bool toDark;
   final VoidCallback onComplete;
 
   @override
-  State<_FadeRevealOverlay> createState() => _FadeRevealOverlayState();
+  State<_CircleRevealOverlay> createState() => _CircleRevealOverlayState();
 }
 
-class _FadeRevealOverlayState extends State<_FadeRevealOverlay>
+class _CircleRevealOverlayState extends State<_CircleRevealOverlay>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
-  late final Animation<double> _opacity;
+  late final Animation<double> _radius;
 
   @override
   void initState() {
@@ -55,13 +110,13 @@ class _FadeRevealOverlayState extends State<_FadeRevealOverlay>
 
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 100),
+      duration: const Duration(milliseconds: 550),
     );
 
-    _opacity = Tween<double>(
-      begin: 1.0,
-      end: 0.0,
-    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+    _radius = Tween<double>(
+      begin: widget.toDark ? widget.maxRadius : 0,
+      end: widget.toDark ? 0 : widget.maxRadius,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOutCubic));
 
     _ctrl.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
@@ -80,20 +135,67 @@ class _FadeRevealOverlayState extends State<_FadeRevealOverlay>
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.toDark
-        ? const Color(0xFFF2F2F7)
-        : const Color(0xFF1C1C1E);
+    return IgnorePointer(
+      child: AnimatedBuilder(
+        animation: _ctrl,
+        builder: (context, _) {
+          final clipper = widget.toDark
+              ? _CircleClipper(center: widget.origin, radius: _radius.value)
+              : _InverseCircleClipper(
+                  center: widget.origin,
+                  radius: _radius.value,
+                );
 
-    return AnimatedBuilder(
-      animation: _opacity,
-      builder: (context, _) {
-        return IgnorePointer(
-          child: Opacity(
-            opacity: _opacity.value,
-            child: Container(color: color),
-          ),
-        );
-      },
+          return ClipPath(
+            clipper: clipper,
+            child: Image.memory(
+              widget.oldImageBytes,
+              width: double.infinity,
+              height: double.infinity,
+              fit: BoxFit.cover,
+              gaplessPlayback: true,
+            ),
+          );
+        },
+      ),
     );
+  }
+}
+
+class _CircleClipper extends CustomClipper<Path> {
+  _CircleClipper({required this.center, required this.radius});
+
+  final Offset center;
+  final double radius;
+
+  @override
+  Path getClip(Size size) {
+    return Path()..addOval(Rect.fromCircle(center: center, radius: radius));
+  }
+
+  @override
+  bool shouldReclip(covariant _CircleClipper oldClipper) {
+    return oldClipper.center != center || oldClipper.radius != radius;
+  }
+}
+
+class _InverseCircleClipper extends CustomClipper<Path> {
+  _InverseCircleClipper({required this.center, required this.radius});
+
+  final Offset center;
+  final double radius;
+
+  @override
+  Path getClip(Size size) {
+    final fullRect = Path()
+      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
+    final circle = Path()
+      ..addOval(Rect.fromCircle(center: center, radius: radius));
+    return Path.combine(PathOperation.difference, fullRect, circle);
+  }
+
+  @override
+  bool shouldReclip(covariant _InverseCircleClipper oldClipper) {
+    return oldClipper.center != center || oldClipper.radius != radius;
   }
 }

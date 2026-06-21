@@ -1,7 +1,7 @@
 // lib/controllers/verse_sync_controller.dart
 //
 // مسئولیت: با توجه به position جاری پلیر، تعیین می‌کند کدام مصراع باید
-// هایلایت شود. این controller از AudioPlayerController مستقل است و
+// برگزیده‌ شود. این controller از AudioPlayerController مستقل است و
 // فقط به position و syncPoints نیاز دارد.
 
 import 'dart:async';

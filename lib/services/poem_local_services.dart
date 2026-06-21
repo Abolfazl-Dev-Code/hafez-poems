@@ -7,6 +7,7 @@ import '../models/ghataat_model.dart';
 import '../models/robaeyat_model.dart';
 import '../models/montasab_model.dart';
 import '../models/ghasayed_model.dart';
+import '../models/other_poem_model.dart';
 
 // ══════════════════════════════════════════════════════════
 //  BASE
@@ -166,4 +167,24 @@ class GhasayedLocalService extends BasePoemLocalService<GhasayedModel> {
   );
   Future<List<GhasayedModel>> fetchQasaidList() => fetchList();
   Future<GhasayedModel> fetchQasaidById(String id) => fetchById(id);
+}
+
+// ══════════════════════════════════════════════════════════
+//  OTHER POEMS (مثنوی + ساقی‌نامه)
+// ══════════════════════════════════════════════════════════
+
+class OtherPoemLocalService extends BasePoemLocalService<OtherPoemModel> {
+  static final instance = OtherPoemLocalService._();
+  OtherPoemLocalService._();
+
+  @override
+  String get assetPath => 'assets/json/hafez_other.json';
+  @override
+  String idOf(OtherPoemModel item) => item.id;
+
+  @override
+  OtherPoemModel fromJson(Map<String, dynamic> m) => OtherPoemModel.fromJson(m);
+
+  Future<List<OtherPoemModel>> fetchOtherPoemsList() => fetchList();
+  Future<OtherPoemModel> fetchOtherPoemById(String id) => fetchById(id);
 }

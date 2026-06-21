@@ -1,9 +1,14 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/controllers/profile_controller.dart';
 import 'package:hafez_poems/screens/collection_screen.dart';
-import 'package:hafez_poems/widgets/profile_widgets.dart';
+import 'package:hafez_poems/screens/profile_header.dart';
+import 'package:hafez_poems/widgets/profile_informations_cards.dart';
+import 'package:hafez_poems/widgets/profile_most_and_favorite_poem.dart';
+import 'package:hafez_poems/widgets/profile_progress_bar.dart';
+import 'package:hafez_poems/widgets/profile_stat_card.dart';
 import 'package:get/get.dart';
+import 'package:hafez_poems/widgets/profle_streak_badge.dart';
+import 'package:hafez_poems/widgets/section_header.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -48,7 +53,14 @@ class ProfileScreen extends StatelessWidget {
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                 children: [
-                  const _ProfileHeader(bio: 'همراه غزل‌ها و بیت‌های ماندگار'),
+                  const ProfileHeader(),
+                  const SizedBox(height: 16),
+                  Obx(
+                    () => StreakMotivationCard(
+                      currentStreak: controller.streakCount.value,
+                      bestStreak: controller.bestStreak.value,
+                    ),
+                  ),
                   const SizedBox(height: 24),
                   const SectionHeader(
                     title: 'آمار من',
@@ -59,70 +71,60 @@ class ProfileScreen extends StatelessWidget {
                     children: [
                       Expanded(
                         child: StatCard(
-                          title: 'لایک‌ها',
-                          value: controller.likedCount.value.toString(),
+                          title: 'علاقه‌مندی‌‌ها',
+                          value: controller.likedCount.value,
                           icon: Icons.favorite_rounded,
                           color: Colors.redAccent,
+                          onTap: () => Get.to(
+                            () => const CollectionScreen(
+                              initialTab: 0,
+                              showTabs: false,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: StatCard(
                           title: 'ذخیره‌ها',
-                          value: controller.savedCount.value.toString(),
+                          value: controller.savedCount.value,
                           icon: Icons.bookmark_rounded,
                           color: theme.colorScheme.primary,
+                          onTap: () => Get.to(
+                            () => const CollectionScreen(
+                              initialTab: 1,
+                              showTabs: false,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: StatCard(
-                          title: 'هایلایت‌ها',
-                          value: controller.highlightedCount.value.toString(),
+                          title: 'برگزیده‌‌ها',
+                          value: controller.highlightedCount.value,
                           icon: Icons.highlight_rounded,
                           color: Colors.amber.shade700,
+                          onTap: () => Get.to(
+                            () => const CollectionScreen(
+                              initialTab: 2,
+                              showTabs: false,
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 28),
                   const SectionHeader(
-                    title: 'میانبرها',
-                    icon: Icons.dashboard_customize_rounded,
+                    title: 'میزان پیشرفت',
+                    icon: Icons.trending_up_rounded,
                   ),
                   const SizedBox(height: 12),
-                  ActionTile(
-                    title: 'لایک‌ها',
-                    subtitle: 'اشعار لایک‌شده',
-                    icon: Icons.favorite_outline_rounded,
-                    onTap: () => Get.to(
-                      () => const CollectionScreen(
-                        initialTab: 0,
-                        showTabs: false,
-                      ),
-                    ),
-                  ),
-                  ActionTile(
-                    title: 'ذخیره‌شده‌ها',
-                    subtitle: 'اشعار ذخیره‌شده',
-                    icon: Icons.bookmark_outline_rounded,
-                    onTap: () => Get.to(
-                      () => const CollectionScreen(
-                        initialTab: 1,
-                        showTabs: false,
-                      ),
-                    ),
-                  ),
-                  ActionTile(
-                    title: 'هایلایت‌ها',
-                    subtitle: 'بیت‌های هایلایت‌شده',
-                    icon: Icons.highlight_rounded,
-                    onTap: () => Get.to(
-                      () => const CollectionScreen(
-                        initialTab: 2,
-                        showTabs: false,
-                      ),
-                    ),
+                  ProgressOverviewCard(
+                    likedProgress: controller.likedRatio.value,
+                    savedProgress: controller.savedRatio.value,
+                    readProgress: controller.readRatio.value,
                   ),
                   const SizedBox(height: 28),
                   const SectionHeader(
@@ -131,9 +133,9 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   InfoCard(
-                    title: 'آخرین اشعار لایک‌شده',
+                    title: 'آخرین اشعار علاقه‌مندی‌‌شده',
                     items: controller.recentLikedTitles,
-                    emptyText: 'هنوز شعری لایک نشده است',
+                    emptyText: 'هنوز شعری علاقه‌مندی‌ نشده است',
                     icon: Icons.favorite_outline_rounded,
                   ),
                   const SizedBox(height: 12),
@@ -145,9 +147,9 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   InfoCard(
-                    title: 'آخرین هایلایت‌ها',
+                    title: 'آخرین برگزیده‌‌ها',
                     items: controller.recentHighlightTexts,
-                    emptyText: 'هنوز هایلایتی ثبت نشده است',
+                    emptyText: 'هنوز برگزیده‌ی ثبت نشده است',
                     icon: Icons.format_quote_rounded,
                   ),
                   const SizedBox(height: 28),
@@ -172,146 +174,6 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ProfileHeader extends StatelessWidget {
-  final String bio;
-
-  const _ProfileHeader({required this.bio});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final isLight = theme.brightness == Brightness.light;
-    final ProfileController controller = Get.find<ProfileController>();
-
-    return Card(
-      elevation: 2,
-      margin: EdgeInsets.zero,
-      color: isLight
-          ? Colors.white
-          : colorScheme.surfaceContainerHighest.withValues(alpha: 0.85),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(28),
-          gradient: LinearGradient(
-            colors: isLight
-                ? [Colors.white, const Color(0xFFF8F1E7)]
-                : [
-                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.9),
-                    colorScheme.surfaceContainer.withValues(alpha: 0.7),
-                  ],
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-          ),
-        ),
-        child: Column(
-          children: [
-            Obx(() {
-              final path = controller.avatarPath.value;
-              return Stack(
-                alignment: Alignment.bottomLeft,
-                children: [
-                  CircleAvatar(
-                    radius: 45,
-                    backgroundColor: colorScheme.primary.withValues(
-                      alpha: 0.12,
-                    ),
-                    backgroundImage: (path != null && path.isNotEmpty)
-                        ? FileImage(File(path))
-                        : null,
-                    child: (path == null || path.isEmpty)
-                        ? Icon(
-                            Icons.person_rounded,
-                            size: 42,
-                            color: colorScheme.primary,
-                          )
-                        : null,
-                  ),
-                  Positioned(
-                    left: 0,
-                    bottom: 0,
-                    child: Material(
-                      color: colorScheme.primary,
-                      shape: const CircleBorder(),
-                      child: InkWell(
-                        customBorder: const CircleBorder(),
-                        onTap: () async {
-                          await showModalBottomSheet(
-                            context: context,
-                            showDragHandle: true,
-                            builder: (_) => SafeArea(
-                              child: Directionality(
-                                textDirection: TextDirection.rtl,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    ListTile(
-                                      leading: const Icon(
-                                        Icons.photo_library_rounded,
-                                      ),
-                                      title: const Text('انتخاب عکس پروفایل'),
-                                      onTap: () async {
-                                        Navigator.pop(context);
-                                        await controller.pickAndSaveAvatar();
-                                      },
-                                    ),
-                                    ListTile(
-                                      leading: const Icon(
-                                        Icons.delete_outline_rounded,
-                                      ),
-                                      title: const Text('حذف عکس پروفایل'),
-                                      onTap: () async {
-                                        Navigator.pop(context);
-                                        await controller.removeAvatar();
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                        child: const Padding(
-                          padding: EdgeInsets.all(8),
-                          child: Icon(
-                            Icons.edit_rounded,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            }),
-            const SizedBox(height: 10),
-            Obx(
-              () => EditableProfileName(
-                name: controller.userName.value.isEmpty
-                    ? 'کاربر عزیز'
-                    : controller.userName.value,
-                onEdit: () => showEditNameDialog(context, controller),
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              bio,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                height: 1.7,
-              ),
-            ),
-          ],
         ),
       ),
     );
