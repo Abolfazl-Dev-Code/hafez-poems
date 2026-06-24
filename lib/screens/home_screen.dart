@@ -28,8 +28,8 @@ class _HomeScreenState extends State<HomeScreen>
   Worker? _textsReadyWorker;
   Worker? _indexingWorker;
 
-  List<String> _allTexts = [];
-  List<String> _carouselTexts = [];
+  List<GhazalExcerpt> _allTexts = [];
+  List<GhazalExcerpt> _carouselTexts = [];
   bool _isLoadingCarousel = true;
 
   // Shimmer animation
@@ -62,6 +62,7 @@ class _HomeScreenState extends State<HomeScreen>
     });
   }
 
+  // بعد
   bool _trySetCarouselTexts() {
     final excerpts = _cache.randomExcerpts(count: 10);
     if (excerpts.isEmpty) return false;
@@ -75,13 +76,14 @@ class _HomeScreenState extends State<HomeScreen>
     return true;
   }
 
+  // بعد
   void _refreshSlide(int index) {
     if (_allTexts.length <= 1 || index >= _carouselTexts.length) return;
-    String newText;
+    GhazalExcerpt newItem;
     do {
-      newText = _allTexts[Random().nextInt(_allTexts.length)];
-    } while (newText == _carouselTexts[index] && _allTexts.length > 1);
-    setState(() => _carouselTexts[index] = newText);
+      newItem = _allTexts[Random().nextInt(_allTexts.length)];
+    } while (newItem.id == _carouselTexts[index].id && _allTexts.length > 1);
+    setState(() => _carouselTexts[index] = newItem);
   }
 
   Future<void> _onRefresh() async {
@@ -139,8 +141,10 @@ class _HomeScreenState extends State<HomeScreen>
                       ),
                       itemCount: 1,
                       itemBuilder: (context, index, _) => CarouselScreenWidget(
-                        key: ValueKey(_carouselTexts[index]),
-                        initialGhazal: _carouselTexts[index],
+                        key: ValueKey('carousel_slide_$index'),
+                        initialGhazal: _carouselTexts[index].excerpt,
+                        // بعد
+                        ghazalNumber: _carouselTexts[index].number,
                         imagePath: 'assets/icon/hafez-light.png',
                         darkImagePath: 'assets/icon/hafez-dark.png',
                         lightColor: const Color.fromARGB(255, 255, 255, 255),

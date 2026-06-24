@@ -24,10 +24,13 @@ class _ThemeModeIconToggleState extends State<ThemeModeIconToggle>
   late final Animation<Offset> _slideOut;
   late final Animation<Offset> _slideIn;
   late final Animation<double> _glowAnim;
-
+  late bool _outgoingIsDark;
+  late bool _incomingIsDark;
   @override
   void initState() {
     super.initState();
+    _outgoingIsDark = widget.isDarkMode;
+    _incomingIsDark = widget.isDarkMode;
     _ctrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 520),
@@ -73,6 +76,8 @@ class _ThemeModeIconToggleState extends State<ThemeModeIconToggle>
   void didUpdateWidget(ThemeModeIconToggle old) {
     super.didUpdateWidget(old);
     if (old.isDarkMode != widget.isDarkMode) {
+      _outgoingIsDark = old.isDarkMode; // آیکون قدیمی رو نگه دار
+      _incomingIsDark = widget.isDarkMode; // آیکون جدید
       _ctrl.forward(from: 0);
     }
   }
@@ -159,7 +164,7 @@ class _ThemeModeIconToggleState extends State<ThemeModeIconToggle>
                     position: _slideOut,
                     child: Opacity(
                       opacity: (1.0 - _ctrl.value * 2.2).clamp(0.0, 1.0),
-                      child: _buildIcon(isDark: widget.isDarkMode),
+                      child: _buildIcon(isDark: _outgoingIsDark),
                     ),
                   ),
                   SlideTransition(
@@ -170,7 +175,7 @@ class _ThemeModeIconToggleState extends State<ThemeModeIconToggle>
                         scale: _scaleAnim.value,
                         child: RotationTransition(
                           turns: _rotateAnim,
-                          child: _buildIcon(isDark: widget.isDarkMode),
+                          child: _buildIcon(isDark: _incomingIsDark),
                         ),
                       ),
                     ),

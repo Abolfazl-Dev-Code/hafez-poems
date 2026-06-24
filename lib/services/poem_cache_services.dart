@@ -26,6 +26,25 @@ abstract class BasePoemCacheService<T> extends GetxService {
   final RxDouble loadingProgress = 0.0.obs;
   final RxBool isIndexing = false.obs;
 
+  // ── housekeeping فایل Hive ──────────────────────
+  // Hive هیچ‌وقت خودش فضای entry های آپدیت‌شده/حذف‌شده را آزاد نمی‌کند؛
+  // این کار باید با compact() دستی انجام شود، اما نه بعد از هر نوشتن
+  // (که خودش هزینه‌بر است) بلکه با یک آستانه‌ی شمارشی.
+  int _writesSinceCompact = 0;
+  static const int _compactThreshold = 15;
+
+  Future<void> _maybeCompact() async {
+    _writesSinceCompact++;
+    if (_writesSinceCompact >= _compactThreshold) {
+      _writesSinceCompact = 0;
+      try {
+        await _box.compact();
+      } catch (e) {
+        debugPrint('$runtimeType compact error: $e');
+      }
+    }
+  }
+
   // ── زیرکلاس پیاده‌سازی می‌کند ──────────────────
   String get boxName;
   String idOf(T item);
@@ -38,6 +57,7 @@ abstract class BasePoemCacheService<T> extends GetxService {
   int get audioIndex => 0; // قطعات: override با 1
 
   // ── init ─────────────────────────────────────────
+  // بعد
   Future<BasePoemCacheService<T>> init() async {
     _box = await Hive.openBox<T>(boxName); // ← قبلاً Hive.box بود
     if (_box.isNotEmpty) {
@@ -46,6 +66,13 @@ abstract class BasePoemCacheService<T> extends GetxService {
       }
       _rebuildSearchIndex();
       _assignSorted();
+    }
+    // فشرده‌سازی یک‌باره در شروع هر سشن؛ فضای آزادشده از نوشتن‌های
+    // سشن‌های قبلی (که compact نشده بودند) را پاک می‌کند.
+    try {
+      await _box.compact();
+    } catch (e) {
+      debugPrint('$runtimeType initial compact error: $e');
     }
     return this;
   }
@@ -80,7 +107,15 @@ abstract class BasePoemCacheService<T> extends GetxService {
         loadingProgress.value = (i + 1) / list.length;
       }
 
-      if (toSave.isNotEmpty) await _box.putAll(toSave);
+      // بعد
+      if (toSave.isNotEmpty) {
+        await _box.putAll(toSave);
+        try {
+          await _box.compact();
+        } catch (e) {
+          debugPrint('$runtimeType preload compact error: $e');
+        }
+      }
       _rebuildSearchIndex();
       _assignSorted();
     } catch (e, st) {
@@ -96,9 +131,11 @@ abstract class BasePoemCacheService<T> extends GetxService {
     final cached = _map[id];
     if (cached != null && hasFullTextOf(cached)) return cached;
 
+    // بعد
     final item = await localService.fetchById(id);
     _map[id] = item;
     await _box.put(id, item);
+    await _maybeCompact();
     _updateIndexEntry(item);
 
     final idx = cachedItemsRx.indexWhere((e) => idOf(e) == id);
@@ -209,9 +246,24 @@ class _IndexedPoem<T> {
   });
 }
 
+// بعد
 // ══════════════════════════════════════════════════════════
 //  GHAZAL
 // ══════════════════════════════════════════════════════════
+
+/// متن کوتاه‌شده‌ی یک غزل به‌همراه شماره/شناسه‌ی همان غزل
+/// (برای کاروسل صفحه‌ی اصلی استفاده می‌شود تا متن و شماره با هم سینک بمانند)
+class GhazalExcerpt {
+  final String id; // شناسه‌ی داخلی غزل (برای مقایسه/جلوگیری از تکرار، نه نمایش)
+  final String number; // شماره‌ی سنتی غزل در دیوان (مثلاً «۱۳۷»)، برای نمایش
+  final String excerpt;
+
+  const GhazalExcerpt({
+    required this.id,
+    required this.number,
+    required this.excerpt,
+  });
+}
 
 class GhazalCacheService extends BasePoemCacheService<Ghazal> {
   @override
@@ -237,11 +289,13 @@ class GhazalCacheService extends BasePoemCacheService<Ghazal> {
   final RxInt textsReadyCount = 0.obs;
 
   // ذخیره audioUrl در Hive
+  // بعد
   Future<void> updateAudioUrl(String id, String url) async {
     final ghazal = _map[id];
     if (ghazal != null) {
       ghazal.audioUrl = url;
       await ghazal.save();
+      await _maybeCompact();
     }
   }
 
@@ -258,21 +312,41 @@ class GhazalCacheService extends BasePoemCacheService<Ghazal> {
     return (valid..shuffle(Random())).first;
   }
 
-  List<String> randomExcerpts({int count = 5}) {
+  // بعد
+  // بعد
+  List<GhazalExcerpt> randomExcerpts({int count = 5}) {
     final valid =
         _map.values
             .where((g) => g.hasFullText && g.text.trim().isNotEmpty)
             .toList()
           ..shuffle(Random());
-    final result = <String>[];
+    final result = <GhazalExcerpt>[];
     for (final g in valid) {
       final excerpt = _extractFirstFourBeyts(g.text);
       if (excerpt.isNotEmpty) {
-        result.add(excerpt);
+        final number = _extractGhazalNumber(g.title);
+        result.add(
+          GhazalExcerpt(
+            id: g.id,
+            number: number.isNotEmpty ? number : g.id,
+            excerpt: excerpt,
+          ),
+        );
         if (result.length >= count) break;
       }
     }
     return result;
+  }
+
+  /// شماره‌ی سنتی غزل را از روی عنوان (مثل «غزل شمارهٔ ۱۳۷») استخراج می‌کند.
+  /// هم ارقام لاتین و هم فارسی/عربی را تشخیص می‌دهد و آخرین رشته‌ی عددی
+  /// موجود در عنوان را برمی‌گرداند (چون شماره معمولاً انتهای عنوان می‌آید).
+  String _extractGhazalNumber(String title) {
+    final matches = RegExp(
+      r'[0-9\u06F0-\u06F9\u0660-\u0669]+',
+    ).allMatches(title).toList();
+    if (matches.isEmpty) return '';
+    return matches.last.group(0) ?? '';
   }
 
   String _extractFirstFourBeyts(String text) {

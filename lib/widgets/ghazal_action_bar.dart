@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hafez_poems/theme/color_style.dart';
 import '../services/app_snackbar_service.dart';
 
-class GhazalActionBar extends StatelessWidget {
+class PoemActionBar extends StatelessWidget {
   final bool isLiked;
   final bool isSaved;
   final bool isHighlightActive;
@@ -14,7 +14,7 @@ class GhazalActionBar extends StatelessWidget {
 
   final BuildContext scaffoldContext;
 
-  const GhazalActionBar({
+  const PoemActionBar({
     super.key,
     required this.isLiked,
     required this.isSaved,

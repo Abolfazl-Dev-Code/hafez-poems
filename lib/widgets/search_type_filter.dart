@@ -18,6 +18,7 @@ class SearchTypeFilter extends StatelessWidget {
       (SearchResultType.qasaid, 'قصیده'),
       (SearchResultType.robaeyat, 'رباعی'),
       (SearchResultType.montasab, 'منتسب'),
+      (SearchResultType.other, 'دیگر'),
     ];
 
     return SizedBox(

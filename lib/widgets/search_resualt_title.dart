@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/models/search_result.dart';
 import 'package:hafez_poems/screens/poem_screen.dart';
+import 'package:hafez_poems/services/poem_cache_services.dart';
 
 class SearchResultTitle extends StatelessWidget {
   final SearchResult item;
@@ -61,6 +62,25 @@ class SearchResultTitle extends StatelessWidget {
     );
   }
 
+  /// بر اساس نوع نتیجه، fetchAudioUrl متناظرش رو برمی‌گردونه تا پلیر صدا
+  /// توی PoemScreen درست فعال بشه (نه فقط وابسته به audioUrl کش‌شده‌ی احتمالاً خالی)
+  Future<String> Function(String id) _fetchAudioUrlFor(SearchResultType type) {
+    switch (type) {
+      case SearchResultType.ghazal:
+        return (id) => Get.find<GhazalCacheService>().getAudioUrl(id);
+      case SearchResultType.ghataat:
+        return (id) => Get.find<GhataatCacheService>().getAudioUrl(id);
+      case SearchResultType.qasaid:
+        return (id) => Get.find<GhasayedCacheService>().getAudioUrl(id);
+      case SearchResultType.robaeyat:
+        return (id) => Get.find<RobaeyatCacheService>().getAudioUrl(id);
+      case SearchResultType.montasab:
+        return (id) => Get.find<MontasabCacheService>().getAudioUrl(id);
+      case SearchResultType.other:
+        return (id) => Get.find<OtherPoemCacheService>().getAudioUrl(id);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -84,6 +104,7 @@ class SearchResultTitle extends StatelessWidget {
                 text: item.text,
                 audioUrl: item.audioUrl,
                 fetchText: (_) async => item.text,
+                fetchAudioUrl: _fetchAudioUrlFor(item.type),
               ),
             ),
           );

@@ -439,6 +439,7 @@ class _PoemScreenState extends State<PoemScreen> {
                               builder: (context, _) {
                                 final activeOrder =
                                     _verseSyncCtrl.activeVerseOrder;
+                                // بعد
                                 return Column(
                                   children: List.generate(_poemLines.length, (
                                     i,
@@ -448,47 +449,85 @@ class _PoemScreenState extends State<PoemScreen> {
                                         activeOrder == i;
                                     final isFlashing =
                                         _flashingLineIndex == i; // ← اضافه کن
+
+                                    final verseText = PoemSelectedText(
+                                      text: _poemLines[i],
+                                      isSelected: _selectedLineIndex == i,
+                                      isHighlighted: _highlightedLineIndexes
+                                          .contains(i),
+                                      fontSize: _fontSize,
+                                      lineHeight: _lineHeight,
+                                      isFlashing: isFlashing,
+                                      fontFamily: _fontFamily,
+                                      fontColor: _fontColor,
+                                      onTap: () => setState(() {
+                                        _selectedLineIndex =
+                                            _selectedLineIndex == i ? null : i;
+                                      }),
+                                      onLongPress: () =>
+                                          _copyLine(_poemLines[i]),
+                                    );
+
                                     return Padding(
                                       key: _lineKeys[i] ??=
                                           GlobalKey(), // ← key اینجا باشه
                                       padding: const EdgeInsets.only(bottom: 8),
-                                      child: Stack(
-                                        children: [
-                                          PoemSelectedText(
-                                            text: _poemLines[i],
-                                            isSelected: _selectedLineIndex == i,
-                                            isHighlighted:
-                                                _highlightedLineIndexes
-                                                    .contains(i),
-                                            fontSize: _fontSize,
-                                            lineHeight: _lineHeight,
-                                            isFlashing: isFlashing,
-                                            fontFamily: _fontFamily,
-                                            fontColor: _fontColor,
-                                            onTap: () => setState(() {
-                                              _selectedLineIndex =
-                                                  _selectedLineIndex == i
-                                                  ? null
-                                                  : i;
-                                            }),
-                                            onLongPress: () =>
-                                                _copyLine(_poemLines[i]),
-                                          ),
-                                          if (isActive)
-                                            Positioned(
-                                              right: 4,
-                                              top: 0,
-                                              bottom: 0,
-                                              child: Center(
-                                                child: ActiveVerseIndicator(
-                                                  color: Theme.of(
-                                                    context,
-                                                  ).colorScheme.primary,
+                                      // فقط وقتی sync صوتی وجود دارد فضای
+                                      // نشانگر رزرو می‌شود؛ در غیر این صورت
+                                      // متن مصرع کل پهنا را می‌گیرد.
+                                      child: _verseSyncCtrl.hasSyncData
+                                          ? Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                // ── فضای ثابت نشانگر ──
+                                                // کنار متن می‌نشیند، نه رویش؛
+                                                // پس با بزرگ‌شدن فونت یا
+                                                // چندخطی‌شدن مصرع هیچ‌وقت
+                                                // داخل متن نمی‌رود.
+                                                SizedBox(
+                                                  width: 20,
+                                                  child: Center(
+                                                    child: AnimatedSwitcher(
+                                                      duration: const Duration(
+                                                        milliseconds: 250,
+                                                      ),
+                                                      transitionBuilder:
+                                                          (
+                                                            child,
+                                                            anim,
+                                                          ) => ScaleTransition(
+                                                            scale: anim,
+                                                            child:
+                                                                FadeTransition(
+                                                                  opacity: anim,
+                                                                  child: child,
+                                                                ),
+                                                          ),
+                                                      child: isActive
+                                                          ? ActiveVerseIndicator(
+                                                              key: const ValueKey(
+                                                                'active_indicator',
+                                                              ),
+                                                              color:
+                                                                  Theme.of(
+                                                                        context,
+                                                                      )
+                                                                      .colorScheme
+                                                                      .primary,
+                                                            )
+                                                          : const SizedBox.shrink(
+                                                              key: ValueKey(
+                                                                'inactive_indicator',
+                                                              ),
+                                                            ),
+                                                    ),
+                                                  ),
                                                 ),
-                                              ),
-                                            ),
-                                        ],
-                                      ),
+                                                Expanded(child: verseText),
+                                              ],
+                                            )
+                                          : verseText,
                                     );
                                   }),
                                 );
@@ -504,7 +543,7 @@ class _PoemScreenState extends State<PoemScreen> {
               left: 28,
               right: 28,
               bottom: _args.hasAudio ? 190 : 30,
-              child: GhazalActionBar(
+              child: PoemActionBar(
                 isLiked: _isLiked,
                 isSaved: _isSaved,
                 canHighlight: _selectedLineIndex != null,

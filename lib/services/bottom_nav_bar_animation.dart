@@ -19,20 +19,44 @@ class BottomNavBarAnimation extends CustomPainter {
 
     final double centerX = (loc + s / 2) * size.width;
 
-    const double r = 32;
-    const double p = 0;
+    const double notchRadius = 32.0; // دقیقاً مثل کد اصلی - عمق تغییر نمی‌کند
+    const double cornerRadius = 6.0; // گردی گوشه‌های چپ و راست نوار
+    const double filletRadius =
+        0.0; // گردی اتصال به نیم‌دایره (نرم و بدون افزایش عمق)
 
     final path = Path()
-      ..moveTo(0, 0)
-      ..lineTo(centerX - r - p, 0)
-      ..bezierTo(centerX - r - (p / 2), 0, centerX - r, 0, centerX - r, p)
+      // شروع از پایین چپ
+      ..moveTo(0, size.height)
+      ..lineTo(0, cornerRadius)
+      // گوشه بالا-چپ نوار
+      ..quadraticBezierTo(0, 0, cornerRadius, 0)
+      // خط مستقیم تا قبل از اتصال گرد به نیم‌دایره
+      ..lineTo(centerX - notchRadius - filletRadius, 0)
+      // === اتصال نرم (گرد) به سمت چپ نیم‌دایره ===
+      ..quadraticBezierTo(
+        centerX - notchRadius,
+        0,
+        centerX - notchRadius,
+        filletRadius,
+      )
+      // === نیم‌دایره اصلی (عمق دقیقاً مثل کد اولیه) ===
       ..arcToPoint(
-        Offset(centerX + r, p),
-        radius: const Radius.circular(r),
+        Offset(centerX + notchRadius, filletRadius),
+        radius: const Radius.circular(notchRadius),
         clockwise: false,
       )
-      ..bezierTo(centerX + r, 0, centerX + r + (p / 2), 0, centerX + r + p, 0)
-      ..lineTo(size.width, 0)
+      // === اتصال نرم (گرد) به سمت راست ===
+      ..quadraticBezierTo(
+        centerX + notchRadius,
+        0,
+        centerX + notchRadius + filletRadius,
+        0,
+      )
+      // خط مستقیم تا قبل از گوشه راست نوار
+      ..lineTo(size.width - cornerRadius, 0)
+      // گوشه بالا-راست نوار
+      ..quadraticBezierTo(size.width, 0, size.width, cornerRadius)
+      // پایین نوار
       ..lineTo(size.width, size.height)
       ..lineTo(0, size.height)
       ..close();

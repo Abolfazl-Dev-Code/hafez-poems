@@ -161,7 +161,7 @@ class PoemBoxGridsHomePage extends StatelessWidget {
       _ActionItem(
         icon: Image.asset("assets/icon/taabir.png", width: 59, height: 59),
         title: "اشعار منتسب",
-        subtitle: "اشعار دیگر",
+        subtitle: "118 شعر منتسب".toPersianNumbers(),
         onTap: () => _showSheet(
           context,
           PoemListSheet(
@@ -192,7 +192,7 @@ class PoemBoxGridsHomePage extends StatelessWidget {
       ),
 
       _ActionItem(
-        icon: const Icon(Icons.auto_stories_rounded),
+        icon: Image.asset("assets/icon/other.png", width: 59, height: 59),
         title: "اشعار دیگر",
         subtitle: "مثنوی و ساقی‌نامه",
         onTap: () => _showSheet(

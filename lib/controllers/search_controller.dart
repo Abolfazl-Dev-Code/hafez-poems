@@ -21,6 +21,7 @@ class SearchController extends GetxController {
   final GhasayedCacheService ghasayedCache = Get.find();
   final RobaeyatCacheService robaeyatCache = Get.find();
   final MontasabCacheService montasabCache = Get.find();
+  final OtherPoemCacheService otherPoemCache = Get.find();
 
   @override
   void onInit() {
@@ -43,7 +44,8 @@ class SearchController extends GetxController {
       ghataatCache.cachedCount +
       ghasayedCache.cachedCount +
       robaeyatCache.cachedCount +
-      montasabCache.cachedCount;
+      montasabCache.cachedCount +
+      otherPoemCache.cachedCount;
 
   void _debouncedSearch() {
     debounce?.cancel();
@@ -126,6 +128,20 @@ class SearchController extends GetxController {
               text: g.text,
               audioUrl: '',
               type: SearchResultType.montasab,
+            ),
+          ),
+    );
+
+    list.addAll(
+      otherPoemCache
+          .search(query)
+          .map(
+            (o) => SearchResult(
+              id: o.id,
+              title: o.title,
+              text: o.text,
+              audioUrl: '',
+              type: SearchResultType.other,
             ),
           ),
     );

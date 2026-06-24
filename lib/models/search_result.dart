@@ -1,4 +1,4 @@
-enum SearchResultType { ghazal, ghataat, qasaid, robaeyat, montasab }
+enum SearchResultType { ghazal, ghataat, qasaid, robaeyat, montasab, other }
 
 class SearchResult {
   final String id;
@@ -21,5 +21,6 @@ class SearchResult {
     SearchResultType.qasaid => 'قصیده',
     SearchResultType.robaeyat => 'رباعی',
     SearchResultType.montasab => 'منتسب',
+    SearchResultType.other => 'دیگر',
   };
 }

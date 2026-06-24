@@ -139,9 +139,26 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
     }
   }
 
+  // Future<void> _configureAudioSession() async {
+  //   final session = await AudioSession.instance;
+
+  //   await session.configure(
+  //     const AudioSessionConfiguration(
+  //       avAudioSessionCategory: AVAudioSessionCategory.playback,
+  //       avAudioSessionCategoryOptions:
+  //           AVAudioSessionCategoryOptions.mixWithOthers,
+  //       androidAudioAttributes: AndroidAudioAttributes(
+  //         contentType: AndroidAudioContentType.music,
+  //         usage: AndroidAudioUsage.media,
+  //         flags: AndroidAudioFlags.none,
+  //       ),
+  //       androidAudioFocusGainType:
+  //           AndroidAudioFocusGainType.gainTransientMayDuck,
+  //       androidWillPauseWhenDucked: false,
+  //     ),
+  //   );
   Future<void> _configureAudioSession() async {
     final session = await AudioSession.instance;
-
     await session.configure(
       const AudioSessionConfiguration(
         avAudioSessionCategory: AVAudioSessionCategory.playback,
@@ -152,9 +169,8 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
           usage: AndroidAudioUsage.media,
           flags: AndroidAudioFlags.none,
         ),
-        androidAudioFocusGainType:
-            AndroidAudioFocusGainType.gainTransientMayDuck,
-        androidWillPauseWhenDucked: false,
+        androidAudioFocusGainType: AndroidAudioFocusGainType.gain, // ← تغییر
+        androidWillPauseWhenDucked: true, // ← تغییر
       ),
     );
 
@@ -175,8 +191,8 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
 
   /// بارگذاری فایل صوتی جدید
   Future<void> load(String url, {String? title}) async {
-    final session = await AudioSession.instance;
-    await session.setActive(true); // ← اینجا اضافه کن
+    // final session = await AudioSession.instance;
+    // await session.setActive(true); // ← اینجا اضافه کن
     mediaItem.add(
       MediaItem(id: url, title: title ?? 'Hafez Poems', artist: 'اشعار حافظ'),
     );
@@ -225,9 +241,16 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
   }
   //edited
 
+  // @override
+  // Future<void> play() async {
+  // force ExoPlayer به rebuild کردن AudioTrack با routing فعلی
+  //   await _player.seek(_player.position);
+  //   await _player.play();
+  // }
   @override
   Future<void> play() async {
-    // force ExoPlayer به rebuild کردن AudioTrack با routing فعلی
+    final session = await AudioSession.instance;
+    await session.setActive(true); // ← اینجا، نه توی load
     await _player.seek(_player.position);
     await _player.play();
   }
@@ -244,10 +267,28 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
     );
   }
 
+  // @override
+  // Future<void> stop() async {
+  //   await _player.pause();
+  //   await _player.seek(Duration.zero);
+  //   playbackState.add(
+  //     playbackState.value.copyWith(
+  //       controls: _buildControls(false),
+  //       processingState: AudioProcessingState.ready,
+  //       playing: false,
+  //       updatePosition: Duration.zero,
+  //     ),
+  //   );
+  // }
   @override
   Future<void> stop() async {
     await _player.pause();
     await _player.seek(Duration.zero);
+
+    // session رو آزاد کن
+    final session = await AudioSession.instance;
+    await session.setActive(false); // ← این خط اضافه کن
+
     playbackState.add(
       playbackState.value.copyWith(
         controls: _buildControls(false),

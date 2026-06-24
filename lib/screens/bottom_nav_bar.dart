@@ -52,7 +52,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
     setState(() => _currentIndex = index);
     _pageController.animateToPage(
       index,
-      duration: const Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 100),
       curve: Curves.easeOut,
     );
   }

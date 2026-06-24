@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/theme/text_style.dart';
 
+// بعد
 class CarouselScreenWidget extends StatefulWidget {
   final String initialGhazal;
+  final String ghazalNumber; // شماره غزلی که هم‌اکنون نمایش داده می‌شود
   final String imagePath;
   final String changeButtonIcon;
   final String darkImagePath; // عکس تم شب  ← اضافه شد
@@ -13,6 +15,7 @@ class CarouselScreenWidget extends StatefulWidget {
   const CarouselScreenWidget({
     super.key,
     required this.initialGhazal,
+    required this.ghazalNumber,
     required this.imagePath,
     required this.darkImagePath, // ← اضافه شد
     required this.changeButtonIcon,
@@ -28,11 +31,13 @@ class CarouselScreenWidget extends StatefulWidget {
 class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
   double _turns = 0.0;
   late String _displayedGhazal;
+  late String _displayedGhazalNumber;
 
   @override
   void initState() {
     super.initState();
     _displayedGhazal = _extractFirstFourMesras(widget.initialGhazal);
+    _displayedGhazalNumber = widget.ghazalNumber;
   }
 
   @override
@@ -40,6 +45,9 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialGhazal != widget.initialGhazal) {
       _displayedGhazal = _extractFirstFourMesras(widget.initialGhazal);
+    }
+    if (oldWidget.ghazalNumber != widget.ghazalNumber) {
+      _displayedGhazalNumber = widget.ghazalNumber;
     }
   }
 
@@ -108,6 +116,7 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
             ),
           ),
           //* text edit
+          // بعد
           Positioned(
             top: 12,
             right: 12,
@@ -115,67 +124,134 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
             bottom: 0,
             child: SingleChildScrollView(
               physics: const NeverScrollableScrollPhysics(),
-              child: Text(
-                _displayedGhazal,
-                textAlign: TextAlign.right,
-                softWrap: true,
-                overflow: TextOverflow.visible,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: colorScheme.onSurface,
-                  height: 1.4,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 13,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 380),
+                switchInCurve: Curves.easeOut,
+                switchOutCurve: Curves.easeIn,
+                transitionBuilder: (child, animation) {
+                  final slide = Tween<Offset>(
+                    begin: const Offset(0, 0.06),
+                    end: Offset.zero,
+                  ).animate(animation);
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(position: slide, child: child),
+                  );
+                },
+                child: Text(
+                  _displayedGhazal,
+                  key: ValueKey(_displayedGhazal),
+                  textAlign: TextAlign.right,
+                  softWrap: true,
+                  overflow: TextOverflow.visible,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: colorScheme.onSurface,
+                    height: 1.4,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 13,
+                  ),
                 ),
               ),
             ),
           ),
+          // بعد
           Positioned(
             bottom: 8,
             right: 11,
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(50),
-                onTap: () async {
-                  setState(() {
-                    _turns += 1;
-                  });
-
-                  await Future.delayed(const Duration(milliseconds: 600));
-
-                  if (mounted) {
-                    widget.onChangeGhazal();
-                  }
-                },
-                child: Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    color: colorScheme.primary,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              textDirection: TextDirection.rtl,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
                     borderRadius: BorderRadius.circular(50),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colorScheme.primary.withValues(
-                          alpha: isDark ? 0.28 : 0.22,
-                        ),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
+                    onTap: () async {
+                      setState(() {
+                        _turns += 1;
+                      });
+
+                      await Future.delayed(const Duration(milliseconds: 600));
+
+                      if (mounted) {
+                        widget.onChangeGhazal();
+                      }
+                    },
+                    child: Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary,
+                        borderRadius: BorderRadius.circular(50),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.primary.withValues(
+                              alpha: isDark ? 0.28 : 0.22,
+                            ),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  alignment: Alignment.center,
-                  child: AnimatedRotation(
-                    turns: _turns,
-                    duration: const Duration(milliseconds: 450),
-                    curve: Curves.easeInOutCubic,
-                    child: Icon(
-                      Icons.refresh,
-                      size: 22,
-                      color: colorScheme.onPrimary,
+                      alignment: Alignment.center,
+                      child: AnimatedRotation(
+                        turns: _turns,
+                        duration: const Duration(milliseconds: 320),
+                        curve: Curves.easeInOutCubic,
+                        child: Icon(
+                          Icons.refresh,
+                          size: 22,
+                          color: colorScheme.onPrimary,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 320),
+                  switchInCurve: Curves.easeOut,
+                  switchOutCurve: Curves.easeIn,
+                  transitionBuilder: (child, animation) {
+                    final slide = Tween<Offset>(
+                      begin: const Offset(0, 0.06),
+                      end: Offset.zero,
+                    ).animate(animation);
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(position: slide, child: child),
+                    );
+                  },
+                  child: Column(
+                    key: ValueKey(_displayedGhazalNumber),
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start, // در محیط RTL یعنی راست‌چین
+                    children: [
+                      Text(
+                        'دیوان حافظ',
+                        textAlign: TextAlign.right,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: colorScheme.onSurface,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'غزل $_displayedGhazalNumber',
+                        textAlign: TextAlign.right,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.55),
+                          fontWeight: FontWeight.w400,
+                          fontSize: 9,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ],

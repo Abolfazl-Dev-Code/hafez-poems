@@ -30,32 +30,67 @@ class _ActiveVerseIndicatorState extends State<ActiveVerseIndicator>
 
   @override
   Widget build(BuildContext context) {
+    // سایز پایه بر اساس مقیاس فونت کاربر اسکیل می‌شود تا با بزرگ/کوچک
+    // شدن فونت سیستم، نسبت اندازه‌ی این نشانگر به متن مصرع ثابت بماند.
+    final textScale = MediaQuery.textScalerOf(context).scale(1.0);
+    final baseSize = 24.0 * textScale.clamp(1.0, 1.6);
+
     return AnimatedBuilder(
       animation: _pulseCtrl,
       builder: (context, _) {
-        // مقیاس نرم بین 0.85 و 1.15 برای حس «نفس کشیدن»
-        final scale = 0.75 + (_pulseCtrl.value * 0.30);
-        // شفافیت نرم بین 0.55 و 1.0
-        final opacity = 0.55 + (_pulseCtrl.value * 0.45);
+        final t = _pulseCtrl.value;
+        // حلقه‌ی بیرونی: محو می‌شود و کمی بزرگ‌تر می‌شود (حس امواج صدا)
+        final ringScale = 1.0 + (t * 0.45);
+        final ringOpacity = (1.0 - t) * 0.35;
+        // هسته‌ی مرکزی: نفس می‌کشد
+        final coreScale = 0.85 + (t * 0.15);
 
-        return Opacity(
-          opacity: opacity,
-          child: Transform.scale(
-            scale: scale,
-            child: Container(
-              width: 26,
-              height: 26,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: widget.color.withValues(alpha: 0.15),
-              ),
-              child: Center(
-                child: Transform.flip(
-                  flipX: true,
-                  child: Icon(Icons.arrow_back, size: 15, color: widget.color),
+        return SizedBox(
+          width: baseSize * 1.6,
+          height: baseSize * 1.6,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // حلقه‌ی پالس‌دار بیرونی
+              Transform.scale(
+                scale: ringScale,
+                child: Container(
+                  width: baseSize,
+                  height: baseSize,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: widget.color.withValues(alpha: ringOpacity),
+                      width: 1.4,
+                    ),
+                  ),
                 ),
               ),
-            ),
+              // هسته‌ی مرکزی
+              Transform.scale(
+                scale: coreScale,
+                child: Container(
+                  width: baseSize * 0.62,
+                  height: baseSize * 0.62,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        widget.color,
+                        widget.color.withValues(alpha: 0.65),
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: widget.color.withValues(alpha: 0.35),
+                        blurRadius: 6,
+                        spreadRadius: 0.5,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },

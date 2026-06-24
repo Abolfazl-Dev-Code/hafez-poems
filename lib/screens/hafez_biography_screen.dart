@@ -62,7 +62,7 @@ const List<_ChapterData> _chapters = [
         'غزل پارسی شود.',
   ),
   _ChapterData(
-    eyebrow: 'نام',
+    eyebrow: 'لقب',
     title: 'حافظِ قرآن',
     icon: Icons.menu_book_rounded,
     body:
@@ -99,7 +99,7 @@ const List<_ChapterData> _chapters = [
     title: 'دربار و فراز و نشیب',
     icon: Icons.account_balance_rounded,
     body:
-        'شیراز در زمان حافظ دستخوش تغییر فرمانروایان بود؛ گاه به دربار '
+        'شهر شیراز در زمان حافظ دستخوش تغییر فرمانروایان بود؛ گاه به دربار '
         'شاهان نزدیک می‌شد، گاه با تغییر باد سیاست آرامش شهر برهم '
         'می‌خورد و او ناگزیر می‌شد لحن، و گاه حتی شهر را تغییر دهد. '
         'با این همه، هرگز شعرش را تسلیمِ هیچ قدرتی نکرد.',
@@ -455,7 +455,7 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
                   child: Column(
                     children: [
                       Text(
-                        'برای آغاز سفر، پایین بکش',
+                        'برای آغاز سفر، به پایین بروید',
                         style: TextStyle(
                           fontFamily: 'vazir',
                           fontSize: 11,
@@ -506,9 +506,9 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
   // ══════════════════════════════════════════════════════════════════════════
   Widget _buildFalSection() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 0),
       child: Container(
-        padding: const EdgeInsets.fromLTRB(24, 36, 24, 36),
+        padding: const EdgeInsets.fromLTRB(42, 36, 42, 36),
         decoration: BoxDecoration(
           color: _kPanel,
           borderRadius: BorderRadius.circular(24),
@@ -527,7 +527,7 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
               'یک رسمِ هزارساله',
               style: TextStyle(
                 fontFamily: 'vazir',
-                fontSize: 11,
+                fontSize: 14,
                 letterSpacing: 3.5,
                 color: _kGold.withValues(alpha: 0.88),
               ),
@@ -562,15 +562,6 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
                 ).push(MaterialPageRoute(builder: (_) => const FalScreen()));
               },
               child: _BookCover(),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'برای گرفتن فال لمس کنید',
-              style: TextStyle(
-                fontFamily: 'vazir',
-                fontSize: 12,
-                color: _kGoldSoft.withValues(alpha: 0.70),
-              ),
             ),
           ],
         ),
@@ -618,15 +609,6 @@ class _BookCover extends StatelessWidget {
               color: _kGold,
               fontSize: 15,
               fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'برای گرفتن فال، لمس کن',
-            style: TextStyle(
-              fontFamily: 'vazir',
-              fontSize: 11,
-              color: _kCream.withValues(alpha: 0.45),
             ),
           ),
         ],
@@ -725,19 +707,31 @@ class _ChapterCard extends StatelessWidget {
         if (data.pullQuote != null) ...[
           const SizedBox(height: 16),
           Container(
-            padding: const EdgeInsets.fromLTRB(0, 14, 16, 14),
+            padding: const EdgeInsets.fromLTRB(0, 14, 10, 14),
             decoration: const BoxDecoration(
               border: Border(right: BorderSide(color: _kWine, width: 3)),
               color: Color(0x1A7A2436),
             ),
-            child: Text(
-              data.pullQuote!,
-              style: const TextStyle(
-                fontFamily: 'vazir',
-                fontSize: 14,
-                color: Color(0xFFF1D9B8),
-                height: 2.4,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: data.pullQuote!
+                  .split('\n')
+                  .map(
+                    (line) => FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        line,
+                        style: const TextStyle(
+                          fontFamily: 'vazir',
+                          fontSize: 14,
+                          color: Color(0xFFF1D9B8),
+                          height: 2.4,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
             ),
           ),
         ],
