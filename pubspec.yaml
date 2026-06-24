@@ -59,7 +59,8 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/videos/hafez_flip.mp4
+    - assets/videos/hafez_flip_light.webm
+    - assets/videos/hafez_flip_dark.webm
     - assets/sounds/page_flip.mp3
     - assets/icon/
     - assets/json/hafez_fal.json
