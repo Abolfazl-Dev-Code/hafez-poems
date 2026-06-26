@@ -21,6 +21,9 @@ class ProfileScreen extends StatelessWidget {
     final isLight = theme.brightness == Brightness.light;
     final textColor = isLight ? Colors.black : colorScheme.onSurface;
     final textTheme = theme.textTheme;
+    const EdgeInsetsGeometry sectionHeaderPadding = EdgeInsets.symmetric(
+      horizontal: 6,
+    );
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -62,9 +65,10 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const SectionHeader(
+                  SectionHeader(
                     title: 'آمار من',
                     icon: Icons.auto_graph_rounded,
+                    padding: sectionHeaderPadding,
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -116,9 +120,10 @@ class ProfileScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 28),
-                  const SectionHeader(
+                  SectionHeader(
                     title: 'میزان پیشرفت',
                     icon: Icons.trending_up_rounded,
+                    padding: sectionHeaderPadding,
                   ),
                   const SizedBox(height: 12),
                   ProgressOverviewCard(
@@ -127,9 +132,10 @@ class ProfileScreen extends StatelessWidget {
                     readProgress: controller.readRatio.value,
                   ),
                   const SizedBox(height: 28),
-                  const SectionHeader(
+                  SectionHeader(
                     title: 'فعالیت‌های من',
                     icon: Icons.history_rounded,
+                    padding: sectionHeaderPadding,
                   ),
                   const SizedBox(height: 12),
                   InfoCard(
@@ -153,9 +159,10 @@ class ProfileScreen extends StatelessWidget {
                     icon: Icons.format_quote_rounded,
                   ),
                   const SizedBox(height: 28),
-                  const SectionHeader(
+                  SectionHeader(
                     title: 'علاقه‌مندی ادبی',
                     icon: Icons.menu_book_rounded,
+                    padding: sectionHeaderPadding,
                   ),
                   const SizedBox(height: 12),
                   SingleInfoTile(

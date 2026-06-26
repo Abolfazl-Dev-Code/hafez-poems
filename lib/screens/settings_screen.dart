@@ -29,8 +29,9 @@ class SettingPage extends StatefulWidget {
   State<SettingPage> createState() => _SettingPageState();
 }
 
+// ✅ تغییر ۱: AutomaticKeepAliveClientMixin اضافه شد تا صفحه در حافظه بماند
 class _SettingPageState extends State<SettingPage>
-    with SingleTickerProviderStateMixin {
+    with AutomaticKeepAliveClientMixin {
   static const String _fontSizePrefKey = 'reading_font_size';
   static const String _lineHeightPrefKey = 'reading_line_height';
   static const String _fontFamilyPrefKey = 'reading_font_family';
@@ -47,7 +48,7 @@ class _SettingPageState extends State<SettingPage>
   String _appVersion = '...';
   bool _isTogglingReminder = false;
 
-  late final AnimationController _snackProgressController;
+  // ✅ تغییر ۲: AnimationController بلااستفاده حذف شد
 
   static const fontOptions = [
     {'label': 'وزیر', 'value': 'vazir'},
@@ -69,20 +70,20 @@ class _SettingPageState extends State<SettingPage>
     Color(0xFFFFFFFF),
   ];
 
+  // ✅ تغییر ۱: وانت‌کیپ‌الایو برای ماندن صفحه در حافظه
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   void initState() {
     super.initState();
-    _loadSettings();
-    _loadAppVersion();
-    _snackProgressController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 3),
-    );
+    // ✅ تغییر ۳: لودها موازی اجرا می‌شوند
+    Future.wait([_loadSettings(), _loadAppVersion()]);
   }
 
+  // ✅ تغییر ۲: dispose فقط چیزهایی که واقعاً وجود دارند
   @override
   void dispose() {
-    _snackProgressController.dispose();
     super.dispose();
   }
 
@@ -98,8 +99,14 @@ class _SettingPageState extends State<SettingPage>
 
     final savedFont = prefs.getString(_fontFamilyPrefKey) ?? 'vazir';
     final savedReminder = prefs.getBool(_dailyReminderPrefKey) ?? false;
+
+    // ✅ تغییر ۴: timeout برای جلوگیری از hang شدن
     final isReminderScheduled = await NotificationService.instance
-        .isDailyReminderScheduled();
+        .isDailyReminderScheduled()
+        .timeout(
+          const Duration(milliseconds: 300),
+          onTimeout: () => savedReminder,
+        );
 
     final reminderEnabled = savedReminder && isReminderScheduled;
     if (savedReminder != reminderEnabled) {
@@ -300,6 +307,9 @@ class _SettingPageState extends State<SettingPage>
 
   @override
   Widget build(BuildContext context) {
+    // ✅ تغییر ۱: این خط الزامی است برای AutomaticKeepAliveClientMixin
+    super.build(context);
+
     final ThemeController themeController = Get.find<ThemeController>();
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -315,7 +325,7 @@ class _SettingPageState extends State<SettingPage>
           padding: EdgeInsets.only(left: 16, right: 16, top: 10, bottom: 65),
           child: Column(
             children: [
-              // ── کارت تغییر تم (عین کد اصلی) ──────────────────────────
+              // ── کارت تغییر تم ──────────────────────────
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
@@ -350,13 +360,29 @@ class _SettingPageState extends State<SettingPage>
                               ),
                             ),
                             const SizedBox(height: 6),
-                            Text(
-                              darkMode
-                                  ? 'حالت تیره فعال است'
-                                  : 'حالت روشن فعال است',
-                              style: textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurface.withValues(
-                                  alpha: 0.72,
+                            AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 400),
+                              transitionBuilder: (child, animation) =>
+                                  FadeTransition(
+                                    opacity: animation,
+                                    child: SlideTransition(
+                                      position: Tween<Offset>(
+                                        begin: const Offset(0, 0.3),
+                                        end: Offset.zero,
+                                      ).animate(animation),
+                                      child: child,
+                                    ),
+                                  ),
+                              child: Text(
+                                darkMode
+                                    ? 'حالت تیره فعال است'
+                                    : 'حالت روشن فعال است',
+                                // ✅ key الزامی است — بدون آن AnimatedSwitcher تفاوت را تشخیص نمی‌دهد
+                                key: ValueKey(darkMode),
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: colorScheme.onSurface.withValues(
+                                    alpha: 0.72,
+                                  ),
                                 ),
                               ),
                             ),
@@ -386,7 +412,7 @@ class _SettingPageState extends State<SettingPage>
               // ── تنظیمات مطالعه ────────────────────────────────────────
               SectionCard(
                 title: 'تنظیمات مطالعه',
-                icon: Icons.chrome_reader_mode_rounded,
+                icon: Icons.text_fields_outlined,
                 children: [
                   Align(
                     alignment: Alignment.centerRight,

@@ -3,15 +3,20 @@ import 'package:flutter/material.dart';
 class SectionHeader extends StatelessWidget {
   final String title;
   final IconData? icon;
+  final EdgeInsetsGeometry padding;
 
-  const SectionHeader({super.key, required this.title, this.icon});
+  const SectionHeader({
+    super.key,
+    required this.title,
+    this.icon,
+    this.padding = const EdgeInsets.symmetric(horizontal: 20),
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: padding,
       child: Row(
         children: [
           Container(
@@ -22,9 +27,7 @@ class SectionHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-
           const SizedBox(width: 8),
-
           Text(
             title,
             style: theme.textTheme.titleSmall?.copyWith(

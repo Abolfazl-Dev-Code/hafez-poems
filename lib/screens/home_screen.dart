@@ -20,8 +20,9 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
+// ✅ تغییر: AutomaticKeepAliveClientMixin اضافه شد
 class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   final CarouselSliderController _carouselController =
       CarouselSliderController();
   final GhazalCacheService _cache = Get.find<GhazalCacheService>();
@@ -34,6 +35,10 @@ class _HomeScreenState extends State<HomeScreen>
 
   // Shimmer animation
   late final AnimationController _shimmerController;
+
+  // ✅ تغییر: wantKeepAlive برای ماندن صفحه در حافظه
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -62,7 +67,6 @@ class _HomeScreenState extends State<HomeScreen>
     });
   }
 
-  // بعد
   bool _trySetCarouselTexts() {
     final excerpts = _cache.randomExcerpts(count: 10);
     if (excerpts.isEmpty) return false;
@@ -76,7 +80,6 @@ class _HomeScreenState extends State<HomeScreen>
     return true;
   }
 
-  // بعد
   void _refreshSlide(int index) {
     if (_allTexts.length <= 1 || index >= _carouselTexts.length) return;
     GhazalExcerpt newItem;
@@ -102,6 +105,9 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    // ✅ تغییر: این خط الزامی است برای AutomaticKeepAliveClientMixin
+    super.build(context);
+
     final theme = Theme.of(context);
 
     return Directionality(
@@ -125,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen>
                   const SizedBox(height: 8),
                   // ── Greeting ──
                   GreetingCard(theme),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 15),
                   // ── Carousel / Skeleton ──
                   if (_isLoadingCarousel && _carouselTexts.isEmpty)
                     ShimmerSkeleton(theme)
@@ -143,7 +149,6 @@ class _HomeScreenState extends State<HomeScreen>
                       itemBuilder: (context, index, _) => CarouselScreenWidget(
                         key: ValueKey('carousel_slide_$index'),
                         initialGhazal: _carouselTexts[index].excerpt,
-                        // بعد
                         ghazalNumber: _carouselTexts[index].number,
                         imagePath: 'assets/icon/hafez-light.png',
                         darkImagePath: 'assets/icon/hafez-dark.png',

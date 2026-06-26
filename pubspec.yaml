@@ -1,7 +1,7 @@
 name: hafez_poems
 description: "Poems of Hafez"
 publish_to: "none"
-version: 1.5.0+5
+version: 1.8.3+6
 
 environment:
   sdk: ^3.11.0
@@ -59,8 +59,8 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/videos/hafez_flip_light.webm
-    - assets/videos/hafez_flip_dark.webm
+    - assets/videos/hafez_flip_light_v2.webm
+    - assets/videos/hafez_flip_dark_v2.webm
     - assets/sounds/page_flip.mp3
     - assets/icon/
     - assets/json/hafez_fal.json

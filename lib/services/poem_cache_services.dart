@@ -176,12 +176,22 @@ abstract class BasePoemCacheService<T> extends GetxService {
   // ── search ────────────────────────────────────────
   List<T> search(String normalizedQuery) {
     if (normalizedQuery.trim().isEmpty) return [];
+
+    // ✅ query را به کلمات جداگانه تقسیم کن
+    final tokens = normalizedQuery
+        .split(' ')
+        .map((t) => t.trim())
+        .where((t) => t.isNotEmpty)
+        .toList();
+
+    if (tokens.isEmpty) return [];
+
     return _searchIndex
-        .where(
-          (e) =>
-              e.normalizedTitle.contains(normalizedQuery) ||
-              e.normalizedText.contains(normalizedQuery),
-        )
+        .where((e) {
+          final searchable = '${e.normalizedTitle} ${e.normalizedText}';
+          // ✅ همه توکن‌ها باید در متن یا عنوان وجود داشته باشند
+          return tokens.every((token) => searchable.contains(token));
+        })
         .map((e) => e.original)
         .take(100)
         .toList();
@@ -219,6 +229,28 @@ abstract class BasePoemCacheService<T> extends GetxService {
   );
 
   String _normalize(String text) => text
+      // ✅ اعداد فارسی و عربی به انگلیسی
+      .replaceAll('۰', '0')
+      .replaceAll('٠', '0')
+      .replaceAll('۱', '1')
+      .replaceAll('١', '1')
+      .replaceAll('۲', '2')
+      .replaceAll('٢', '2')
+      .replaceAll('۳', '3')
+      .replaceAll('٣', '3')
+      .replaceAll('۴', '4')
+      .replaceAll('٤', '4')
+      .replaceAll('۵', '5')
+      .replaceAll('٥', '5')
+      .replaceAll('۶', '6')
+      .replaceAll('٦', '6')
+      .replaceAll('۷', '7')
+      .replaceAll('٧', '7')
+      .replaceAll('۸', '8')
+      .replaceAll('٨', '8')
+      .replaceAll('۹', '9')
+      .replaceAll('٩', '9')
+      // موارد قبلی
       .replaceAll('\u064a', '\u06cc')
       .replaceAll('\u0643', '\u06a9')
       .replaceAll('\u200c', ' ')

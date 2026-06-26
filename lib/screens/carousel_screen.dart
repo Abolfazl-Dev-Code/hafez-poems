@@ -43,8 +43,13 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
   bool _isDark = false;
   Timer? _completionTimer;
 
-  static const String _flipVideoLight = 'assets/videos/hafez_flip_light.webm';
-  static const String _flipVideoDark = 'assets/videos/hafez_flip_dark.webm';
+  // بعد
+  Future<void>? _videoInitFuture;
+  bool _isInitializingVideo = false;
+
+  static const String _flipVideoLight =
+      'assets/videos/hafez_flip_light_v2.webm';
+  static const String _flipVideoDark = 'assets/videos/hafez_flip_dark_v2.webm';
 
   @override
   void initState() {
@@ -53,13 +58,14 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
     _displayedGhazalNumber = widget.ghazalNumber;
   }
 
+  // بعد
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     if (_videoController == null || _isDark != isDark) {
       _isDark = isDark;
-      _initFlipVideo(isDark);
+      _videoInitFuture = _initFlipVideo(isDark);
     }
   }
 
@@ -96,14 +102,17 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
     return lines.join('\n');
   }
 
+  // بعد
   Future<void> _initFlipVideo(bool isDark) async {
-    _videoController?.removeListener(_onVideoTick);
-    await _videoController?.dispose();
-    _videoController = null;
-
-    final asset = isDark ? _flipVideoDark : _flipVideoLight;
-    final controller = VideoPlayerController.asset(asset);
+    if (_isInitializingVideo) return;
+    _isInitializingVideo = true;
     try {
+      _videoController?.removeListener(_onVideoTick);
+      await _videoController?.dispose();
+      _videoController = null;
+
+      final asset = isDark ? _flipVideoDark : _flipVideoLight;
+      final controller = VideoPlayerController.asset(asset);
       await controller.initialize();
       await controller.setVolume(0);
       controller.addListener(_onVideoTick);
@@ -114,7 +123,8 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
       setState(() => _videoController = controller);
     } catch (e) {
       debugPrint('Hafez flip video failed to load: $e');
-      controller.dispose();
+    } finally {
+      _isInitializingVideo = false;
     }
   }
 
@@ -146,6 +156,14 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
 
   Future<void> _handleRefreshTap() async {
     if (_isRefreshing) return;
+
+    // اگر ویدیو هنوز در حال آماده‌سازیه، کمی صبر کن
+    if (_videoController == null && _videoInitFuture != null) {
+      await _videoInitFuture!.timeout(
+        const Duration(milliseconds: 1200),
+        onTimeout: () {},
+      );
+    }
 
     final controller = _videoController;
     final videoReady = controller != null && controller.value.isInitialized;
@@ -244,10 +262,11 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
                           bottomLeft: Radius.circular(20),
                           topLeft: Radius.circular(20),
                         ),
-                        child: Image.asset(
-                          isDark ? widget.darkImagePath : widget.imagePath,
-                          fit: BoxFit.cover,
-                          width: 145,
+                        child: SizedBox.expand(
+                          child: Image.asset(
+                            isDark ? widget.darkImagePath : widget.imagePath,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
               ),
@@ -274,18 +293,22 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
                     child: SlideTransition(position: slide, child: child),
                   );
                 },
-                child: Text(
-                  _displayedGhazal,
+                // بعد
+                child: Align(
                   key: ValueKey(_displayedGhazal),
-                  textAlign: TextAlign.right,
-                  textDirection: TextDirection.rtl,
-                  softWrap: true,
-                  overflow: TextOverflow.visible,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: colorScheme.onSurface,
-                    height: 1.4,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 13,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    _displayedGhazal,
+                    textAlign: TextAlign.right,
+                    textDirection: TextDirection.rtl,
+                    softWrap: true,
+                    overflow: TextOverflow.visible,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: colorScheme.onSurface,
+                      height: 1.4,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
               ),
@@ -326,7 +349,7 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
                         alignment: Alignment.center,
                         child: AnimatedRotation(
                           turns: _turns,
-                          duration: const Duration(milliseconds: 320),
+                          duration: const Duration(milliseconds: 600),
                           curve: Curves.easeInOutCubic,
                           child: Icon(
                             Icons.refresh,

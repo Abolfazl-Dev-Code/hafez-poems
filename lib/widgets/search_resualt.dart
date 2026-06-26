@@ -21,7 +21,7 @@ class SearchResults extends StatelessWidget {
         itemCount: c.results.length,
         itemBuilder: (_, i) => SearchResultTitle(
           item: c.results[i],
-          query: c.searchText.value, // ← اضافه
+          query: app.normalize(c.searchText.value), // ← normalize اضافه کن
         ),
       );
     });

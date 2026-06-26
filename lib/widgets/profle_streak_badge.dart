@@ -126,7 +126,15 @@ class StreakMotivationCard extends StatelessWidget {
               width: 50,
               height: 50,
               decoration: BoxDecoration(
+                border: Border.all(
+                  color: isNewRecord
+                      ? Colors.white.withValues(alpha: 0.92)
+                      : colorScheme.onSurfaceVariant,
+                  strokeAlign: 1,
+                  width: 2.5,
+                ),
                 shape: BoxShape.circle,
+
                 color: isNewRecord
                     ? Colors.white.withValues(alpha: 0.25)
                     : const Color(0xFFFF6B35).withValues(alpha: 0.15),

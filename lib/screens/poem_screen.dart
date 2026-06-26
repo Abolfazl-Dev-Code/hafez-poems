@@ -65,6 +65,10 @@ class _PoemScreenState extends State<PoemScreen> {
   static const String _fontFamilyKey = 'reading_font_family';
   static const String _fontColorKey = 'reading_font_color';
 
+  // ← اضافه: حداقل زمان حضور در صفحه برای ثبت «خوانده‌شده»
+  static const Duration _minReadDuration = Duration(seconds: 9);
+  Timer? _markAsReadTimer;
+
   double _fontSize = 20;
   double _lineHeight = 1.9;
   String _fontFamily = 'Vazir';
@@ -101,7 +105,7 @@ class _PoemScreenState extends State<PoemScreen> {
     _verseSyncCtrl.addListener(_onActiveVerseChanged); // ← اضافه
     _loadReadingSettings();
     _loadInitialActionsState();
-    _markAsRead();
+    _scheduleMarkAsRead(); // ← قبلاً: _markAsRead();
     _initText();
   }
 
@@ -273,8 +277,22 @@ class _PoemScreenState extends State<PoemScreen> {
     );
   }
 
+  /// تایمرِ حداقل زمان حضور را شروع می‌کند. اگر کاربر زودتر از
+  /// [_minReadDuration] از صفحه خارج شود، `dispose()` این تایمر را
+  /// کنسل می‌کند و `_markAsRead` هیچ‌وقت اجرا نمی‌شود.
+  void _scheduleMarkAsRead() {
+    _markAsReadTimer = Timer(_minReadDuration, () {
+      if (!mounted) return;
+      _markAsRead();
+    });
+  }
+
   void _markAsRead() {
-    Hive.box(ProfileController.readBoxName).put(_args.id, true);
+    final box = Hive.box(ProfileController.readBoxName);
+    // جلوگیری از نوشتنِ تکراری اگه از قبل خوانده‌شده بوده
+    if (box.get(_args.id) != true) {
+      box.put(_args.id, true);
+    }
   }
 
   Future<void> _toggleLike() async {
@@ -340,8 +358,9 @@ class _PoemScreenState extends State<PoemScreen> {
 
   @override
   void dispose() {
-    _resumeAutoScrollTimer?.cancel(); // ← اضافه
-    _verseSyncCtrl.removeListener(_onActiveVerseChanged); // ← اضافه
+    _markAsReadTimer?.cancel(); // ← اضافه
+    _resumeAutoScrollTimer?.cancel();
+    _verseSyncCtrl.removeListener(_onActiveVerseChanged);
     _scrollController.dispose();
     _audioCtrl.removeListener(_syncPosition);
     _audioCtrl.dispose();
@@ -408,7 +427,6 @@ class _PoemScreenState extends State<PoemScreen> {
                       ),
                     )
                   : NotificationListener<ScrollNotification>(
-                      // ← اضافه
                       onNotification: (notification) {
                         if (notification is ScrollStartNotification &&
                             notification.dragDetails != null) {
@@ -419,7 +437,7 @@ class _PoemScreenState extends State<PoemScreen> {
                         return false;
                       },
                       child: SingleChildScrollView(
-                        controller: _scrollController, // ← اضافه
+                        controller: _scrollController,
                         padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPadding),
                         child: Card(
                           color: colorScheme.surface,
@@ -439,7 +457,6 @@ class _PoemScreenState extends State<PoemScreen> {
                               builder: (context, _) {
                                 final activeOrder =
                                     _verseSyncCtrl.activeVerseOrder;
-                                // بعد
                                 return Column(
                                   children: List.generate(_poemLines.length, (
                                     i,
@@ -447,8 +464,7 @@ class _PoemScreenState extends State<PoemScreen> {
                                     final isActive =
                                         _verseSyncCtrl.hasSyncData &&
                                         activeOrder == i;
-                                    final isFlashing =
-                                        _flashingLineIndex == i; // ← اضافه کن
+                                    final isFlashing = _flashingLineIndex == i;
 
                                     final verseText = PoemSelectedText(
                                       text: _poemLines[i],
@@ -469,22 +485,13 @@ class _PoemScreenState extends State<PoemScreen> {
                                     );
 
                                     return Padding(
-                                      key: _lineKeys[i] ??=
-                                          GlobalKey(), // ← key اینجا باشه
+                                      key: _lineKeys[i] ??= GlobalKey(),
                                       padding: const EdgeInsets.only(bottom: 8),
-                                      // فقط وقتی sync صوتی وجود دارد فضای
-                                      // نشانگر رزرو می‌شود؛ در غیر این صورت
-                                      // متن مصرع کل پهنا را می‌گیرد.
                                       child: _verseSyncCtrl.hasSyncData
                                           ? Row(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.center,
                                               children: [
-                                                // ── فضای ثابت نشانگر ──
-                                                // کنار متن می‌نشیند، نه رویش؛
-                                                // پس با بزرگ‌شدن فونت یا
-                                                // چندخطی‌شدن مصرع هیچ‌وقت
-                                                // داخل متن نمی‌رود.
                                                 SizedBox(
                                                   width: 20,
                                                   child: Center(
@@ -542,7 +549,7 @@ class _PoemScreenState extends State<PoemScreen> {
             Positioned(
               left: 28,
               right: 28,
-              bottom: _args.hasAudio ? 190 : 30,
+              bottom: _args.hasAudio ? 193 : 30,
               child: PoemActionBar(
                 isLiked: _isLiked,
                 isSaved: _isSaved,
@@ -569,9 +576,7 @@ class _PoemScreenState extends State<PoemScreen> {
                   verseSyncController: _verseSyncCtrl,
                   onRecitationChanged: (recitation) {
                     if (recitation.xmlText.isNotEmpty) {
-                      _verseSyncCtrl.loadSyncPoints(
-                        recitation.xmlText,
-                      ); // ← به جای id
+                      _verseSyncCtrl.loadSyncPoints(recitation.xmlText);
                     }
                   },
                 ),

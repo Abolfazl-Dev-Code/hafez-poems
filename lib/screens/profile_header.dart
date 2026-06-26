@@ -71,7 +71,7 @@ class ProfileHeader extends StatelessWidget {
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: colorScheme.primary.withValues(alpha: 0.55),
-                            width: 2,
+                            width: 1.4,
                           ),
                         ),
                         child: CircleAvatar(

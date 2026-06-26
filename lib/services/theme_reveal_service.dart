@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -30,35 +29,33 @@ class ThemeRevealService {
     final size = MediaQuery.of(context).size;
     final pixelRatio = MediaQuery.of(context).devicePixelRatio;
 
-    // ۱) عکس از وضعیتِ فعلی (تمِ قدیمی) قبل از هر تغییری
-    final ui.Image oldImage = await boundary.toImage(pixelRatio: pixelRatio);
-    final ByteData? byteData = await oldImage.toByteData(
-      format: ui.ImageByteFormat.png,
-    );
-    if (byteData == null) {
-      onSwitch();
-      return;
-    }
-    final Uint8List oldImageBytes = byteData.buffer.asUint8List();
-
-    onSwitch();
+    // ۱) اسکرین‌شات بدون هیچ تبدیلی — ui.Image مستقیم، بدون PNG
+    final ui.Image snapshot = await boundary.toImage(pixelRatio: pixelRatio);
 
     final maxRadius = _maxRadiusFromOrigin(origin, size);
 
+    // ۲) ابتدا overlay را اضافه کن تا صفحه پوشانده بشه
+    //    سپس تم رو عوض کن — این ترتیب فلیکر را حذف می‌کند
     _entry = OverlayEntry(
       builder: (_) => _CircleRevealOverlay(
-        oldImageBytes: oldImageBytes,
+        snapshot: snapshot,
+        screenSize: size,
+        pixelRatio: pixelRatio,
         origin: origin,
         maxRadius: maxRadius,
         toDark: toDark,
         onComplete: () {
           _entry?.remove();
           _entry = null;
+          snapshot.dispose();
         },
       ),
     );
 
     overlay.insert(_entry!);
+
+    // ۳) تم را در فریم بعدی عوض کن (overlay الان روی صفحه است)
+    WidgetsBinding.instance.addPostFrameCallback((_) => onSwitch());
   }
 
   double _maxRadiusFromOrigin(Offset origin, Size size) {
@@ -82,14 +79,18 @@ class ThemeRevealService {
 
 class _CircleRevealOverlay extends StatefulWidget {
   const _CircleRevealOverlay({
-    required this.oldImageBytes,
+    required this.snapshot,
+    required this.screenSize,
+    required this.pixelRatio,
     required this.origin,
     required this.maxRadius,
     required this.toDark,
     required this.onComplete,
   });
 
-  final Uint8List oldImageBytes;
+  final ui.Image snapshot;
+  final Size screenSize;
+  final double pixelRatio;
   final Offset origin;
   final double maxRadius;
   final bool toDark;
@@ -137,23 +138,16 @@ class _CircleRevealOverlayState extends State<_CircleRevealOverlay>
   Widget build(BuildContext context) {
     return IgnorePointer(
       child: AnimatedBuilder(
-        animation: _ctrl,
+        animation: _radius,
         builder: (context, _) {
-          final clipper = widget.toDark
-              ? _CircleClipper(center: widget.origin, radius: _radius.value)
-              : _InverseCircleClipper(
-                  center: widget.origin,
-                  radius: _radius.value,
-                );
-
-          return ClipPath(
-            clipper: clipper,
-            child: Image.memory(
-              widget.oldImageBytes,
-              width: double.infinity,
-              height: double.infinity,
-              fit: BoxFit.cover,
-              gaplessPlayback: true,
+          return CustomPaint(
+            size: widget.screenSize,
+            painter: _RevealPainter(
+              snapshot: widget.snapshot,
+              pixelRatio: widget.pixelRatio,
+              origin: widget.origin,
+              radius: _radius.value,
+              toDark: widget.toDark,
             ),
           );
         },
@@ -162,40 +156,61 @@ class _CircleRevealOverlayState extends State<_CircleRevealOverlay>
   }
 }
 
-class _CircleClipper extends CustomClipper<Path> {
-  _CircleClipper({required this.center, required this.radius});
+// ── Painter ───────────────────────────────────────────────────────────────────
 
-  final Offset center;
+class _RevealPainter extends CustomPainter {
+  _RevealPainter({
+    required this.snapshot,
+    required this.pixelRatio,
+    required this.origin,
+    required this.radius,
+    required this.toDark,
+  });
+
+  final ui.Image snapshot;
+  final double pixelRatio;
+  final Offset origin;
   final double radius;
+  final bool toDark;
 
   @override
-  Path getClip(Size size) {
-    return Path()..addOval(Rect.fromCircle(center: center, radius: radius));
+  void paint(Canvas canvas, Size size) {
+    canvas.save();
+
+    // کلیپ دایره‌ای — مستقیم روی canvas بدون ClipPath widget
+    final circlePath = Path()
+      ..addOval(Rect.fromCircle(center: origin, radius: radius));
+
+    if (toDark) {
+      // تم شب: دایره قدیمی (روشن) کوچک می‌شه
+      canvas.clipPath(circlePath);
+    } else {
+      // تم روز: دایره قدیمی (تاریک) کوچک می‌شه
+      final fullPath = Path()
+        ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
+      final invertedPath = Path.combine(
+        PathOperation.difference,
+        fullPath,
+        circlePath,
+      );
+      canvas.clipPath(invertedPath);
+    }
+
+    // رسم ui.Image مستقیم — بدون encode/decode PNG
+    final src = Rect.fromLTWH(
+      0,
+      0,
+      snapshot.width.toDouble(),
+      snapshot.height.toDouble(),
+    );
+    final dst = Rect.fromLTWH(0, 0, size.width, size.height);
+    canvas.drawImageRect(snapshot, src, dst, Paint());
+
+    canvas.restore();
   }
 
   @override
-  bool shouldReclip(covariant _CircleClipper oldClipper) {
-    return oldClipper.center != center || oldClipper.radius != radius;
-  }
-}
-
-class _InverseCircleClipper extends CustomClipper<Path> {
-  _InverseCircleClipper({required this.center, required this.radius});
-
-  final Offset center;
-  final double radius;
-
-  @override
-  Path getClip(Size size) {
-    final fullRect = Path()
-      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
-    final circle = Path()
-      ..addOval(Rect.fromCircle(center: center, radius: radius));
-    return Path.combine(PathOperation.difference, fullRect, circle);
-  }
-
-  @override
-  bool shouldReclip(covariant _InverseCircleClipper oldClipper) {
-    return oldClipper.center != center || oldClipper.radius != radius;
+  bool shouldRepaint(covariant _RevealPainter old) {
+    return old.radius != radius;
   }
 }

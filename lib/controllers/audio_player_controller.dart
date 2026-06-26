@@ -1,11 +1,9 @@
 import 'dart:async';
-
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:audio_service/audio_service.dart';
-
-import 'package:hafez_poems/main.dart';
+import 'package:hafez_poems/Initializers%20and%20Boot/globals.dart';
 import 'package:hafez_poems/models/recitation_models.dart';
 import 'package:hafez_poems/services/recitation_service.dart'; // audioHandler
 

@@ -4,12 +4,14 @@ class PoemListTitle extends StatelessWidget {
   final String title;
   final bool hasFullText;
   final VoidCallback onTap;
+  final bool isRead; // ← اضافه
 
   const PoemListTitle({
     super.key,
     required this.title,
     required this.hasFullText,
     required this.onTap,
+    this.isRead = false, // ← اضافه
   });
 
   @override
@@ -46,9 +48,47 @@ class PoemListTitle extends StatelessWidget {
                 color: colorScheme.onSurface.withValues(alpha: 0.35),
               ),
             ),
-      trailing: Icon(
-        Icons.chevron_left_rounded,
-        color: colorScheme.onSurface.withValues(alpha: 0.45),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isRead) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: colorScheme.primary.withValues(alpha: 0.2),
+                  width: 0.8,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.check_rounded,
+                    size: 11,
+                    color: colorScheme.primary.withValues(alpha: 0.8),
+                  ),
+                  const SizedBox(width: 3),
+                  Text(
+                    'خوانده شده',
+                    style: textTheme.labelSmall?.copyWith(
+                      fontSize: 10,
+                      color: colorScheme.primary.withValues(alpha: 0.85),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 4),
+          ],
+          Icon(
+            Icons.chevron_left_rounded,
+            color: colorScheme.onSurface.withValues(alpha: 0.45),
+          ),
+        ],
       ),
       onTap: onTap,
     );

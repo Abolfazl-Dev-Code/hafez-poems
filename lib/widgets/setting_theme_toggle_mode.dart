@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/services/theme_reveal_service.dart';
 
@@ -19,66 +20,68 @@ class _ThemeModeIconToggleState extends State<ThemeModeIconToggle>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
 
-  late final Animation<double> _rotateAnim;
+  // همه انیمیشن‌ها یک بار ساخته می‌شن — بدون rebuild
+  late final Animation<double> _rotateAnim; // همیشه 0 → 1
   late final Animation<double> _scaleAnim;
-  late final Animation<Offset> _slideOut;
-  late final Animation<Offset> _slideIn;
   late final Animation<double> _glowAnim;
-  late bool _outgoingIsDark;
-  late bool _incomingIsDark;
+
+  // جهت چرخش: +1.0 = راست (خورشید)، -1.0 = چپ (ماه)
+  // این یه متغیر ساده‌ست — نه Animation، نه Tween جدید
+  double _rotateDirection = 1.0;
+
+  // آیکون مبدا انیمیشن (قبل از تعویض)
+  late bool _animFrom;
+
+  // وقتی tap شروع کرده، از didUpdateWidget جلوگیری می‌کنه
+  bool _tapInProgress = false;
+
   @override
   void initState() {
     super.initState();
-    _outgoingIsDark = widget.isDarkMode;
-    _incomingIsDark = widget.isDarkMode;
+    _animFrom = widget.isDarkMode;
+
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 520),
+      duration: const Duration(milliseconds: 900),
     );
-    _buildAnimations();
-    _ctrl.value = widget.isDarkMode ? 1.0 : 0.0;
-  }
 
-  void _buildAnimations() {
+    // ساخت یک‌باره همه انیمیشن‌ها
     _rotateAnim = Tween<double>(
-      begin: 0,
-      end: 1,
-    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOutBack));
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
 
     _scaleAnim = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 0.6, end: 1.15), weight: 60),
-      TweenSequenceItem(tween: Tween(begin: 1.15, end: 1.0), weight: 40),
-    ]).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
-
-    _slideOut = Tween<Offset>(begin: Offset.zero, end: const Offset(0, 1.6))
-        .animate(
-          CurvedAnimation(
-            parent: _ctrl,
-            curve: const Interval(0.0, 0.45, curve: Curves.easeIn),
-          ),
-        );
-
-    _slideIn = Tween<Offset>(begin: const Offset(0, -1.6), end: Offset.zero)
-        .animate(
-          CurvedAnimation(
-            parent: _ctrl,
-            curve: const Interval(0.45, 1.0, curve: Curves.easeOutBack),
-          ),
-        );
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.5), weight: 45),
+      TweenSequenceItem(tween: Tween(begin: 0.5, end: 1.12), weight: 35),
+      TweenSequenceItem(tween: Tween(begin: 1.12, end: 1.0), weight: 20),
+    ]).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
 
     _glowAnim = TweenSequence<double>([
       TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 50),
       TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 50),
     ]).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+
+    // وقتی انیمیشن تموم شد، flag رو پاک کن
+    _ctrl.addStatusListener((status) {
+      if (status == AnimationStatus.completed ||
+          status == AnimationStatus.dismissed) {
+        _tapInProgress = false;
+      }
+    });
   }
 
   @override
   void didUpdateWidget(ThemeModeIconToggle old) {
     super.didUpdateWidget(old);
-    if (old.isDarkMode != widget.isDarkMode) {
-      _outgoingIsDark = old.isDarkMode; // آیکون قدیمی رو نگه دار
-      _incomingIsDark = widget.isDarkMode; // آیکون جدید
-      _ctrl.forward(from: 0);
+    // فقط برای تغییر تم از بیرون (مثل تم سیستم) — نه از tap این دکمه
+    if (old.isDarkMode != widget.isDarkMode && !_tapInProgress) {
+      if (!_ctrl.isAnimating) {
+        // تغییر خارجی: جهت و مبدا رو آپدیت کن و انیمیشن بزن
+        _rotateDirection = widget.isDarkMode ? -1.0 : 1.0;
+        setState(() => _animFrom = old.isDarkMode);
+        _ctrl.forward(from: 0);
+      }
     }
   }
 
@@ -99,6 +102,18 @@ class _ThemeModeIconToggleState extends State<ThemeModeIconToggle>
 
     return GestureDetector(
       onTap: () {
+        // ─── جهت چرخش ───────────────────────────────────────────────────────
+        // رفتن به تم شب (ماه)  → چرخش چپ  -1.0
+        // رفتن به تم روز (خورشید) → چرخش راست +1.0
+        // !widget.isDarkMode = مقصد:
+        //   مقصد=true  (شب/ماه)   → -1.0
+        //   مقصد=false (روز/خورشید) → +1.0
+        _rotateDirection = !widget.isDarkMode ? -1.0 : 1.0;
+
+        _tapInProgress = true;
+        setState(() => _animFrom = widget.isDarkMode);
+        _ctrl.forward(from: 0);
+
         final box = context.findRenderObject() as RenderBox?;
         final pos =
             box?.localToGlobal(box.size.center(Offset.zero)) ??
@@ -114,6 +129,23 @@ class _ThemeModeIconToggleState extends State<ThemeModeIconToggle>
       child: AnimatedBuilder(
         animation: _ctrl,
         builder: (context, _) {
+          // آیکون فعلی:
+          //   وقتی انیمیشن اجرا نمی‌شه → همیشه widget.isDarkMode
+          //   قبل از نقطه ۵۰٪       → _animFrom (آیکون قدیمی)
+          //   بعد از نقطه ۵۰٪       → !_animFrom (آیکون جدید)
+          final bool currentIsDark;
+          if (!_ctrl.isAnimating) {
+            currentIsDark = widget.isDarkMode;
+          } else if (_ctrl.value < 0.5) {
+            currentIsDark = _animFrom;
+          } else {
+            currentIsDark = !_animFrom;
+          }
+
+          // چرخش واقعی: مقدار 0→1 ضربدر جهت (+1 یا -1) = زاویه کامل
+          final double rotationAngle =
+              _rotateAnim.value * _rotateDirection * 2 * math.pi;
+
           return Container(
             width: 58,
             height: 58,
@@ -136,9 +168,10 @@ class _ThemeModeIconToggleState extends State<ThemeModeIconToggle>
               child: Stack(
                 alignment: Alignment.center,
                 children: [
+                  // پس‌زمینه گرادیان
                   Positioned.fill(
                     child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 520),
+                      duration: const Duration(milliseconds: 560),
                       decoration: BoxDecoration(
                         gradient: RadialGradient(
                           center: Alignment.center,
@@ -160,24 +193,13 @@ class _ThemeModeIconToggleState extends State<ThemeModeIconToggle>
                       ),
                     ),
                   ),
-                  SlideTransition(
-                    position: _slideOut,
-                    child: Opacity(
-                      opacity: (1.0 - _ctrl.value * 2.2).clamp(0.0, 1.0),
-                      child: _buildIcon(isDark: _outgoingIsDark),
-                    ),
-                  ),
-                  SlideTransition(
-                    position: _slideIn,
-                    child: Opacity(
-                      opacity: ((_ctrl.value - 0.4) * 1.8).clamp(0.0, 1.0),
-                      child: Transform.scale(
-                        scale: _scaleAnim.value,
-                        child: RotationTransition(
-                          turns: _rotateAnim,
-                          child: _buildIcon(isDark: _incomingIsDark),
-                        ),
-                      ),
+
+                  // آیکون واحد با چرخش جهت‌دار
+                  Transform.scale(
+                    scale: _scaleAnim.value,
+                    child: Transform.rotate(
+                      angle: rotationAngle,
+                      child: _buildIcon(isDark: currentIsDark),
                     ),
                   ),
                 ],
