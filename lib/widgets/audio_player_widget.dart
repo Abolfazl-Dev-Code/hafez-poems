@@ -218,7 +218,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 0),
 
                 // ── ۵. دکمه‌های کنترل + سرعت پخش در گوشه ────────────
                 Stack(
@@ -232,7 +232,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.stop_circle_outlined),
-                            iconSize: 46,
+                            iconSize: 40,
                             color: ctrl.isAudioLoaded
                                 ? cs.error
                                 : theme.disabledColor,
@@ -247,7 +247,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
                     // ── سرعت پخش — گوشه راست ──
                     Positioned(
-                      right: 0,
+                      right: 10,
                       child: SpeedButtons(ctrl: ctrl, cs: cs, theme: theme),
                     ),
                   ],

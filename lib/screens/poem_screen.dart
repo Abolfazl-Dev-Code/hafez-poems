@@ -373,17 +373,19 @@ class _PoemScreenState extends State<PoemScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
-    final double bottomPadding = _args.hasAudio ? 258 : 110;
+    final double bottomPadding = _args.hasAudio ? 240 : 110;
 
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
+          toolbarHeight: 40, // پیش‌فرض 56 هست، می‌تونی هر عددی که خواستی بگذاری
           title: Text(_args.title, style: textTheme.headlineMedium),
           leading: Padding(
-            padding: const EdgeInsets.only(right: 8.0),
+            padding: const EdgeInsets.only(right: 22.0),
             child: IconButton(
+              iconSize: 25,
               icon: const Icon(Icons.arrow_back_rounded),
               onPressed: () {
                 Navigator.of(context).pop();
@@ -393,7 +395,7 @@ class _PoemScreenState extends State<PoemScreen> {
           ),
           actions: [
             Padding(
-              padding: const EdgeInsets.only(left: 8.0),
+              padding: const EdgeInsets.only(left: 18.0),
               child: IconButton(
                 icon: const Icon(Icons.share_rounded),
                 iconSize: 21,
@@ -438,7 +440,7 @@ class _PoemScreenState extends State<PoemScreen> {
                       },
                       child: SingleChildScrollView(
                         controller: _scrollController,
-                        padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPadding),
+                        padding: EdgeInsets.fromLTRB(16, 0, 16, bottomPadding),
                         child: Card(
                           color: colorScheme.surface,
                           elevation: theme.brightness == Brightness.dark
@@ -483,10 +485,13 @@ class _PoemScreenState extends State<PoemScreen> {
                                       onLongPress: () =>
                                           _copyLine(_poemLines[i]),
                                     );
-
+                                    // space between indicator and text
                                     return Padding(
                                       key: _lineKeys[i] ??= GlobalKey(),
-                                      padding: const EdgeInsets.only(bottom: 8),
+                                      padding: const EdgeInsets.only(
+                                        bottom: 8,
+                                        right: 0,
+                                      ),
                                       child: _verseSyncCtrl.hasSyncData
                                           ? Row(
                                               crossAxisAlignment:
@@ -549,7 +554,7 @@ class _PoemScreenState extends State<PoemScreen> {
             Positioned(
               left: 28,
               right: 28,
-              bottom: _args.hasAudio ? 193 : 30,
+              bottom: _args.hasAudio ? 182 : 30,
               child: PoemActionBar(
                 isLiked: _isLiked,
                 isSaved: _isSaved,

@@ -20,8 +20,8 @@ class PlayPauseButton extends StatelessWidget {
     final enabled = ctrl.isAudioLoaded && !ctrl.isLoadingAudio;
 
     return Container(
-      height: 46,
-      width: 46,
+      height: 38,
+      width: 38,
       decoration: BoxDecoration(
         color: enabled ? cs.primary : theme.disabledColor,
         shape: BoxShape.circle,

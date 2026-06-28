@@ -20,7 +20,7 @@ class SpeedButtons extends StatelessWidget {
     return PopupMenuButton<double>(
       enabled: ctrl.isAudioLoaded,
       onSelected: (speed) => ctrl.setPlaybackSpeed(speed),
-      offset: const Offset(0, -160),
+      offset: const Offset(-20, -180),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       color: cs.surface,
       tooltip: 'سرعت پخش',
@@ -48,7 +48,7 @@ class SpeedButtons extends StatelessWidget {
         );
       }).toList(),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 6),
         decoration: BoxDecoration(
           color: ctrl.isAudioLoaded
               ? cs.surfaceContainerHighest.withValues(alpha: 0.6)
