@@ -64,7 +64,11 @@ class _PoemScreenState extends State<PoemScreen> {
   static const String _lineHeightKey = 'reading_line_height';
   static const String _fontFamilyKey = 'reading_font_family';
   static const String _fontColorKey = 'reading_font_color';
-
+  // ← اضافه: برای اندازه‌گیری واقعی ارتفاع نوار پایین
+  final GlobalKey _bottomOverlayKey = GlobalKey();
+  bool _isAudioExpanded = false;
+  double? _collapsedOverlayHeight;
+  double? _expandedOverlayHeight;
   // ← اضافه: حداقل زمان حضور در صفحه برای ثبت «خوانده‌شده»
   static const Duration _minReadDuration = Duration(seconds: 9);
   Timer? _markAsReadTimer;
@@ -107,6 +111,7 @@ class _PoemScreenState extends State<PoemScreen> {
     _loadInitialActionsState();
     _scheduleMarkAsRead(); // ← قبلاً: _markAsRead();
     _initText();
+    _scheduleMeasureBottomOverlay(); // ← اضافه
   }
 
   void _syncPosition() {
@@ -179,6 +184,31 @@ class _PoemScreenState extends State<PoemScreen> {
       // اجازه بده با موقعیت فعلیِ پخش دوباره سینک شه
       _lastAutoScrolledVerseOrder = null;
       _onActiveVerseChanged();
+    });
+  }
+
+  void _measureBottomOverlay() {
+    if (!mounted) return;
+    final box =
+        _bottomOverlayKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return;
+
+    final height = box.size.height;
+    setState(() {
+      if (_isAudioExpanded) {
+        _expandedOverlayHeight = height;
+      } else {
+        _collapsedOverlayHeight = height;
+      }
+    });
+  }
+
+  void _scheduleMeasureBottomOverlay({Duration delay = Duration.zero}) {
+    Future.delayed(delay, () {
+      if (!mounted) return;
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _measureBottomOverlay(),
+      );
     });
   }
 
@@ -373,14 +403,25 @@ class _PoemScreenState extends State<PoemScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
-    final double bottomPadding = _args.hasAudio ? 240 : 110;
+    const double breathingRoom = 16; // فاصله‌ی نفس بین متن شعر و نوار اکشن
+    final double bottomInset = _args.hasAudio
+        ? 10
+        : 110; // همون bottom پایین Positioned
+    final double overlayHeight = !_args.hasAudio
+        ? 0
+        : (_isAudioExpanded
+                  ? _expandedOverlayHeight
+                  : _collapsedOverlayHeight) ??
+              150; // تخمین اولیه تا قبل از اولین اندازه‌گیری
+    final double bottomPadding =
+        (_args.hasAudio ? overlayHeight + bottomInset : 110) + breathingRoom;
 
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          toolbarHeight: 40, // پیش‌فرض 56 هست، می‌تونی هر عددی که خواستی بگذاری
+          toolbarHeight: 45, // پیش‌فرض 56 هست، می‌تونی هر عددی که خواستی بگذاری
           title: Text(_args.title, style: textTheme.headlineMedium),
           leading: Padding(
             padding: const EdgeInsets.only(right: 22.0),
@@ -440,7 +481,7 @@ class _PoemScreenState extends State<PoemScreen> {
                       },
                       child: SingleChildScrollView(
                         controller: _scrollController,
-                        padding: EdgeInsets.fromLTRB(16, 0, 16, bottomPadding),
+                        padding: EdgeInsets.fromLTRB(12, 0, 12, bottomPadding),
                         child: Card(
                           color: colorScheme.surface,
                           elevation: theme.brightness == Brightness.dark
@@ -550,42 +591,55 @@ class _PoemScreenState extends State<PoemScreen> {
                       ),
                     ),
             ),
-            // ── نوار اکشن ─────────────────────────────────────────
+            // ── نوار اکشن + پلیر صدا (دقیقاً زیر هم، فاصله ۵ پیکسل) ──
             Positioned(
-              left: 28,
-              right: 28,
-              bottom: _args.hasAudio ? 182 : 30,
-              child: PoemActionBar(
-                isLiked: _isLiked,
-                isSaved: _isSaved,
-                canHighlight: _selectedLineIndex != null,
-                isHighlightActive: _isSelectedLineHighlighted,
-                onLikeTap: _toggleLike,
-                onSaveTap: _toggleSave,
-                onHighlightTap: _toggleHighlight,
-                scaffoldContext: context,
+              left: 12,
+              right: 12,
+              bottom: _args.hasAudio ? 10 : 100,
+              child: Column(
+                key: _bottomOverlayKey, // ← اضافه
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: PoemActionBar(
+                      isLiked: _isLiked,
+                      isSaved: _isSaved,
+                      canHighlight: _selectedLineIndex != null,
+                      isHighlightActive: _isSelectedLineHighlighted,
+                      onLikeTap: _toggleLike,
+                      onSaveTap: _toggleSave,
+                      onHighlightTap: _toggleHighlight,
+                      scaffoldContext: context,
+                    ),
+                  ),
+                  if (_args.hasAudio) const SizedBox(height: 5),
+                  if (_args.hasAudio)
+                    AudioPlayerWidget(
+                      id: _args.id,
+                      audioUrl: _args.audioUrl,
+                      fetchAudioUrl: _args.fetchAudioUrl,
+                      controller: _audioCtrl,
+                      title: _args.title,
+                      verseSyncController: _verseSyncCtrl,
+                      onRecitationChanged: (recitation) {
+                        if (recitation.xmlText.isNotEmpty) {
+                          _verseSyncCtrl.loadSyncPoints(recitation.xmlText);
+                        }
+                      },
+                      onExpansionChanged: (expanded) {
+                        // ← اضافه
+                        setState(() => _isAudioExpanded = expanded);
+                        // صبر تا انیمیشن AnimatedSize پلیر (۲۲۰ms) کامل شود، بعد اندازه واقعی گرفته شود
+                        _scheduleMeasureBottomOverlay(
+                          delay: const Duration(milliseconds: 260),
+                        );
+                      },
+                    ),
+                ],
               ),
             ),
-            // ── پلیر صدا ──────────────────────────────────────────
-            if (_args.hasAudio)
-              Positioned(
-                left: 12,
-                right: 12,
-                bottom: 10,
-                child: AudioPlayerWidget(
-                  id: _args.id,
-                  audioUrl: _args.audioUrl,
-                  fetchAudioUrl: _args.fetchAudioUrl,
-                  controller: _audioCtrl,
-                  title: _args.title,
-                  verseSyncController: _verseSyncCtrl,
-                  onRecitationChanged: (recitation) {
-                    if (recitation.xmlText.isNotEmpty) {
-                      _verseSyncCtrl.loadSyncPoints(recitation.xmlText);
-                    }
-                  },
-                ),
-              ),
           ],
         ),
       ),

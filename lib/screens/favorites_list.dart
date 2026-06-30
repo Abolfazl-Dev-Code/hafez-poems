@@ -44,7 +44,7 @@ class FavoritesList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(12, 2, 12, 65),
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
@@ -93,7 +93,7 @@ class _FavoriteCard extends StatelessWidget {
         : colorScheme.outlineVariant;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: selectionMode ? onToggleSelect : item.onTap,
