@@ -6,6 +6,12 @@
 
 ### اپلیکیشن موبایل برای مطالعه اشعار خواجه شمس‌الدین محمد حافظ شیرازی
 
+### 📥 دانلود آخرین نسخه
+
+<a href="https://github.com/Abolfazl-Dev-Code/hafez-poems/releases">
+  <img src="https://img.shields.io/badge/⬇️-دانلود_آخرین_نسخه-success?style=for-the-badge" alt="Download">
+</a>
+
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=flat-square&logo=flutter)
 ![Dart](https://img.shields.io/badge/Dart-3.11-0175C2?style=flat-square&logo=dart)
 ![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?style=flat-square&logo=android)
