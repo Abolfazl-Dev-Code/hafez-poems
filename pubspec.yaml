@@ -61,6 +61,8 @@ flutter:
   assets:
     - assets/videos/hafez_flip_light_v2.webm
     - assets/videos/hafez_flip_dark_v2.webm
+    - assets/audio/
+    - assets/audio/Jalal_Naghsh_Nilchi.mp3
     - assets/sounds/page_flip.mp3
     - assets/icon/
     - assets/json/hafez_fal.json

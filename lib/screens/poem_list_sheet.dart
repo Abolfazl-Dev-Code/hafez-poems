@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hafez_poems/widgets/persian_numbers.dart';
 import 'package:hive/hive.dart';
 import 'package:hafez_poems/controllers/profile_controller.dart';
 import 'package:hafez_poems/models/base_poem_model.dart';
@@ -86,8 +87,8 @@ class _PoemListSheetState extends State<PoemListSheet> {
     final args = _cfg.tilePrefix != null
         ? PoemScreenArgs(
             id: baseArgs.id,
-            title: displayTitle,
-            text: baseArgs.text,
+            title: displayTitle.toPersianNumbers(),
+            text: baseArgs.text.toPersianNumbers(),
             audioUrl: baseArgs.audioUrl,
             fetchText: baseArgs.fetchText,
             fetchAudioUrl: baseArgs.fetchAudioUrl,
@@ -412,7 +413,7 @@ class _PoemListSheetState extends State<PoemListSheet> {
                             : item.title;
 
                         return PoemListTitle(
-                          title: tileTitle,
+                          title: tileTitle.toPersianNumbers(),
                           hasFullText: item.hasFullText,
                           isRead: read,
                           onTap: () => _navigate(item, tileTitle),

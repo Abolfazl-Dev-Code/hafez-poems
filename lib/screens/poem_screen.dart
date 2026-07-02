@@ -10,7 +10,8 @@ import 'package:hafez_poems/controllers/verse_sync_controller.dart';
 import 'package:hafez_poems/services/app_snackbar_service.dart';
 import 'package:hafez_poems/widgets/active_verse_indicator_widget.dart';
 import 'package:hafez_poems/widgets/audio_player_widget.dart';
-import 'package:hafez_poems/widgets/ghazal_action_bar.dart';
+import 'package:hafez_poems/widgets/poem_action_bar.dart';
+import 'package:hafez_poems/widgets/persian_numbers.dart';
 import 'package:hafez_poems/widgets/poem_selected_text.dart';
 import 'package:hive/hive.dart';
 import 'package:share_plus/share_plus.dart';
@@ -422,7 +423,10 @@ class _PoemScreenState extends State<PoemScreen> {
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
           toolbarHeight: 45, // پیش‌فرض 56 هست، می‌تونی هر عددی که خواستی بگذاری
-          title: Text(_args.title, style: textTheme.headlineMedium),
+          title: Text(
+            _args.title.toPersianNumbers(),
+            style: textTheme.headlineMedium,
+          ),
           leading: Padding(
             padding: const EdgeInsets.only(right: 22.0),
             child: IconButton(

@@ -66,7 +66,7 @@ void showStreakGuide(BuildContext context) {
   AppSnackBarService.info(
     duration: const Duration(seconds: 7),
     context,
-    '🔥 استریک یعنی چند روز پشت‌سرهم برنامه رو باز کرده‌ای. '
+    '🔥 روز شمار یعنی چند روز پشت‌سرهم برنامه رو باز کرده‌ای. '
     'هر روز که وارد بشی یه روز بهش اضافه می‌شه. '
     'اگه یه روز رو جا بندازی، از صفر شروع می‌شه!',
   );
@@ -94,7 +94,7 @@ class StreakMotivationCard extends StatelessWidget {
 
     final String message;
     if (isNewRecord) {
-      message = 'این بهترین استریکیه که تا حالا داشتی، همینطور ادامه بده.';
+      message = 'این بهترین امتیازیه که تا حالا داشتی، همینطور ادامه بده.';
     } else {
       message =
           '${remaining.toString().toPersianNumbers()} روز تا شکستن رکوردت';
