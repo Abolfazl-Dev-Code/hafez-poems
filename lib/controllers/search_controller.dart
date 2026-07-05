@@ -22,6 +22,12 @@ class SearchController extends GetxController {
   final MontasabCacheService montasabCache = Get.find();
   final OtherPoemCacheService otherPoemCache = Get.find();
 
+  // حداقل طول کوئری برای شروع جستجو (جلوگیری از جستجوی سنگین با ۱ حرف)
+  static const int _minQueryLength = 2;
+
+  // حداکثر تعداد نتایج نمایشی
+  static const int _maxResults = 50;
+
   @override
   void onInit() {
     super.onInit();
@@ -38,6 +44,12 @@ class SearchController extends GetxController {
     cachedCount.value = totalCachedCount;
   }
 
+  @override
+  void onClose() {
+    debounce?.cancel();
+    super.onClose();
+  }
+
   int get totalCachedCount =>
       ghazalCache.cachedCount +
       ghataatCache.cachedCount +
@@ -48,108 +60,101 @@ class SearchController extends GetxController {
 
   void _debouncedSearch() {
     debounce?.cancel();
-    debounce = Timer(const Duration(milliseconds: 250), performSearch);
+    debounce = Timer(const Duration(milliseconds: 400), performSearch);
   }
 
   void performSearch() {
     final query = normalize(searchText.value);
 
-    if (query.isEmpty) {
+    if (query.length < _minQueryLength) {
       results.clear();
       return;
     }
 
-    final list = <SearchResult>[];
+    final scoredList = <MapEntry<SearchResult, int>>[];
 
-    list.addAll(
-      ghazalCache
-          .search(query)
-          .map(
-            (g) => SearchResult(
-              id: g.id,
-              title: g.title,
-              text: g.text,
-              audioUrl: g.audioUrl,
-              type: SearchResultType.ghazal,
-            ),
-          ),
-    );
-
-    list.addAll(
-      ghataatCache
-          .search(query)
-          .map(
-            (g) => SearchResult(
-              id: g.id,
-              title: g.title,
-              text: g.text,
-              audioUrl: '',
-              type: SearchResultType.ghataat,
-            ),
-          ),
-    );
-
-    list.addAll(
-      ghasayedCache
-          .search(query)
-          .map(
-            (g) => SearchResult(
-              id: g.id,
-              title: g.title,
-              text: g.text,
-              audioUrl: '',
-              type: SearchResultType.qasaid,
-            ),
-          ),
-    );
-
-    list.addAll(
-      robaeyatCache
-          .search(query)
-          .map(
-            (g) => SearchResult(
-              id: g.id,
-              title: g.title,
-              text: g.text,
-              audioUrl: '',
-              type: SearchResultType.robaeyat,
-            ),
-          ),
-    );
-
-    list.addAll(
-      montasabCache
-          .search(query)
-          .map(
-            (g) => SearchResult(
-              id: g.id,
-              title: g.title,
-              text: g.text,
-              audioUrl: '',
-              type: SearchResultType.montasab,
-            ),
-          ),
-    );
-
-    list.addAll(
-      otherPoemCache
-          .search(query)
-          .map(
-            (o) => SearchResult(
-              id: o.id,
-              title: o.title,
-              text: o.text,
-              audioUrl: '',
-              type: SearchResultType.other,
-            ),
-          ),
-    );
-
-    if (selectedType.value != null) {
-      results.value = list.where((e) => e.type == selectedType.value).toList();
-    } else {
-      results.value = list;
+    void addScored<T>(
+      List<MapEntry<T, int>> items,
+      SearchResult Function(T) toResult,
+    ) {
+      for (final e in items) {
+        scoredList.add(MapEntry(toResult(e.key), e.value));
+      }
     }
+
+    addScored(
+      ghazalCache.searchWithScore(query),
+      (g) => SearchResult(
+        id: g.id,
+        title: g.title,
+        text: g.text,
+        audioUrl: g.audioUrl,
+        type: SearchResultType.ghazal,
+      ),
+    );
+
+    addScored(
+      ghataatCache.searchWithScore(query),
+      (g) => SearchResult(
+        id: g.id,
+        title: g.title,
+        text: g.text,
+        audioUrl: '',
+        type: SearchResultType.ghataat,
+      ),
+    );
+
+    addScored(
+      ghasayedCache.searchWithScore(query),
+      (g) => SearchResult(
+        id: g.id,
+        title: g.title,
+        text: g.text,
+        audioUrl: '',
+        type: SearchResultType.qasaid,
+      ),
+    );
+
+    addScored(
+      robaeyatCache.searchWithScore(query),
+      (g) => SearchResult(
+        id: g.id,
+        title: g.title,
+        text: g.text,
+        audioUrl: '',
+        type: SearchResultType.robaeyat,
+      ),
+    );
+
+    addScored(
+      montasabCache.searchWithScore(query),
+      (g) => SearchResult(
+        id: g.id,
+        title: g.title,
+        text: g.text,
+        audioUrl: '',
+        type: SearchResultType.montasab,
+      ),
+    );
+
+    addScored(
+      otherPoemCache.searchWithScore(query),
+      (o) => SearchResult(
+        id: o.id,
+        title: o.title,
+        text: o.text,
+        audioUrl: '',
+        type: SearchResultType.other,
+      ),
+    );
+
+    final filtered = selectedType.value != null
+        ? scoredList.where((e) => e.key.type == selectedType.value).toList()
+        : scoredList;
+
+    filtered.sort((a, b) => b.value.compareTo(a.value));
+
+    results.value = filtered.map((e) => e.key).take(_maxResults).toList();
   }
 }
 

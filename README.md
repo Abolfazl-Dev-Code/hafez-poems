@@ -8,8 +8,11 @@
 
 ### 📥 دانلود آخرین نسخه
 
-<a href="https://github.com/Abolfazl-Dev-Code/hafez-poems/releases">
-  <img src="https://img.shields.io/badge/⬇️-دانلود_آخرین_نسخه-success?style=for-the-badge" alt="Download">
+<a href="https://github.com/Abolfazl-Dev-Code/hafez-poems/releases/latest">
+  <img
+    src="assets/badge/github-badge.png"
+    alt="دانلود آخرین نسخه"
+    width="280">
 </a>
 
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=flat-square&logo=flutter)

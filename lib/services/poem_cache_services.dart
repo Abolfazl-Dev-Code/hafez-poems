@@ -27,9 +27,6 @@ abstract class BasePoemCacheService<T> extends GetxService {
   final RxBool isIndexing = false.obs;
 
   // ── housekeeping فایل Hive ──────────────────────
-  // Hive هیچ‌وقت خودش فضای entry های آپدیت‌شده/حذف‌شده را آزاد نمی‌کند؛
-  // این کار باید با compact() دستی انجام شود، اما نه بعد از هر نوشتن
-  // (که خودش هزینه‌بر است) بلکه با یک آستانه‌ی شمارشی.
   int _writesSinceCompact = 0;
   static const int _compactThreshold = 15;
 
@@ -57,9 +54,8 @@ abstract class BasePoemCacheService<T> extends GetxService {
   int get audioIndex => 0; // قطعات: override با 1
 
   // ── init ─────────────────────────────────────────
-  // بعد
   Future<BasePoemCacheService<T>> init() async {
-    _box = await Hive.openBox<T>(boxName); // ← قبلاً Hive.box بود
+    _box = await Hive.openBox<T>(boxName);
     if (_box.isNotEmpty) {
       for (final d in _box.values) {
         _map[idOf(d)] = d;
@@ -67,8 +63,6 @@ abstract class BasePoemCacheService<T> extends GetxService {
       _rebuildSearchIndex();
       _assignSorted();
     }
-    // فشرده‌سازی یک‌باره در شروع هر سشن؛ فضای آزادشده از نوشتن‌های
-    // سشن‌های قبلی (که compact نشده بودند) را پاک می‌کند.
     try {
       await _box.compact();
     } catch (e) {
@@ -107,7 +101,6 @@ abstract class BasePoemCacheService<T> extends GetxService {
         loadingProgress.value = (i + 1) / list.length;
       }
 
-      // بعد
       if (toSave.isNotEmpty) {
         await _box.putAll(toSave);
         try {
@@ -131,7 +124,6 @@ abstract class BasePoemCacheService<T> extends GetxService {
     final cached = _map[id];
     if (cached != null && hasFullTextOf(cached)) return cached;
 
-    // بعد
     final item = await localService.fetchById(id);
     _map[id] = item;
     await _box.put(id, item);
@@ -174,10 +166,17 @@ abstract class BasePoemCacheService<T> extends GetxService {
   }
 
   // ── search ────────────────────────────────────────
-  List<T> search(String normalizedQuery) {
+  /// جستجو با امتیازدهی؛ خروجی: لیست (آیتم، امتیاز) که هنوز sort نشده.
+  /// اولویت امتیازها:
+  ///   100  تطابق کامل عنوان
+  ///    95  عنوان با query شروع می‌شود
+  ///    90  query داخل عنوان است
+  ///    85  عبارت کامل (چند کلمه‌ای، دقیقاً پشت‌سرهم) داخل متن است
+  ///    60  یکی از کلمات عنوان با query شروع می‌شود
+  ///  10-55  نسبت کلمات مطابق‌شده‌ی query که در متن پیدا شده‌اند
+  List<MapEntry<T, int>> searchWithScore(String normalizedQuery) {
     if (normalizedQuery.trim().isEmpty) return [];
 
-    // ✅ query را به کلمات جداگانه تقسیم کن
     final tokens = normalizedQuery
         .split(' ')
         .map((t) => t.trim())
@@ -186,16 +185,59 @@ abstract class BasePoemCacheService<T> extends GetxService {
 
     if (tokens.isEmpty) return [];
 
-    return _searchIndex
-        .where((e) {
-          final searchable = '${e.normalizedTitle} ${e.normalizedText}';
-          // ✅ همه توکن‌ها باید در متن یا عنوان وجود داشته باشند
-          return tokens.every((token) => searchable.contains(token));
-        })
-        .map((e) => e.original)
-        .take(100)
-        .toList();
+    final result = <MapEntry<T, int>>[];
+
+    for (final e in _searchIndex) {
+      final searchable = '${e.normalizedTitle} ${e.normalizedText}';
+      if (!tokens.every((token) => searchable.contains(token))) continue;
+
+      final score = _scoreEntry(e, normalizedQuery, tokens);
+      result.add(MapEntry(e.original, score));
+    }
+
+    return result;
   }
+
+  /// امتیازدهی: تطابق عبارت کامل (phrase) در متن باید خیلی بالاتر از
+  /// تطابق پخش‌وپلای تک‌کلمه‌ای امتیاز بگیرد، چون کاربر معمولاً یک مصرع
+  /// یا عبارت دقیق را جستجو می‌کند (مثل «گل در بر و می در کف»).
+  int _scoreEntry(
+    _IndexedPoem<T> e,
+    String normalizedQuery,
+    List<String> tokens,
+  ) {
+    final title = e.normalizedTitle;
+    final text = e.normalizedText;
+
+    // ── تطابق در عنوان (بالاترین اولویت) ──────────────
+    if (title == normalizedQuery) return 100;
+    if (title.startsWith(normalizedQuery)) return 95;
+    if (title.contains(normalizedQuery)) return 90;
+
+    // ── تطابق عبارت کامل (چند کلمه‌ای، پشت‌سرهم) در متن ──
+    // یعنی خودِ query دقیقاً به همین شکل (با همین فاصله‌ها) توی متن هست
+    if (tokens.length > 1 && text.contains(normalizedQuery)) {
+      return 85;
+    }
+
+    // ── یکی از کلمات عنوان با query شروع می‌شود ──────
+    final titleWords = title.split(' ');
+    if (titleWords.any((w) => w.startsWith(normalizedQuery))) return 60;
+
+    // ── تطابق پخش‌وپلا: نسبت کلمات query که در متن پیدا شده‌اند ──
+    int matchedTokens = 0;
+    for (final token in tokens) {
+      if (text.contains(token)) matchedTokens++;
+    }
+    final ratio = matchedTokens / tokens.length; // بین 0 و 1
+
+    // امتیاز بین 10 تا 55 بر اساس نسبت تطابق
+    return 10 + (ratio * 45).round();
+  }
+
+  /// نگه‌داشته‌شده برای سازگاری با کدهای قدیمی که فقط لیست خام می‌خوان
+  List<T> search(String normalizedQuery) =>
+      searchWithScore(normalizedQuery).map((e) => e.key).toList();
 
   int get cachedCount => _map.length;
 
@@ -229,7 +271,6 @@ abstract class BasePoemCacheService<T> extends GetxService {
   );
 
   String _normalize(String text) => text
-      // ✅ اعداد فارسی و عربی به انگلیسی
       .replaceAll('۰', '0')
       .replaceAll('٠', '0')
       .replaceAll('۱', '1')
@@ -250,7 +291,6 @@ abstract class BasePoemCacheService<T> extends GetxService {
       .replaceAll('٨', '8')
       .replaceAll('۹', '9')
       .replaceAll('٩', '9')
-      // موارد قبلی
       .replaceAll('\u064a', '\u06cc')
       .replaceAll('\u0643', '\u06a9')
       .replaceAll('\u200c', ' ')
@@ -278,16 +318,13 @@ class _IndexedPoem<T> {
   });
 }
 
-// بعد
 // ══════════════════════════════════════════════════════════
 //  GHAZAL
 // ══════════════════════════════════════════════════════════
 
-/// متن کوتاه‌شده‌ی یک غزل به‌همراه شماره/شناسه‌ی همان غزل
-/// (برای کاروسل صفحه‌ی اصلی استفاده می‌شود تا متن و شماره با هم سینک بمانند)
 class GhazalExcerpt {
-  final String id; // شناسه‌ی داخلی غزل (برای مقایسه/جلوگیری از تکرار، نه نمایش)
-  final String number; // شماره‌ی سنتی غزل در دیوان (مثلاً «۱۳۷»)، برای نمایش
+  final String id;
+  final String number;
   final String excerpt;
 
   const GhazalExcerpt({
@@ -317,11 +354,8 @@ class GhazalCacheService extends BasePoemCacheService<Ghazal> {
   @override
   GhazalLocalService get localService => GhazalLocalService.instance;
 
-  // اختصاصی غزل ─────────────────────────────────────
   final RxInt textsReadyCount = 0.obs;
 
-  // ذخیره audioUrl در Hive
-  // بعد
   Future<void> updateAudioUrl(String id, String url) async {
     final ghazal = _map[id];
     if (ghazal != null) {
@@ -344,8 +378,6 @@ class GhazalCacheService extends BasePoemCacheService<Ghazal> {
     return (valid..shuffle(Random())).first;
   }
 
-  // بعد
-  // بعد
   List<GhazalExcerpt> randomExcerpts({int count = 5}) {
     final valid =
         _map.values
@@ -370,9 +402,6 @@ class GhazalCacheService extends BasePoemCacheService<Ghazal> {
     return result;
   }
 
-  /// شماره‌ی سنتی غزل را از روی عنوان (مثل «غزل شمارهٔ ۱۳۷») استخراج می‌کند.
-  /// هم ارقام لاتین و هم فارسی/عربی را تشخیص می‌دهد و آخرین رشته‌ی عددی
-  /// موجود در عنوان را برمی‌گرداند (چون شماره معمولاً انتهای عنوان می‌آید).
   String _extractGhazalNumber(String title) {
     final matches = RegExp(
       r'[0-9\u06F0-\u06F9\u0660-\u0669]+',
@@ -411,7 +440,7 @@ class GhataatCacheService extends BasePoemCacheService<GhataatModel> {
   @override
   String get boxName => 'ghataat_box';
   @override
-  int get audioIndex => 1; // ← قطعات از index=1 می‌خواند
+  int get audioIndex => 1;
   @override
   String idOf(GhataatModel g) => g.id;
   @override

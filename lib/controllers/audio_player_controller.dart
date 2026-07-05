@@ -22,7 +22,6 @@ class AudioPlayerController extends ChangeNotifier {
   String? get lastId => _lastId;
   String? get lastAudioUrl => _lastAudioUrl;
 
-  //edited
   // ── سرعت پخش ──
   double _playbackSpeed = 1.0;
   double get playbackSpeed => _playbackSpeed;
@@ -39,7 +38,6 @@ class AudioPlayerController extends ChangeNotifier {
   bool get hasMultipleRecitations => _recitations.length > 1;
 
   final _recitationService = RecitationService();
-  //edited
 
   // ── وضعیت ──
   HafezPlayerState _state = HafezPlayerState.stopped;
@@ -77,6 +75,16 @@ class AudioPlayerController extends ChangeNotifier {
     _onPositionChanged = callback;
   }
 
+  // ── تیکر برای موقعیت لحظه‌ای ─────────────────────
+  // audio_service فقط روی تغییر وضعیت (play/pause/buffer) ایونت
+  // emit می‌کند، نه هر چند صدم ثانیه. برای همگام‌سازی نرم verse
+  // highlight، باید بین دو ایونت واقعی، موقعیت را خودمان با
+  // فرکانس بالا از روی PlaybackState.position (که خودش با
+  // DateTime.now() محاسبه می‌شود) بخوانیم.
+  PlaybackState? _lastPlaybackState;
+  Timer? _positionTicker;
+  static const _tickInterval = Duration(milliseconds: 50);
+
   /// یک‌بار در initState فراخوانی شود
   void setupListeners() {
     _playbackSub?.cancel();
@@ -86,14 +94,15 @@ class AudioPlayerController extends ChangeNotifier {
     _playbackSub = audioHandler.playbackState.listen((state) {
       if (_disposed) return;
 
+      _lastPlaybackState = state; // ← انکر برای تیکر
       final processingState = state.processingState;
 
       // loading / buffering
       if (processingState == AudioProcessingState.loading ||
           processingState == AudioProcessingState.buffering) {
         _state = HafezPlayerState.loading;
-        position = state.updatePosition;
-        _onPositionChanged?.call(); // ← اضافه کن
+        position = state.position; // به‌جای updatePosition
+        _onPositionChanged?.call();
         _notify();
         return;
       }
@@ -103,6 +112,7 @@ class AudioPlayerController extends ChangeNotifier {
         _state = HafezPlayerState.stopped;
         position = Duration.zero;
         duration = Duration.zero;
+        _stopTicker();
         _notify();
         return;
       }
@@ -110,16 +120,17 @@ class AudioPlayerController extends ChangeNotifier {
       // error
       if (processingState == AudioProcessingState.error) {
         _state = HafezPlayerState.stopped;
+        _stopTicker();
         _notify();
         return;
       }
 
       // completed
-      // اگر handler درست پیاده شده باشد، خودش seek(0)+pause می‌کند.
-      // ولی برای اطمینان اینجا هم position را صفر می‌کنیم.
       if (processingState == AudioProcessingState.completed) {
         _state = HafezPlayerState.paused;
         position = Duration.zero;
+        _stopTicker();
+        _onPositionChanged?.call();
         _notify();
         return;
       }
@@ -129,7 +140,15 @@ class AudioPlayerController extends ChangeNotifier {
           ? HafezPlayerState.playing
           : HafezPlayerState.paused;
 
-      position = state.updatePosition;
+      position = state.position; // به‌جای updatePosition
+
+      if (state.playing) {
+        _startTicker();
+      } else {
+        _stopTicker();
+      }
+
+      _onPositionChanged?.call(); // ← قبلاً اینجا صدا زده نمی‌شد
       _notify();
     });
 
@@ -141,6 +160,22 @@ class AudioPlayerController extends ChangeNotifier {
       duration = media.duration ?? Duration.zero;
       _notify();
     });
+  }
+
+  void _startTicker() {
+    if (_positionTicker != null) return; // از قبل در حال اجراست
+    _positionTicker = Timer.periodic(_tickInterval, (_) {
+      if (_disposed || _lastPlaybackState == null) return;
+      // .position هر بار با DateTime.now() فعلی دوباره حساب می‌شود
+      position = _lastPlaybackState!.position;
+      _onPositionChanged?.call();
+      _notify();
+    });
+  }
+
+  void _stopTicker() {
+    _positionTicker?.cancel();
+    _positionTicker = null;
   }
 
   // ───────────────── speaker ─────────────────
@@ -171,6 +206,7 @@ class AudioPlayerController extends ChangeNotifier {
     _state = HafezPlayerState.loading;
     duration = Duration.zero;
     position = Duration.zero;
+    _stopTicker();
     _notify();
 
     String url = audioUrl;
@@ -242,7 +278,7 @@ class AudioPlayerController extends ChangeNotifier {
 
   // ───────────────── stop ─────────────────
 
-  /// توقف و برگشت به ابتدا — audio unload نمی‌شود
+  /// توقف کامل — audio unload می‌شود و پخش پس‌زمینه/نوتیفیکیشن هم متوقف می‌شود
   Future<void> stop() async {
     if (_disposed) return;
 
@@ -250,8 +286,10 @@ class AudioPlayerController extends ChangeNotifier {
       await audioHandler.stop();
       await _setSpeaker(false);
 
-      // برای واکنش سریع UI
-      _state = HafezPlayerState.paused;
+      _stopTicker();
+      // ← اصلاح شد: بعد از stop باید stopped باشد نه paused،
+      // وگرنه UI فکر می‌کند صدا هنوز لود است.
+      _state = HafezPlayerState.stopped;
       position = Duration.zero;
       _notify();
     } catch (e) {
@@ -267,13 +305,13 @@ class AudioPlayerController extends ChangeNotifier {
     try {
       await audioHandler.seek(pos);
       position = pos;
+      _onPositionChanged?.call();
       _notify();
     } catch (e) {
       debugPrint('❌ seek error: $e');
     }
   }
 
-  //edited
   // ───────────────── playback speed ─────────────────
 
   Future<void> setPlaybackSpeed(double speed) async {
@@ -298,17 +336,13 @@ class AudioPlayerController extends ChangeNotifier {
     _notify();
 
     try {
-      // خواننده ذخیره‌شده قبلی را بررسی کن
       final saved = await _recitationService.loadSelectedRecitation(poemId);
-
-      // لیست همه خوانندگان را دریافت کن
       final list = await _recitationService.fetchRecitations(poemId);
       if (_disposed) return;
 
       _recitations = list;
 
       if (list.isNotEmpty) {
-        // اگر انتخاب ذخیره‌شده هنوز در لیست است، همان را بزن
         if (saved != null && list.any((r) => r.id == saved.id)) {
           _selectedRecitation = list.firstWhere((r) => r.id == saved.id);
         } else {
@@ -337,10 +371,8 @@ class AudioPlayerController extends ChangeNotifier {
     _selectedRecitation = recitation;
     _notify();
 
-    // ذخیره انتخاب
     await _recitationService.saveSelectedRecitation(poemId, recitation);
 
-    // لود صدا با خواننده جدید
     await load(id: poemId, audioUrl: recitation.mp3Url, title: _lastTitle);
   }
 
@@ -348,7 +380,6 @@ class AudioPlayerController extends ChangeNotifier {
   bool get hasAudio =>
       _recitations.isNotEmpty ||
       (_lastAudioUrl != null && _lastAudioUrl!.isNotEmpty);
-  //edited
 
   // ───────────────── dispose ─────────────────
 
@@ -356,6 +387,7 @@ class AudioPlayerController extends ChangeNotifier {
   void dispose() {
     _disposed = true;
 
+    _stopTicker();
     _playbackSub?.cancel();
     _mediaSub?.cancel();
 
@@ -363,6 +395,10 @@ class AudioPlayerController extends ChangeNotifier {
     _mediaSub = null;
 
     _setSpeaker(false);
+    // این خط پخش پس‌زمینه/نوتیفیکیشن را واقعاً متوقف می‌کند.
+    // بدون این، audioHandler به‌صورت global همچنان در حال پخش می‌ماند
+    // حتی بعد از خروج از صفحه و dispose شدن این کنترلر.
+    audioHandler.stop();
 
     super.dispose();
   }

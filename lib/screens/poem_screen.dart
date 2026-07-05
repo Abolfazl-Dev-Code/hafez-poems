@@ -74,6 +74,8 @@ class _PoemScreenState extends State<PoemScreen> {
   static const Duration _minReadDuration = Duration(seconds: 9);
   Timer? _markAsReadTimer;
 
+  static const double indicatorSlotSize = 20.0;
+
   double _fontSize = 20;
   double _lineHeight = 1.9;
   String _fontFamily = 'Vazir';
@@ -543,7 +545,9 @@ class _PoemScreenState extends State<PoemScreen> {
                                                   CrossAxisAlignment.center,
                                               children: [
                                                 SizedBox(
-                                                  width: 20,
+                                                  width: indicatorSlotSize,
+                                                  height:
+                                                      indicatorSlotSize, // ← این خط کلید حل مسئله است
                                                   child: Center(
                                                     child: AnimatedSwitcher(
                                                       duration: const Duration(

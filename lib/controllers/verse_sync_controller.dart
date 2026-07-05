@@ -1,11 +1,7 @@
 // lib/controllers/verse_sync_controller.dart
-//
-// مسئولیت: با توجه به position جاری پلیر، تعیین می‌کند کدام مصراع باید
-// برگزیده‌ شود. این controller از AudioPlayerController مستقل است و
-// فقط به position و syncPoints نیاز دارد.
-
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/recitation_models.dart';
 import '../services/recitation_service.dart';
 
@@ -13,7 +9,7 @@ class VerseSyncController extends ChangeNotifier {
   bool _disposed = false;
 
   List<VerseSyncPoint> _syncPoints = [];
-  int _activeVerseOrder = -1; // verseOrder فعال (از API)
+  int _activeVerseOrder = -1;
   bool _isLoadingSync = false;
 
   int get activeVerseOrder => _activeVerseOrder;
@@ -22,11 +18,29 @@ class VerseSyncController extends ChangeNotifier {
 
   final _service = RecitationService();
 
-  // ── بارگذاری زمان‌بندی ─────────────────────────────
+  // ── لید دستی (کاربر می‌تواند جلوتر/عقب‌تر ببرد) ─────
+  // مثبت = indicator جلوتر می‌رود (سریع‌تر واکنش می‌دهد)
+  // منفی = indicator عقب‌تر می‌رود
+  int _manualLeadMs = 800;
+  int get manualLeadMs => _manualLeadMs;
 
-  /// باید بعد از انتخاب خواننده فراخوانی شود
+  static const _prefKeyLead = 'verse_sync_manual_lead_ms';
+
+  Future<void> loadManualLead() async {
+    final prefs = await SharedPreferences.getInstance();
+    _manualLeadMs = prefs.getInt(_prefKeyLead) ?? 0;
+    _notify();
+  }
+
+  Future<void> setManualLead(int ms) async {
+    _manualLeadMs = ms;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_prefKeyLead, ms);
+    _notify();
+  }
+
+  // ── بارگذاری زمان‌بندی ─────────────────────────────
   Future<void> loadSyncPoints(String xmlUrl) async {
-    // ← int recitationId حذف شد
     if (_disposed) return;
     _syncPoints = [];
     _activeVerseOrder = -1;
@@ -34,7 +48,7 @@ class VerseSyncController extends ChangeNotifier {
     _notify();
 
     try {
-      final points = await _service.fetchSyncPoints(xmlUrl); // ← xmlUrl
+      final points = await _service.fetchSyncPoints(xmlUrl);
       if (_disposed) return;
       _syncPoints = points;
     } catch (e) {
@@ -54,20 +68,17 @@ class VerseSyncController extends ChangeNotifier {
   }
 
   // ── به‌روزرسانی بر اساس position ──────────────────
-
-  /// با هر تغییر position پلیر باید فراخوانی شود
   void updatePosition(Duration position) {
     if (_disposed || _syncPoints.isEmpty) return;
 
-    final ms = position.inMilliseconds;
+    final ms = position.inMilliseconds + _manualLeadMs;
     int newOrder = -1;
 
-    // پیدا کردن آخرین sync point که زمانش از position کمتر یا مساوی است
     for (final point in _syncPoints) {
       if (point.audioMilliseconds <= ms) {
         newOrder = point.verseOrder;
       } else {
-        break; // چون مرتب شده‌اند، بعدی‌ها بزرگ‌ترند
+        break;
       }
     }
 

@@ -59,6 +59,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/badge/github-badge.png
     - assets/videos/hafez_flip_light_v2.webm
     - assets/videos/hafez_flip_dark_v2.webm
     - assets/audio/
