@@ -6,8 +6,6 @@
 
 ### اپلیکیشن موبایل برای مطالعه اشعار خواجه شمس‌الدین محمد حافظ شیرازی
 
-### 📥 دانلود آخرین نسخه
-
 <a href="https://github.com/Abolfazl-Dev-Code/hafez-poems/releases/latest">
   <img
     src="assets/badge/github-badge.png"
