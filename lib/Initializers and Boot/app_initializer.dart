@@ -3,10 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/Initializers%20and%20Boot/audio_boot.dart';
 import 'package:hafez_poems/Initializers%20and%20Boot/cache_services_boot.dart';
-import 'package:hafez_poems/controllers/profile_controller.dart';
-import 'package:hafez_poems/controllers/user_actions_controller.dart';
+import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_controller.dart';
 import 'package:hafez_poems/Initializers%20and%20Boot/hive_boot.dart';
-import 'package:hafez_poems/services/notification_service.dart';
+import 'package:hafez_poems/navbarHomeScreenUnit/bottomNavBar/user_actions_saver.dart';
+import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/notification_service.dart';
 import 'package:hafez_poems/theme/theme_controller.dart';
 
 class AppInitializer {
@@ -29,7 +29,7 @@ class AppInitializer {
 
     // سرویس‌های کش + UserActionsController + preload
     await CacheServicesBoot.init();
-    Get.put<UserActionsController>(UserActionsController(), permanent: true);
+    Get.put<UserActionsSaver>(UserActionsSaver(), permanent: true);
     CacheServicesBoot.preloadAll();
   }
 }

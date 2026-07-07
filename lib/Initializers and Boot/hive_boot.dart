@@ -1,5 +1,4 @@
-import 'package:hafez_poems/controllers/profile_controller.dart';
-import 'package:hafez_poems/controllers/user_actions_controller.dart';
+import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_controller.dart';
 import 'package:hafez_poems/models/ghasayed_model.dart';
 import 'package:hafez_poems/models/ghazal_model.dart';
 import 'package:hafez_poems/models/ghataat_model.dart';
@@ -9,6 +8,7 @@ import 'package:hafez_poems/models/montasab_model.dart';
 import 'package:hafez_poems/models/other_poem_model.dart';
 import 'package:hafez_poems/models/robaeyat_model.dart';
 import 'package:hafez_poems/models/saved_item.dart';
+import 'package:hafez_poems/navbarHomeScreenUnit/bottomNavBar/user_actions_saver.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class HiveBoot {
@@ -41,9 +41,9 @@ class HiveBoot {
 
     // 3. همه Boxها را قبل از ساخت کنترلرها باز کن
     await Future.wait<Box>([
-      openBoxSafely<LikedItem>(UserActionsController.likedBoxName),
-      openBoxSafely<SavedItem>(UserActionsController.savedBoxName),
-      openBoxSafely<HighlightItem>(UserActionsController.highlightBoxName),
+      openBoxSafely<LikedItem>(UserActionsSaver.likedBoxName),
+      openBoxSafely<SavedItem>(UserActionsSaver.savedBoxName),
+      openBoxSafely<HighlightItem>(UserActionsSaver.highlightBoxName),
 
       // فقط یکی برای پروفایل نگه دار
       openBoxSafely<dynamic>('profile_box'),

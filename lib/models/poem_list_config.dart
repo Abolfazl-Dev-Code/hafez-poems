@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/models/base_poem_model.dart';
-import 'package:hafez_poems/screens/poem_screen.dart';
+import 'package:hafez_poems/poemsUnit/poems/poem_screen.dart';
 
 class PoemListConfig {
   final String headerTitle;
