@@ -26,7 +26,7 @@ class PoemBoxGridsHomePage extends StatelessWidget {
 
     final items = [
       _ActionItem(
-        icon: Image.asset("assets/icon/ghazaliat.png", width: 56, height: 56),
+        icon: Image.asset("assets/icons/ghazaliat.png", width: 56, height: 56),
         title: "غزلیات",
         subtitle: "۴۹۵ غزل",
         onTap: () => _showSheet(
@@ -60,7 +60,7 @@ class PoemBoxGridsHomePage extends StatelessWidget {
       ),
 
       _ActionItem(
-        icon: Image.asset("assets/icon/ghasayed.png", width: 49, height: 49),
+        icon: Image.asset("assets/icons/ghasayed.png", width: 49, height: 49),
         title: "قصاید",
         subtitle: "۳ قصیده",
         onTap: () => _showSheet(
@@ -93,7 +93,7 @@ class PoemBoxGridsHomePage extends StatelessWidget {
       ),
 
       _ActionItem(
-        icon: Image.asset("assets/icon/robaeiyat.png", width: 59, height: 59),
+        icon: Image.asset("assets/icons/robaeiyat.png", width: 59, height: 59),
         title: "رباعیات",
         subtitle: "۴۲ رباعی",
         onTap: () => _showSheet(
@@ -126,7 +126,7 @@ class PoemBoxGridsHomePage extends StatelessWidget {
       ),
 
       _ActionItem(
-        icon: Image.asset("assets/icon/divan.png", width: 50, height: 50),
+        icon: Image.asset("assets/icons/divan.png", width: 50, height: 50),
         title: "قطعات",
         subtitle: "34 قطعه".toPersianNumbers(),
         onTap: () => _showSheet(
@@ -159,7 +159,7 @@ class PoemBoxGridsHomePage extends StatelessWidget {
       ),
 
       _ActionItem(
-        icon: Image.asset("assets/icon/taabir.png", width: 59, height: 59),
+        icon: Image.asset("assets/icons/taabir.png", width: 59, height: 59),
         title: "اشعار منتسب",
         subtitle: "118 شعر منتسب".toPersianNumbers(),
         onTap: () => _showSheet(
@@ -192,7 +192,7 @@ class PoemBoxGridsHomePage extends StatelessWidget {
       ),
 
       _ActionItem(
-        icon: Image.asset("assets/icon/other.png", width: 59, height: 59),
+        icon: Image.asset("assets/icons/other.png", width: 59, height: 59),
         title: "اشعار دیگر",
         subtitle: "مثنوی و ساقی‌نامه",
         onTap: () => _showSheet(

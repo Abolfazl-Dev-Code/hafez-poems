@@ -132,6 +132,7 @@ class _PoemScreenState extends State<PoemScreen> {
 
   void _onActiveVerseChanged() {
     if (_userIsInteractingWithScroll) return;
+    if (_isContextMenuOpen) return; // ← اضافه کن
 
     final order = _verseSyncCtrl.activeVerseOrder;
     if (order < 0) return;
@@ -150,7 +151,7 @@ class _PoemScreenState extends State<PoemScreen> {
     double anchorFraction = 1 / 3,
   }) async {
     if (!mounted) return;
-
+    if (_isContextMenuOpen) return; // ← اضافه کن
     final key = _lineKeys[index];
     final ctx = key?.currentContext;
     if (ctx == null) return;
@@ -192,6 +193,14 @@ class _PoemScreenState extends State<PoemScreen> {
       _lastAutoScrolledVerseOrder = null;
       _onActiveVerseChanged();
     });
+  }
+
+  void _resumeAutoScrollImmediately() {
+    _resumeAutoScrollTimer?.cancel();
+    if (!mounted) return;
+    _userIsInteractingWithScroll = false;
+    _lastAutoScrolledVerseOrder = null;
+    _onActiveVerseChanged();
   }
 
   void _measureBottomOverlay() {
@@ -269,7 +278,7 @@ class _PoemScreenState extends State<PoemScreen> {
     final targetOffset = renderObject.localToGlobal(Offset.zero);
 
     HapticFeedback.mediumImpact();
-
+    _pauseAutoScroll(); // ← اضافه کن
     setState(() {
       _selectedLineIndex = index;
       _menuOpenLineIndex = index;
@@ -305,6 +314,7 @@ class _PoemScreenState extends State<PoemScreen> {
           _menuOpenLineIndex = null;
           _selectedLineIndex = null;
         });
+        _resumeAutoScrollImmediately(); // ← اضافه کن
       },
     );
   }
@@ -479,7 +489,7 @@ class _PoemScreenState extends State<PoemScreen> {
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          toolbarHeight: 45, // پیش‌فرض 56 هست، می‌تونی هر عددی که خواستی بگذاری
+          toolbarHeight: 50, // پیش‌فرض 56 هست، می‌تونی هر عددی که خواستی بگذاری
           title: Text(
             _args.title.toPersianNumbers(),
             style: textTheme.headlineMedium,

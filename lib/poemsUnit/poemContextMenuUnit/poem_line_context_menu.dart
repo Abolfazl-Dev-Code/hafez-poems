@@ -1,4 +1,3 @@
-// lib/poemsUnit/poems/poem_line_context_menu.dart
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/poemsUnit/poemContextMenuUnit/poem_line_action_menu.dart';
@@ -6,7 +5,7 @@ import 'package:hafez_poems/theme/color_style.dart';
 
 typedef LineWidgetBuilder = Widget Function(BuildContext context);
 
-/// کنترلر مدیریت چرخه‌ی حیات منوی شناور (Overlay-based context menu)
+/// کنترلر مدیریت چرخه‌ی حیات منوی شناور
 class PoemLineContextMenuController {
   OverlayEntry? _entry;
   GlobalKey<_PoemLineContextMenuOverlayState>? _overlayKey;
@@ -26,13 +25,18 @@ class PoemLineContextMenuController {
     required VoidCallback onClosed,
   }) {
     if (_entry != null) return;
-
     _overlayKey = GlobalKey<_PoemLineContextMenuOverlayState>();
-
-    final screenHeight = MediaQuery.of(context).size.height;
-    final spaceBelow = screenHeight - (targetOffset.dy + targetSize.height);
-    const estimatedMenuHeight = 190.0;
-    final showBelow = spaceBelow >= estimatedMenuHeight;
+    final mediaQuery = MediaQuery.of(context);
+    const menuHeight = 170.0;
+    const menuGap = 10.0;
+    final screenHeight = mediaQuery.size.height;
+    final topSpace = targetOffset.dy - mediaQuery.padding.top;
+    final bottomSpace =
+        screenHeight -
+        mediaQuery.padding.bottom -
+        (targetOffset.dy + targetSize.height);
+    final showBelow =
+        bottomSpace >= menuHeight + menuGap || bottomSpace >= topSpace;
 
     _entry = OverlayEntry(
       builder: (overlayContext) {
@@ -43,10 +47,12 @@ class PoemLineContextMenuController {
           lineBuilder: lineBuilder,
           isHighlighted: isHighlighted,
           showBelow: showBelow,
+
           onCopy: () {
             onCopy();
             hide();
           },
+
           onToggleHighlight: () {
             onToggleHighlight();
             hide();
@@ -109,9 +115,10 @@ class _PoemLineContextMenuOverlayState
   late final Animation<double> _scale;
   late final Animation<double> _fade;
   late final Animation<double> _lift;
+  static const double _liftDistance = 14.0;
 
-  static const double _menuGap = 8.0;
-  static const double _liftDistance = 18.0;
+  // ارتفاع واقعی منو (به جای 170)
+  double get _menuHeight => 155;
 
   @override
   void initState() {
@@ -121,9 +128,10 @@ class _PoemLineContextMenuOverlayState
       duration: const Duration(milliseconds: 240),
       reverseDuration: const Duration(milliseconds: 180),
     );
+
     _scale = Tween<double>(
       begin: 0.92,
-      end: 1.0,
+      end: 1,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
     _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
     _lift = Tween<double>(
@@ -154,7 +162,6 @@ class _PoemLineContextMenuOverlayState
         builder: (context, _) {
           return Stack(
             children: [
-              // لایه ۱: بلور پس‌زمینه + بستن با تپ بیرون
               Positioned.fill(
                 child: GestureDetector(
                   onTap: widget.onDismiss,
@@ -170,7 +177,7 @@ class _PoemLineContextMenuOverlayState
                 ),
               ),
 
-              // لایه ۲: کارت شناور مصرع
+              // کارت مصرع
               CompositedTransformFollower(
                 link: widget.layerLink,
                 showWhenUnlinked: false,
@@ -198,39 +205,30 @@ class _PoemLineContextMenuOverlayState
                   ),
                 ),
               ),
-
-              // لایه ۳: منوی اکشن دقیقاً زیر/بالای کارت شناور
+              // منوی اکشن
               CompositedTransformFollower(
                 link: widget.layerLink,
                 showWhenUnlinked: false,
                 offset: Offset(
-                  0,
+                  widget.targetSize.width - 210,
                   widget.showBelow
-                      ? widget.targetSize.height + _lift.value + _menuGap
-                      : _lift.value - _menuGap,
+                      ? widget.targetSize.height + -5
+                      : -_menuHeight - -17,
                 ),
-                child: Align(
-                  alignment: widget.showBelow
-                      ? Alignment.topCenter
-                      : Alignment.bottomCenter,
-                  child: FractionalTranslation(
-                    translation: Offset(0, widget.showBelow ? 0 : -1),
-                    child: Opacity(
-                      opacity: _fade.value,
-                      child: Transform.scale(
-                        scale: _scale.value,
-                        alignment: widget.showBelow
-                            ? Alignment.topCenter
-                            : Alignment.bottomCenter,
-                        child: ActionMenu(
-                          isHighlighted: widget.isHighlighted,
-                          fadeValue: _fade.value,
-                          isDark: isDark,
-                          onCopy: widget.onCopy,
-                          onToggleHighlight: widget.onToggleHighlight,
-                          onClose: widget.onDismiss,
-                        ),
-                      ),
+                child: Opacity(
+                  opacity: _fade.value,
+                  child: Transform.scale(
+                    scale: _scale.value,
+                    alignment: widget.showBelow
+                        ? Alignment.topCenter
+                        : Alignment.bottomCenter,
+                    child: ActionMenu(
+                      isHighlighted: widget.isHighlighted,
+                      fadeValue: _fade.value,
+                      isDark: isDark,
+                      onCopy: widget.onCopy,
+                      onToggleHighlight: widget.onToggleHighlight,
+                      onClose: widget.onDismiss,
                     ),
                   ),
                 ),

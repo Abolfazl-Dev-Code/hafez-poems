@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/poemsUnit/poemContextMenuUnit/menu_item_data.dart';
 import 'package:hafez_poems/theme/color_style.dart';
 
 class ActionMenu extends StatelessWidget {
@@ -103,16 +104,4 @@ class ActionMenu extends StatelessWidget {
       ),
     );
   }
-}
-
-class MenuItemData {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  const MenuItemData({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
 }

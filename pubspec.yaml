@@ -51,7 +51,7 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/icon/hafez-logo.png"
+  image_path: "assets/icons/hafez-logo.png"
   min_sdk_android: 21
   remove_alpha_ios_icons: true
 
@@ -65,7 +65,7 @@ flutter:
     - assets/audio/
     - assets/audio/Jalal_Naghsh_Nilchi.mp3
     - assets/sounds/page_flip.mp3
-    - assets/icon/
+    - assets/icons/
     - assets/json/hafez_fal.json
     - assets/json/hafez_ghazals.json
     - assets/json/hafez_ghataat.json

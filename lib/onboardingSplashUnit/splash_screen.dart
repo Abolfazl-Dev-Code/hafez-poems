@@ -350,7 +350,7 @@ class _LogoWidget extends StatelessWidget {
             ],
           ),
           child: Image.asset(
-            'assets/icon/hafez-logo.png',
+            'assets/icons/hafez-logo.png',
             width: 100,
             height: 100,
           ),

@@ -27,7 +27,7 @@ class FalBanner extends StatelessWidget {
                 width: 1,
               ),
               image: const DecorationImage(
-                image: AssetImage('assets/icon/faal-banner.png'),
+                image: AssetImage('assets/icons/faal-banner.png'),
                 fit: BoxFit.fitWidth,
                 opacity: 1,
               ),
