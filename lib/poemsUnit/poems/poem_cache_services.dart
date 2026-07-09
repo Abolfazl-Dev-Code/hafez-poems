@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:hafez_poems/appbarHomeScreenUnit/searchUnit/search_logic.dart';
 import 'package:hafez_poems/models/ghasayed_model.dart';
 import 'package:hafez_poems/models/ghataat_model.dart';
 import 'package:hafez_poems/models/ghazal_model.dart';
@@ -22,7 +23,11 @@ abstract class BasePoemCacheService<T> extends GetxService {
   late Box<T> _box;
   final Map<String, T> _map = {};
   final RxList<T> cachedItemsRx = <T>[].obs;
-  final List<_IndexedPoem<T>> _searchIndex = [];
+  late final PoemSearchIndex<T> _searchIndex = PoemSearchIndex<T>(
+    idOf: idOf,
+    titleOf: titleOf,
+    textOf: textOf,
+  );
   final RxDouble loadingProgress = 0.0.obs;
   final RxBool isIndexing = false.obs;
 
@@ -60,7 +65,7 @@ abstract class BasePoemCacheService<T> extends GetxService {
       for (final d in _box.values) {
         _map[idOf(d)] = d;
       }
-      _rebuildSearchIndex();
+      _searchIndex.rebuild(_map.values);
       _assignSorted();
     }
     try {
@@ -109,7 +114,7 @@ abstract class BasePoemCacheService<T> extends GetxService {
           debugPrint('$runtimeType preload compact error: $e');
         }
       }
-      _rebuildSearchIndex();
+      _searchIndex.rebuild(_map.values);
       _assignSorted();
     } catch (e, st) {
       debugPrintStack(label: '$runtimeType preload error: $e', stackTrace: st);
@@ -128,7 +133,7 @@ abstract class BasePoemCacheService<T> extends GetxService {
     _map[id] = item;
     await _box.put(id, item);
     await _maybeCompact();
-    _updateIndexEntry(item);
+    _searchIndex.updateEntry(item);
 
     final idx = cachedItemsRx.indexWhere((e) => idOf(e) == id);
     if (idx != -1) {
@@ -165,79 +170,11 @@ abstract class BasePoemCacheService<T> extends GetxService {
     }
   }
 
-  // ── search ────────────────────────────────────────
-  /// جستجو با امتیازدهی؛ خروجی: لیست (آیتم، امتیاز) که هنوز sort نشده.
-  /// اولویت امتیازها:
-  ///   100  تطابق کامل عنوان
-  ///    95  عنوان با query شروع می‌شود
-  ///    90  query داخل عنوان است
-  ///    85  عبارت کامل (چند کلمه‌ای، دقیقاً پشت‌سرهم) داخل متن است
-  ///    60  یکی از کلمات عنوان با query شروع می‌شود
-  ///  10-55  نسبت کلمات مطابق‌شده‌ی query که در متن پیدا شده‌اند
-  List<MapEntry<T, int>> searchWithScore(String normalizedQuery) {
-    if (normalizedQuery.trim().isEmpty) return [];
+  List<MapEntry<T, int>> searchWithScore(String normalizedQuery) =>
+      _searchIndex.searchWithScore(normalizedQuery);
 
-    final tokens = normalizedQuery
-        .split(' ')
-        .map((t) => t.trim())
-        .where((t) => t.isNotEmpty)
-        .toList();
-
-    if (tokens.isEmpty) return [];
-
-    final result = <MapEntry<T, int>>[];
-
-    for (final e in _searchIndex) {
-      final searchable = '${e.normalizedTitle} ${e.normalizedText}';
-      if (!tokens.every((token) => searchable.contains(token))) continue;
-
-      final score = _scoreEntry(e, normalizedQuery, tokens);
-      result.add(MapEntry(e.original, score));
-    }
-
-    return result;
-  }
-
-  /// امتیازدهی: تطابق عبارت کامل (phrase) در متن باید خیلی بالاتر از
-  /// تطابق پخش‌وپلای تک‌کلمه‌ای امتیاز بگیرد، چون کاربر معمولاً یک مصرع
-  /// یا عبارت دقیق را جستجو می‌کند (مثل «گل در بر و می در کف»).
-  int _scoreEntry(
-    _IndexedPoem<T> e,
-    String normalizedQuery,
-    List<String> tokens,
-  ) {
-    final title = e.normalizedTitle;
-    final text = e.normalizedText;
-
-    // ── تطابق در عنوان (بالاترین اولویت) ──────────────
-    if (title == normalizedQuery) return 100;
-    if (title.startsWith(normalizedQuery)) return 95;
-    if (title.contains(normalizedQuery)) return 90;
-
-    // ── تطابق عبارت کامل (چند کلمه‌ای، پشت‌سرهم) در متن ──
-    // یعنی خودِ query دقیقاً به همین شکل (با همین فاصله‌ها) توی متن هست
-    if (tokens.length > 1 && text.contains(normalizedQuery)) {
-      return 85;
-    }
-
-    // ── یکی از کلمات عنوان با query شروع می‌شود ──────
-    final titleWords = title.split(' ');
-    if (titleWords.any((w) => w.startsWith(normalizedQuery))) return 60;
-
-    // ── تطابق پخش‌وپلا: نسبت کلمات query که در متن پیدا شده‌اند ──
-    int matchedTokens = 0;
-    for (final token in tokens) {
-      if (text.contains(token)) matchedTokens++;
-    }
-    final ratio = matchedTokens / tokens.length; // بین 0 و 1
-
-    // امتیاز بین 10 تا 55 بر اساس نسبت تطابق
-    return 10 + (ratio * 45).round();
-  }
-
-  /// نگه‌داشته‌شده برای سازگاری با کدهای قدیمی که فقط لیست خام می‌خوان
   List<T> search(String normalizedQuery) =>
-      searchWithScore(normalizedQuery).map((e) => e.key).toList();
+      _searchIndex.search(normalizedQuery);
 
   int get cachedCount => _map.length;
 
@@ -248,56 +185,6 @@ abstract class BasePoemCacheService<T> extends GetxService {
     cachedItemsRx.assignAll(items);
   }
 
-  void _rebuildSearchIndex() {
-    _searchIndex
-      ..clear()
-      ..addAll(_map.values.map(_toIndexed));
-  }
-
-  void _updateIndexEntry(T item) {
-    final idx = _searchIndex.indexWhere((e) => idOf(e.original) == idOf(item));
-    final entry = _toIndexed(item);
-    if (idx != -1) {
-      _searchIndex[idx] = entry;
-    } else {
-      _searchIndex.add(entry);
-    }
-  }
-
-  _IndexedPoem<T> _toIndexed(T item) => _IndexedPoem(
-    original: item,
-    normalizedTitle: _normalize(titleOf(item)),
-    normalizedText: _normalize(textOf(item)),
-  );
-
-  String _normalize(String text) => text
-      .replaceAll('۰', '0')
-      .replaceAll('٠', '0')
-      .replaceAll('۱', '1')
-      .replaceAll('١', '1')
-      .replaceAll('۲', '2')
-      .replaceAll('٢', '2')
-      .replaceAll('۳', '3')
-      .replaceAll('٣', '3')
-      .replaceAll('۴', '4')
-      .replaceAll('٤', '4')
-      .replaceAll('۵', '5')
-      .replaceAll('٥', '5')
-      .replaceAll('۶', '6')
-      .replaceAll('٦', '6')
-      .replaceAll('۷', '7')
-      .replaceAll('٧', '7')
-      .replaceAll('۸', '8')
-      .replaceAll('٨', '8')
-      .replaceAll('۹', '9')
-      .replaceAll('٩', '9')
-      .replaceAll('\u064a', '\u06cc')
-      .replaceAll('\u0643', '\u06a9')
-      .replaceAll('\u200c', ' ')
-      .replaceAll(RegExp(r'\s+'), ' ')
-      .trim()
-      .toLowerCase();
-
   int _compareItems(T a, T b) {
     final ai = int.tryParse(idOf(a));
     final bi = int.tryParse(idOf(b));
@@ -305,17 +192,6 @@ abstract class BasePoemCacheService<T> extends GetxService {
         ? ai.compareTo(bi)
         : idOf(a).compareTo(idOf(b));
   }
-}
-
-class _IndexedPoem<T> {
-  final T original;
-  final String normalizedTitle;
-  final String normalizedText;
-  const _IndexedPoem({
-    required this.original,
-    required this.normalizedTitle,
-    required this.normalizedText,
-  });
 }
 
 // ══════════════════════════════════════════════════════════

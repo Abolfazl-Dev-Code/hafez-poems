@@ -7,7 +7,7 @@ import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_and_name_ed
 import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_avatar_picker.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_controller.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_editor_icon_button.dart';
-import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profle_streak_badge.dart';
+import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_streak_badge.dart';
 import 'package:hafez_poems/onboardingSplashUnit/noise_particles_background.dart';
 
 class ProfileHeader extends StatelessWidget {

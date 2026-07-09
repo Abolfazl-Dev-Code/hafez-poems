@@ -3,7 +3,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/searchUnit/search_controller.dart'
     as app;
-import 'package:hafez_poems/appbarHomeScreenUnit/searchUnit/search_resualt.dart';
+import 'package:hafez_poems/appbarHomeScreenUnit/searchUnit/search_result.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/searchUnit/search_type_filter.dart';
 
 class SearchScreen extends StatefulWidget {

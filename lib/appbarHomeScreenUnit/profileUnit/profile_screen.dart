@@ -5,7 +5,7 @@ import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_information
 import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_most_and_favorite_poem.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_progress_bar.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_stat_card.dart';
-import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profle_streak_badge.dart';
+import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_streak_badge.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/collectionUnit/collection_screen.dart';
 import 'package:hafez_poems/homeScreenUnit/section_header.dart';

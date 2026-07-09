@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/searchUnit/search_controller.dart'
     as app;
-import 'package:hafez_poems/appbarHomeScreenUnit/searchUnit/search_resualt_title.dart';
+import 'package:hafez_poems/appbarHomeScreenUnit/searchUnit/search_result_title.dart';
 
 class SearchResults extends StatelessWidget {
   const SearchResults({super.key});
