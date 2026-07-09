@@ -69,7 +69,7 @@ class _LikedTabState extends State<LikedTab> with SelectionMixin {
                     orElse: () => ghazal.text,
                   );
               return FavoriteItem(
-                hiveKey: ghazal.key,
+                itemKey: ghazal.key,
                 id: ghazal.id,
                 title: ghazal.title,
                 subtitle: firstLine,

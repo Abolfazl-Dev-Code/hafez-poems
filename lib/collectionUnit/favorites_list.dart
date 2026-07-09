@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hafez_poems/poemsUnit/poemsActionBarUnit/poem_favorites_list_card_selector.dart';
 
 class FavoriteItem {
-  final dynamic hiveKey;
+  final dynamic itemKey;
   final String id;
   final String title;
   final String subtitle;
@@ -13,7 +13,7 @@ class FavoriteItem {
   final VoidCallback onTap;
 
   const FavoriteItem({
-    required this.hiveKey,
+    required this.itemKey,
     required this.id,
     required this.title,
     required this.subtitle,
@@ -48,13 +48,13 @@ class FavoritesList extends StatelessWidget {
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
-        final isSelected = selectedKeys.contains(item.hiveKey);
+        final isSelected = selectedKeys.contains(item.itemKey);
         return _FavoriteCard(
           item: item,
           isSelected: isSelected,
           selectionMode: selectionMode,
-          onToggleSelect: () => onToggleSelect(item.hiveKey),
-          onLongPress: () => onLongPress(item.hiveKey),
+          onToggleSelect: () => onToggleSelect(item.itemKey),
+          onLongPress: () => onLongPress(item.itemKey),
         );
       },
     );

@@ -82,7 +82,7 @@ class _SavedTabState extends State<SavedTab> with SelectionMixin {
                           orElse: () => item.text,
                         );
               return FavoriteItem(
-                hiveKey: item.key,
+                itemKey: item.key,
                 id: item.id,
                 title: item.title,
                 subtitle: subtitle,

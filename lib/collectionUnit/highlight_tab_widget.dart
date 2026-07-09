@@ -65,7 +65,7 @@ class _HighlightsTabState extends State<HighlightsTab> with SelectionMixin {
             items: items
                 .map(
                   (item) => FavoriteItem(
-                    hiveKey: item.key,
+                    itemKey: item.key,
                     id: item.ghazalId,
                     title: item.ghazalTitle,
                     subtitle: item.highlightedLine,
