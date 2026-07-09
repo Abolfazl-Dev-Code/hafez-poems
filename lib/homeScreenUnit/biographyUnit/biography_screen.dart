@@ -43,7 +43,6 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
 
     _scrollCtrl = ScrollController()..addListener(_onScroll);
 
-    debugPrint('AUDIO_DEBUG: HafezBiographyScreen.initState() called!');
     BiographyAudioController.play();
 
     final random = Random();
@@ -65,18 +64,15 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
   void didChangeDependencies() {
     super.didChangeDependencies();
     final route = ModalRoute.of(context);
-    debugPrint('🎵 [Biography] didChangeDependencies, route = $route');
     if (route != null) {
       routeObserver.subscribe(this, route);
-      debugPrint('🎵 [Biography] subscribed to routeObserver');
-    } else {
-      debugPrint('⚠️ [Biography] ModalRoute is NULL — could not subscribe');
     }
   }
 
+  /// توقف صدای بیوگرافی هنگام جابه‌جایی صفحه
   @override
   void didPushNext() {
-    BiographyAudioController.stop(); // فقط توقف، نه آزادسازی — چون برمی‌گرده
+    BiographyAudioController.stop();
   }
 
   @override
@@ -123,6 +119,7 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
 
   void _onScroll() => _checkChapterVisibility();
 
+  /// بررسی دید‌پذیری فصل‌های بیوگرافی هنگام scroll
   void _checkChapterVisibility() {
     final screenH = MediaQuery.of(context).size.height;
     bool changed = false;
@@ -147,7 +144,7 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
     if (changed && mounted) setState(() {});
   }
 
-  // ✅ NEW: audio toggle button
+  /// دکمه کنترل پخش صدای بیوگرافی
   Widget _buildAudioControls() {
     return ValueListenableBuilder<bool>(
       valueListenable: BiographyAudioController.isPlayingNotifier,
@@ -169,6 +166,7 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
     );
   }
 
+  /// دکمه کنترل scroll خودکار صفحه
   Widget _buildControls() {
     return FloatingActionButton(
       heroTag: 'scroll_btn',
@@ -186,7 +184,7 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
     _ambientCtrl.dispose();
     _scrollCtrl.dispose();
     routeObserver.unsubscribe(this);
-    BiographyAudioController.release(); // ✅ آزادسازی کامل AudioTrack
+    BiographyAudioController.release();
     super.dispose();
   }
 
@@ -213,7 +211,6 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
           ),
         ),
 
-        // ✅ BOTH BUTTONS TOGETHER
         floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
         floatingActionButton: Column(
           mainAxisSize: MainAxisSize.min,

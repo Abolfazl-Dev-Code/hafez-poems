@@ -3,8 +3,12 @@ import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
 
 class ProgressStatBar extends StatelessWidget {
   final String label;
-  final double progress; // 0.0 تا 1.0 (بیشترش هم باشه خودش clamp می‌شه)
-  final List<Color> gradientColors; // [رنگ پررنگ, Colors.white]
+
+  /// مقدار پیشرفت — از ۰.۰ تا ۱.۰ (مقادیر بزرگتر خودکار clamp می‌شوند)
+  final double progress;
+
+  /// رنگ‌های gradient — [رنگ اصلی، رنگ کمرنگ]
+  final List<Color> gradientColors;
   final IconData icon;
 
   const ProgressStatBar({

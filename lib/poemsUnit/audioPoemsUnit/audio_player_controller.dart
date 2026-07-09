@@ -75,7 +75,7 @@ class AudioPlayerController extends ChangeNotifier {
     _onPositionChanged = callback;
   }
 
-  //new
+  /// پخش صوت از حالت آماده (بدون نیاز به load مجدد)
   Future<void> playFromPrepared() async {
     if (!isAudioLoaded) {
       await load(
@@ -90,8 +90,8 @@ class AudioPlayerController extends ChangeNotifier {
       await togglePlayPause();
     }
   }
-  //new
 
+  /// آخرین وضعیت پخش‌کننده
   PlaybackState? _lastPlaybackState;
   Timer? _positionTicker;
   static const _tickInterval = Duration(milliseconds: 50);
@@ -180,19 +180,17 @@ class AudioPlayerController extends ChangeNotifier {
     _positionTicker = null;
   }
 
+  /// تنظیم سخنگو‌ی دستگاه (اسپیکر یا هدفون)
   Future<void> _setSpeaker(bool on) async {
     try {
       await _channel.invokeMethod(on ? 'setSpeakerOn' : 'setSpeakerOff');
     } catch (e) {
-      debugPrint('⚠️ Speaker route error: $e');
+      // خطا در تنظیم اسپیکر نادیده گرفته می‌شود
     }
   }
 
-  // ───────────────── بررسی اتصال اینترنت (بدون وابستگی به DNS) ─────────────────
-
-  /// اتصال مستقیم به IP سرویس‌های معتبر جهانی، بدون نیاز به DNS resolve.
-  /// این کار باعث می‌شود فیلترینگ DNS (که در برخی مناطق رایج است) روی
-  /// نتیجه‌ی این بررسی اثر نگذارد.
+  /// بررسی اتصال مستقیم به اینترنت از طریق IP سرویس‌های معتبر
+  /// این روش از DNS استفاده نمی‌کند و از فیلترینگ DNS جلوگیری می‌کند
   Future<bool> _hasInternetConnection() async {
     const probes = ['1.1.1.1', '8.8.8.8'];
     for (final ip in probes) {
@@ -213,11 +211,8 @@ class AudioPlayerController extends ChangeNotifier {
     return false;
   }
 
-  // ───────────────── بررسی وجود فایل صوتی ─────────────────
-
-  /// درخواست GET با هدر Range (فقط ۲ بایت اول) — این روش نسبت به HEAD
-  /// خیلی گسترده‌تر توسط سرورها و CDN ها پشتیبانی می‌شود و باعث
-  /// تشخیص اشتباهِ «فایل موجود نیست» نمی‌شود.
+  /// بررسی وجود و دسترسی‌پذیری فایل صوتی از طریق درخواست Range
+  /// این روش نسبت به HEAD بسیار گسترده‌تر پشتیبانی می‌شود
   Future<_AudioAvailability> _checkAudioAvailability(String url) async {
     HttpClient? client;
     try {
@@ -309,7 +304,7 @@ class AudioPlayerController extends ChangeNotifier {
         url = await fetchAudioUrl(id).timeout(const Duration(seconds: 10));
         _lastAudioUrl = url;
       } catch (e) {
-        debugPrint('❌ fetchAudioUrl error: $e');
+        // خطای دریافت URL نادیده گرفته می‌شود
       }
     }
 
@@ -423,10 +418,11 @@ class AudioPlayerController extends ChangeNotifier {
         await audioHandler.play();
       }
     } catch (e) {
-      debugPrint('❌ togglePlayPause error: $e');
+      // خطا در toggle play/pause نادیده گرفته می‌شود
     }
   }
 
+  /// توقف پخش و آزادسازی منابع
   Future<void> stop() async {
     if (_disposed) return;
 
@@ -438,10 +434,11 @@ class AudioPlayerController extends ChangeNotifier {
       position = Duration.zero;
       _notify();
     } catch (e) {
-      debugPrint('❌ stop error: $e');
+      // خطا در توقف نادیده گرفته می‌شود
     }
   }
 
+  /// تغییر موقعیت پخش
   Future<void> seek(Duration pos) async {
     if (_disposed || !isAudioLoaded) return;
 
@@ -451,21 +448,23 @@ class AudioPlayerController extends ChangeNotifier {
       _onPositionChanged?.call();
       _notify();
     } catch (e) {
-      debugPrint('❌ seek error: $e');
+      // خطا در seek نادیده گرفته می‌شود
     }
   }
 
+  /// تنظیم سرعت پخش
   Future<void> setPlaybackSpeed(double speed) async {
     if (_disposed) return;
     _playbackSpeed = speed;
     try {
       await audioHandler.customAction('setSpeed', {'speed': speed});
     } catch (e) {
-      debugPrint('❌ setSpeed error: $e');
+      // خطا در تنظیم سرعت نادیده گرفته می‌شود
     }
     _notify();
   }
 
+  /// بارگذاری لیست تلاوت‌کنندگان برای شعر
   Future<void> loadRecitations(String poemId) async {
     if (_disposed) return;
 
@@ -490,7 +489,7 @@ class AudioPlayerController extends ChangeNotifier {
         _selectedRecitation = null;
       }
     } catch (e) {
-      debugPrint('❌ loadRecitations error: $e');
+      // خطا در بارگذاری تلاوت‌کنندگان نادیده گرفته می‌شود
     } finally {
       if (!_disposed) {
         _isLoadingRecitations = false;

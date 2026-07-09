@@ -25,7 +25,6 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
   //edited
 
   // ───────────────── listeners ─────────────────
-
   /// وضعیت پخش، pause، completed، loading و غیره
   void _listenToPlayerState() {
     _player.playerStateStream.listen((state) async {
@@ -120,7 +119,7 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
     String name, [
     Map<String, dynamic>? extras,
   ]) async {
-    debugPrint('🎵 customAction called: $name'); // این لاگ مهم است
+    debugPrint('🎵 customAction called: $name');
     switch (name) {
       case 'load':
         final url = extras?['url'] as String?;
@@ -151,8 +150,8 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
           usage: AndroidAudioUsage.media,
           flags: AndroidAudioFlags.none,
         ),
-        androidAudioFocusGainType: AndroidAudioFocusGainType.gain, // ← تغییر
-        androidWillPauseWhenDucked: true, // ← تغییر
+        androidAudioFocusGainType: AndroidAudioFocusGainType.gain,
+        androidWillPauseWhenDucked: true,
       ),
     );
 
@@ -163,14 +162,13 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
         wasPlaying = _player.playing;
       } else {
         if (wasPlaying) {
-          play(); // ← از همین متد که seek داره استفاده کن
+          play();
         }
       }
     });
   }
 
   // ───────────────── public API ─────────────────
-
   /// بارگذاری فایل صوتی جدید
   Future<void> load(String url, {String? title}) async {
     mediaItem.add(
@@ -219,18 +217,11 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
     _playbackSpeed = speed.clamp(0.25, 2.0);
     await _player.setSpeed(_playbackSpeed);
   }
-  //edited
 
-  // @override
-  // Future<void> play() async {
-  // force ExoPlayer به rebuild کردن AudioTrack با routing فعلی
-  //   await _player.seek(_player.position);
-  //   await _player.play();
-  // }
   @override
   Future<void> play() async {
     final session = await AudioSession.instance;
-    await session.setActive(true); // ← اینجا، نه توی load
+    await session.setActive(true);
     await _player.seek(_player.position);
     await _player.play();
   }
@@ -247,19 +238,6 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
     );
   }
 
-  // @override
-  // Future<void> stop() async {
-  //   await _player.pause();
-  //   await _player.seek(Duration.zero);
-  //   playbackState.add(
-  //     playbackState.value.copyWith(
-  //       controls: _buildControls(false),
-  //       processingState: AudioProcessingState.ready,
-  //       playing: false,
-  //       updatePosition: Duration.zero,
-  //     ),
-  //   );
-  // }
   @override
   Future<void> stop() async {
     await _player.pause();
@@ -267,7 +245,7 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
 
     // session رو آزاد کن
     final session = await AudioSession.instance;
-    await session.setActive(false); // ← این خط اضافه کن
+    await session.setActive(false);
 
     playbackState.add(
       playbackState.value.copyWith(

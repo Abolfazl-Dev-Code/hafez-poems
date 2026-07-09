@@ -38,7 +38,7 @@ class ProfileAndNameEditor extends StatelessWidget {
   }
 }
 
-// --- باتم‌شیت کامل: عکس + نام + بیو با هم ---
+/// نمایش باتم‌شیت ویرایش پروفایل — انتخاب عکس، نام و متن دلخواه
 Future<void> showEditProfileSheet(
   BuildContext context,
   ProfileController controller,

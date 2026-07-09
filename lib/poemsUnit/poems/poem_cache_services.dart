@@ -1,5 +1,3 @@
-// lib/services/poem_cache_services.dart
-
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
@@ -15,10 +13,7 @@ import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'poem_local_services.dart';
 
-// ══════════════════════════════════════════════════════════
-//  BASE
-// ══════════════════════════════════════════════════════════
-
+/// کش‌کننده اساسی برای تمام انواع اشعار — مدیریت ذخیره و جستجو در Hive
 abstract class BasePoemCacheService<T> extends GetxService {
   late Box<T> _box;
   final Map<String, T> _map = {};
@@ -31,7 +26,7 @@ abstract class BasePoemCacheService<T> extends GetxService {
   final RxDouble loadingProgress = 0.0.obs;
   final RxBool isIndexing = false.obs;
 
-  // ── housekeeping فایل Hive ──────────────────────
+  /// مدیریت فشرده‌سازی فایل Hive برای بهینه‌سازی اندازه ذخیره‌سازی
   int _writesSinceCompact = 0;
   static const int _compactThreshold = 15;
 
@@ -47,7 +42,7 @@ abstract class BasePoemCacheService<T> extends GetxService {
     }
   }
 
-  // ── زیرکلاس پیاده‌سازی می‌کند ──────────────────
+  /// متدهای انتزاعی که هر زیرکلاس باید پیاده‌سازی کند
   String get boxName;
   String idOf(T item);
   String titleOf(T item);
@@ -56,9 +51,9 @@ abstract class BasePoemCacheService<T> extends GetxService {
   void setFullText(T item, String text);
   BasePoemLocalService<T> get localService;
   bool get sortById => false;
-  int get audioIndex => 0; // قطعات: override با 1
+  int get audioIndex => 0;
 
-  // ── init ─────────────────────────────────────────
+  /// راه‌اندازی کش — بارگذاری دیتا از Hive و ساخت ایندکس جستجو
   Future<BasePoemCacheService<T>> init() async {
     _box = await Hive.openBox<T>(boxName);
     if (_box.isNotEmpty) {
@@ -76,7 +71,7 @@ abstract class BasePoemCacheService<T> extends GetxService {
     return this;
   }
 
-  // ── preload ───────────────────────────────────────
+  /// پیش‌لود تمام اشعار — بارگذاری کامل متن‌ها از منبع محلی به Hive
   Future<void> preload() async {
     if (isIndexing.value) return;
     final incomplete = _map.values.where((d) => !hasFullTextOf(d)).toList();
@@ -124,7 +119,7 @@ abstract class BasePoemCacheService<T> extends GetxService {
     }
   }
 
-  // ── getDetail ─────────────────────────────────────
+  /// دریافت یک شعر کامل با متن کامل — از کش یا بارگذاری از منبع
   Future<T> getDetail(String id) async {
     final cached = _map[id];
     if (cached != null && hasFullTextOf(cached)) return cached;
@@ -145,7 +140,7 @@ abstract class BasePoemCacheService<T> extends GetxService {
     return item;
   }
 
-  // ── audio ─────────────────────────────────────────
+  /// دریافت URL صدای شعر از API گنجور
   Future<String> getAudioUrl(String id) async {
     try {
       final url = Uri.parse(
@@ -178,7 +173,7 @@ abstract class BasePoemCacheService<T> extends GetxService {
 
   int get cachedCount => _map.length;
 
-  // ── private ───────────────────────────────────────
+  /// متدهای کمکی درونی
   void _assignSorted() {
     final items = _map.values.toList();
     if (sortById) items.sort(_compareItems);
@@ -194,10 +189,7 @@ abstract class BasePoemCacheService<T> extends GetxService {
   }
 }
 
-// ══════════════════════════════════════════════════════════
-//  GHAZAL
-// ══════════════════════════════════════════════════════════
-
+/// نقل‌قول کوتاه از غزل — برای نمایش در کاروسل
 class GhazalExcerpt {
   final String id;
   final String number;
@@ -210,6 +202,7 @@ class GhazalExcerpt {
   });
 }
 
+/// کش‌کننده غزل‌ها — بارگذاری و جستجو در غزل‌های حافظ
 class GhazalCacheService extends BasePoemCacheService<Ghazal> {
   @override
   String get boxName => 'ghazals_box';
@@ -308,10 +301,7 @@ class GhazalCacheService extends BasePoemCacheService<Ghazal> {
   Future<Ghazal> getGhazalDetail(String id) => getDetail(id);
 }
 
-// ══════════════════════════════════════════════════════════
-//  GHATAAT
-// ══════════════════════════════════════════════════════════
-
+/// کش‌کننده قطعات — بارگذاری و جستجو در قطعات
 class GhataatCacheService extends BasePoemCacheService<GhataatModel> {
   @override
   String get boxName => 'ghataat_box';
@@ -338,10 +328,7 @@ class GhataatCacheService extends BasePoemCacheService<GhataatModel> {
   RxList<GhataatModel> get cachedGhataatRx => cachedItemsRx;
 }
 
-// ══════════════════════════════════════════════════════════
-//  ROBAEYAT
-// ══════════════════════════════════════════════════════════
-
+/// کش‌کننده رباعی‌ات — بارگذاری و جستجو در رباعی‌ات
 class RobaeyatCacheService extends BasePoemCacheService<RobaeyatModel> {
   @override
   String get boxName => 'robaeyat_box';
@@ -368,10 +355,7 @@ class RobaeyatCacheService extends BasePoemCacheService<RobaeyatModel> {
   RxList<RobaeyatModel> get cachedRobaeyatRx => cachedItemsRx;
 }
 
-// ══════════════════════════════════════════════════════════
-//  MONTASAB
-// ══════════════════════════════════════════════════════════
-
+/// کش‌کننده اشعار منتسب — بارگذاری و جستجو در اشعار منتسب
 class MontasabCacheService extends BasePoemCacheService<MontasabModel> {
   @override
   String get boxName => 'montasab_box';
@@ -398,10 +382,7 @@ class MontasabCacheService extends BasePoemCacheService<MontasabModel> {
   RxList<MontasabModel> get cachedMontasabRx => cachedItemsRx;
 }
 
-// ══════════════════════════════════════════════════════════
-//  GHASAYED
-// ══════════════════════════════════════════════════════════
-
+/// کش‌کننده قصایید — بارگذاری و جستجو در قصایید
 class GhasayedCacheService extends BasePoemCacheService<GhasayedModel> {
   @override
   String get boxName => 'ghasayed_box';
@@ -430,10 +411,7 @@ class GhasayedCacheService extends BasePoemCacheService<GhasayedModel> {
   Future<GhasayedModel> getGhasayedDetail(String id) => getDetail(id);
 }
 
-// ══════════════════════════════════════════════════════════
-//  OTHER POEMS (مثنوی + ساقی‌نامه)
-// ══════════════════════════════════════════════════════════
-
+/// کش‌کننده سایر اشعار — مثنوی و ساقی‌نامه
 class OtherPoemCacheService extends BasePoemCacheService<OtherPoemModel> {
   @override
   String get boxName => 'other_poems_box';

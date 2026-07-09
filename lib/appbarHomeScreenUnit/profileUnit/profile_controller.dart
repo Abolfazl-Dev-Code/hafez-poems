@@ -41,7 +41,7 @@ class ProfileController extends GetxController {
   static const _kName = 'name';
   static const _kAvatarPath = 'avatarPath';
   static const String readBoxName = 'read_poems_box';
-  static const int totalGhazals = 495; // 👈 پایین توضیح دادم
+  static const int totalGhazals = 495;
   static const _kHasSeenEditHint = 'hasSeenEditHint';
 
   final likedCount = 0.obs;

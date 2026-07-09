@@ -52,7 +52,7 @@ class ProfileHeader extends StatelessWidget {
           Positioned.fill(
             child: NoiseParticlesBackground(
               color: colorScheme.primary,
-              brightness: theme.brightness, // اضافه کن
+              brightness: theme.brightness,
             ),
           ),
           Padding(
