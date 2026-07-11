@@ -29,7 +29,7 @@ class BiographyBanner extends StatelessWidget {
                 width: 1,
               ),
               image: const DecorationImage(
-                image: AssetImage('assets/icon/hafez-banner.png'),
+                image: AssetImage('assets/icons/hafez-banner.png'),
                 fit: BoxFit.cover,
                 opacity: 1,
               ),

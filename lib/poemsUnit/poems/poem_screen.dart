@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_controller.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/bottomNavBar/user_actions_saver.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_player_controller.dart';
@@ -12,9 +11,10 @@ import 'package:hafez_poems/poemsUnit/poemsActionBarUnit/poem_action_bar.dart';
 import 'package:hafez_poems/poemsUnit/poemContextMenuUnit/poem_selected_text.dart';
 import 'package:hafez_poems/poemsUnit/verseSyncUnit/active_verse_indicator_widget.dart';
 import 'package:hafez_poems/poemsUnit/verseSyncUnit/verse_sync_controller.dart';
-import 'package:hive/hive.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart';
+import 'package:hafez_poems/core/data/contracts/i_read_status_storage.dart';
 
 class PoemScreenArgs {
   final String id;
@@ -78,7 +78,7 @@ class _PoemScreenState extends State<PoemScreen> {
   static const Duration _minReadDuration = Duration(seconds: 9);
   Timer? _markAsReadTimer;
 
-  static const double indicatorSlotSize = 20.0;
+  static const double indicatorSlotSize = 18.0;
 
   double _fontSize = 20;
   double _lineHeight = 1.9;
@@ -385,18 +385,14 @@ class _PoemScreenState extends State<PoemScreen> {
   }
 
   void _markAsRead() {
-    final box = Hive.box(ProfileController.readBoxName);
-    // جلوگیری از نوشتنِ تکراری اگه از قبل خوانده‌شده بوده
-    if (box.get(_args.id) != true) {
-      box.put(_args.id, true);
-    }
+    Get.find<IReadStatusStorage>().markAsRead(_args.id);
   }
 
   Future<void> _toggleLike() async {
     await _actionController.toggleLike(
-      ghazalId: _args.id,
-      title: _args.title,
-      text: _poemText,
+      poemId: _args.id,
+      poemTitle: _args.title,
+      poemText: _poemText,
       audioUrl: _args.audioUrl,
     );
     if (mounted) {
@@ -406,9 +402,9 @@ class _PoemScreenState extends State<PoemScreen> {
 
   Future<void> _toggleSave() async {
     await _actionController.toggleSave(
-      ghazalId: _args.id,
-      title: _args.title,
-      text: _poemText,
+      poemId: _args.id,
+      poemTitle: _args.title,
+      poemText: _poemText,
       audioUrl: _args.audioUrl,
     );
     if (mounted) {
@@ -434,9 +430,9 @@ class _PoemScreenState extends State<PoemScreen> {
     final lineText = _poemLines[index];
 
     await _actionController.toggleHighlight(
-      ghazalId: _args.id,
-      ghazalTitle: _args.title,
-      ghazalText: _poemText,
+      poemId: _args.id,
+      poemTitle: _args.title,
+      poemText: _poemText,
       audioUrl: _args.audioUrl,
       highlightedLine: lineText,
       lineIndex: index,
@@ -568,7 +564,7 @@ class _PoemScreenState extends State<PoemScreen> {
                             ),
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.all(16),
+                            padding: const EdgeInsets.all(14),
                             child: ListenableBuilder(
                               listenable: _verseSyncCtrl,
                               builder: (context, _) {
@@ -621,6 +617,7 @@ class _PoemScreenState extends State<PoemScreen> {
                                       ),
                                     );
                                     // space between indicator and text
+
                                     return Padding(
                                       key: _lineKeys[i] ??= GlobalKey(),
                                       padding: const EdgeInsets.only(
@@ -673,6 +670,7 @@ class _PoemScreenState extends State<PoemScreen> {
                                                     ),
                                                   ),
                                                 ),
+                                                SizedBox(width: 6.5),
                                                 Expanded(child: verseText),
                                               ],
                                             )

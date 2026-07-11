@@ -4,12 +4,12 @@ import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:hafez_poems/collectionUnit/favorites_list.dart';
 import 'package:hafez_poems/collectionUnit/selection_mixin.dart';
+import 'package:hafez_poems/core/data/contracts/i_keyed_item_storage.dart';
 import 'package:hafez_poems/models/highlight_item.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/bottomNavBar/user_actions_saver.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_cache_services.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_local_services.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_screen.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 class HighlightsTab extends StatefulWidget {
   const HighlightsTab({super.key});
@@ -19,10 +19,14 @@ class HighlightsTab extends StatefulWidget {
 }
 
 class _HighlightsTabState extends State<HighlightsTab> with SelectionMixin {
+  IKeyedItemStorage<HighlightItem> get _storage =>
+      Get.find<IKeyedItemStorage<HighlightItem>>();
+
+  String _keyOf(HighlightItem item) =>
+      UserActionsSaver.highlightKey(item.poemId, item.lineIndex);
+
   @override
   Widget build(BuildContext context) {
-    final box = Hive.box<HighlightItem>(UserActionsSaver.highlightBoxName);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -37,25 +41,25 @@ class _HighlightsTabState extends State<HighlightsTab> with SelectionMixin {
                 icon: const Icon(Icons.close),
               )
             : null,
-        actions: selectionMode ? [_buildActions(context, box)] : null,
+        actions: selectionMode ? [_buildActions(context)] : null,
       ),
-      body: ValueListenableBuilder(
-        valueListenable: box.listenable(),
-        builder: (context, Box<HighlightItem> b, _) {
+      body: StreamBuilder<void>(
+        stream: _storage.watch(),
+        builder: (context, _) {
+          final items = _storage.values().toList()
+            ..sort(
+              (a, b) => int.parse(a.poemId).compareTo(int.parse(b.poemId)),
+            );
+
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) pruneDeletedKeys(b.values.map((e) => e.key));
+            if (mounted) pruneDeletedKeys(items.map(_keyOf));
           });
 
-          if (b.isEmpty) {
+          if (items.isEmpty) {
             return const Center(
               child: Text('هنوز هیچ مصرعی را برگزیده‌ نکرده‌اید.'),
             );
           }
-
-          final items = b.values.toList()
-            ..sort(
-              (a, b) => int.parse(a.ghazalId).compareTo(int.parse(b.ghazalId)),
-            );
 
           return FavoritesList(
             selectedKeys: selectedKeys,
@@ -65,9 +69,9 @@ class _HighlightsTabState extends State<HighlightsTab> with SelectionMixin {
             items: items
                 .map(
                   (item) => FavoriteItem(
-                    itemKey: item.key,
-                    id: item.ghazalId,
-                    title: item.ghazalTitle,
+                    itemKey: _keyOf(item),
+                    id: item.poemId,
+                    title: item.poemTitle,
                     subtitle: item.highlightedLine,
                     badge: 'مصرع ${item.lineIndex + 1}',
                     icon: Icons.highlight,
@@ -76,11 +80,11 @@ class _HighlightsTabState extends State<HighlightsTab> with SelectionMixin {
                     onTap: () => Get.to(
                       () => PoemScreen(
                         args: PoemScreenArgs(
-                          id: item.ghazalId,
-                          title: item.ghazalTitle,
-                          text: item.ghazalText,
+                          id: item.poemId,
+                          title: item.poemTitle,
+                          text: item.poemText,
                           audioUrl: item.audioUrl,
-                          highlightLineIndex: item.lineIndex, // ← اضافه
+                          highlightLineIndex: item.lineIndex,
                           fetchText: (id) => GhazalLocalService.instance
                               .fetchGhazalById(id)
                               .then((g) => g.text),
@@ -98,11 +102,11 @@ class _HighlightsTabState extends State<HighlightsTab> with SelectionMixin {
     );
   }
 
-  Widget _buildActions(BuildContext context, Box<HighlightItem> box) {
-    return ValueListenableBuilder(
-      valueListenable: box.listenable(),
-      builder: (context, Box<HighlightItem> b, _) {
-        final allKeys = b.values.map((e) => e.key);
+  Widget _buildActions(BuildContext context) {
+    return StreamBuilder<void>(
+      stream: _storage.watch(),
+      builder: (context, _) {
+        final allKeys = _storage.values().map(_keyOf);
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -113,7 +117,7 @@ class _HighlightsTabState extends State<HighlightsTab> with SelectionMixin {
             IconButton(
               onPressed: selectedKeys.isEmpty
                   ? null
-                  : () => deleteSelected(context, box as Box<HiveObject>),
+                  : () => deleteSelected(context, _storage),
               icon: const Icon(Icons.delete_outline),
             ),
           ],

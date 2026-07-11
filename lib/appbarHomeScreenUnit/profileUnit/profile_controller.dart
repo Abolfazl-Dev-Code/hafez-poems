@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:get/get.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/avatar_crop_screen.dart';
-import 'package:hafez_poems/navbarHomeScreenUnit/bottomNavBar/user_actions_saver.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hafez_poems/core/data/contracts/i_keyed_item_storage.dart';
+import 'package:hafez_poems/core/data/contracts/i_read_status_storage.dart';
+import 'package:hafez_poems/core/data/contracts/i_settings_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
@@ -12,11 +14,17 @@ import 'package:hafez_poems/models/liked_item.dart';
 import 'package:hafez_poems/models/saved_item.dart';
 
 class ProfileController extends GetxController {
-  late final Box<LikedItem> likedBox;
-  late final Box<SavedItem> savedBox;
-  late final Box<HighlightItem> highlightBox;
-  late final Box readBox;
-  late final Box profileBox;
+  late final IKeyedItemStorage<LikedItem> _likedStorage;
+  late final IKeyedItemStorage<SavedItem> _savedStorage;
+  late final IKeyedItemStorage<HighlightItem> _highlightStorage;
+  late final IReadStatusStorage _readStatus;
+  late final ISettingsStorage _settings;
+
+  StreamSubscription<void>? _likedSubscription;
+  StreamSubscription<void>? _savedSubscription;
+  StreamSubscription<void>? _highlightSubscription;
+  StreamSubscription<void>? _readStatusSubscription;
+
   final streakCount = 0.obs;
   static const _kStreakCount = 'streakCount';
   static const _kLastStreakDate = 'lastStreakDate';
@@ -41,7 +49,7 @@ class ProfileController extends GetxController {
   static const _kName = 'name';
   static const _kAvatarPath = 'avatarPath';
   static const String readBoxName = 'read_poems_box';
-  static const int totalGhazals = 495;
+  static const int totalGhazals = 495; // 👈 پایین توضیح دادم
   static const _kHasSeenEditHint = 'hasSeenEditHint';
 
   final likedCount = 0.obs;
@@ -64,47 +72,57 @@ class ProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    profileBox = Hive.box('profile_box');
 
-    userName.value =
-        (profileBox.get(_kName) as String?)?.trim().isNotEmpty == true
-        ? (profileBox.get(_kName) as String).trim()
+    _likedStorage = Get.find<IKeyedItemStorage<LikedItem>>();
+    _savedStorage = Get.find<IKeyedItemStorage<SavedItem>>();
+    _highlightStorage = Get.find<IKeyedItemStorage<HighlightItem>>();
+    _readStatus = Get.find<IReadStatusStorage>();
+    _settings = Get.find<ISettingsStorage>();
+
+    final storedName = _settings.get<String>(_kName);
+    userName.value = (storedName?.trim().isNotEmpty == true)
+        ? storedName!.trim()
         : '';
 
-    avatarPath.value = (profileBox.get(_kAvatarPath) as String?)?.trim();
-    bio.value = (profileBox.get(_kBio) as String?)?.trim().isNotEmpty == true
-        ? (profileBox.get(_kBio) as String).trim()
+    avatarPath.value = _settings.get<String>(_kAvatarPath)?.trim();
+
+    final storedBio = _settings.get<String>(_kBio);
+    bio.value = (storedBio?.trim().isNotEmpty == true)
+        ? storedBio!.trim()
         : presetBios.first;
 
-    final storedCustomBios = profileBox.get(_kCustomBios);
-    if (storedCustomBios is List) {
+    // نکته: get<List> (بدون پارامتر نوع دقیق) عمداً است — همان دفاعی که
+    // نسخه‌ی قبلی هم داشت، چون Hive ممکن است List را به‌صورت List<dynamic>
+    // برگرداند و cast مستقیم به List<String> خطا می‌دهد.
+    final storedCustomBios = _settings.get<List>(_kCustomBios);
+    if (storedCustomBios != null) {
       customBios.value = storedCustomBios.cast<String>();
     }
-    likedBox = Hive.box<LikedItem>(UserActionsSaver.likedBoxName);
-    savedBox = Hive.box<SavedItem>(UserActionsSaver.savedBoxName);
-    highlightBox = Hive.box<HighlightItem>(UserActionsSaver.highlightBoxName);
-    readBox = Hive.box(readBoxName);
-    bestStreak.value = profileBox.get(_kBestStreak, defaultValue: 0) as int;
+
+    bestStreak.value = _settings.getOrDefault<int>(_kBestStreak, 0);
     _updateStreak();
     _loadData();
 
-    likedBox.listenable().addListener(_loadData);
-    savedBox.listenable().addListener(_loadData);
-    highlightBox.listenable().addListener(_loadData);
+    _likedSubscription = _likedStorage.watch().listen((_) => _loadData());
+    _savedSubscription = _savedStorage.watch().listen((_) => _loadData());
+    _highlightSubscription = _highlightStorage.watch().listen(
+      (_) => _loadData(),
+    );
+    _readStatusSubscription = _readStatus.watch().listen((_) => _loadData());
   }
 
   Future<void> updateName(String newName) async {
     final name = newName.trim();
     if (name.isEmpty) return;
     userName.value = name;
-    await profileBox.put(_kName, name);
+    await _settings.put(_kName, name);
   }
 
   Future<void> updateBio(String newBio) async {
     final trimmed = newBio.trim();
     if (trimmed.isEmpty) return;
     bio.value = trimmed;
-    await profileBox.put(_kBio, trimmed);
+    await _settings.put(_kBio, trimmed);
   }
 
   Future<void> addCustomBio(String newBio) async {
@@ -112,14 +130,14 @@ class ProfileController extends GetxController {
     if (trimmed.isEmpty) return;
     if (!customBios.contains(trimmed)) {
       customBios.add(trimmed);
-      await profileBox.put(_kCustomBios, customBios.toList());
+      await _settings.put(_kCustomBios, customBios.toList());
     }
     await updateBio(trimmed);
   }
 
   Future<void> removeCustomBio(String bioText) async {
     customBios.remove(bioText);
-    await profileBox.put(_kCustomBios, customBios.toList());
+    await _settings.put(_kCustomBios, customBios.toList());
     if (bio.value == bioText) {
       await updateBio(presetBios.first);
     }
@@ -152,7 +170,7 @@ class ProfileController extends GetxController {
       final savedFile = await File(filePath).writeAsBytes(croppedBytes);
 
       avatarPath.value = savedFile.path;
-      await profileBox.put(_kAvatarPath, savedFile.path);
+      await _settings.put(_kAvatarPath, savedFile.path);
       // ignore: empty_catches
     } catch (e) {}
   }
@@ -161,8 +179,8 @@ class ProfileController extends GetxController {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    final lastStr = profileBox.get(_kLastStreakDate) as String?;
-    final savedStreak = profileBox.get(_kStreakCount, defaultValue: 0) as int;
+    final lastStr = _settings.get<String>(_kLastStreakDate);
+    final savedStreak = _settings.getOrDefault<int>(_kStreakCount, 0);
 
     if (lastStr == null) {
       streakCount.value = 1;
@@ -180,56 +198,56 @@ class ProfileController extends GetxController {
       }
     }
 
-    await profileBox.put(_kStreakCount, streakCount.value);
-    await profileBox.put(_kLastStreakDate, today.toIso8601String());
+    await _settings.put(_kStreakCount, streakCount.value);
+    await _settings.put(_kLastStreakDate, today.toIso8601String());
 
     if (streakCount.value > bestStreak.value) {
       bestStreak.value = streakCount.value;
-      await profileBox.put(_kBestStreak, bestStreak.value);
+      await _settings.put(_kBestStreak, bestStreak.value);
     }
   }
 
   Future<void> removeAvatar() async {
     avatarPath.value = null;
-    await profileBox.delete(_kAvatarPath);
+    await _settings.delete(_kAvatarPath);
   }
 
   Future<void> dismissEditHint() async {
     if (!showEditHint.value) return;
     showEditHint.value = false;
-    await profileBox.put(_kHasSeenEditHint, true);
+    await _settings.put(_kHasSeenEditHint, true);
   }
 
   @override
   void onClose() {
-    likedBox.listenable().removeListener(_loadData);
-    savedBox.listenable().removeListener(_loadData);
-    highlightBox.listenable().removeListener(_loadData);
-    readBox.listenable().removeListener(_loadData);
+    _likedSubscription?.cancel();
+    _savedSubscription?.cancel();
+    _highlightSubscription?.cancel();
+    _readStatusSubscription?.cancel();
     super.onClose();
   }
 
   void _loadData() {
-    final likedItems = likedBox.values.toList().reversed.toList();
-    final savedItems = savedBox.values.toList().reversed.toList();
-    final highlightItems = highlightBox.values.toList().reversed.toList();
+    final likedItems = _likedStorage.values().reversed.toList();
+    final savedItems = _savedStorage.values().reversed.toList();
+    final highlightItems = _highlightStorage.values().reversed.toList();
 
     likedCount.value = likedItems.length;
     savedCount.value = savedItems.length;
     highlightedCount.value = highlightItems.length;
     likedRatio.value = totalGhazals > 0 ? likedCount.value / totalGhazals : 0.0;
     savedRatio.value = totalGhazals > 0 ? savedCount.value / totalGhazals : 0.0;
-    readCount.value = readBox.keys.length;
+    readCount.value = _readStatus.count;
     readRatio.value = totalGhazals > 0 ? readCount.value / totalGhazals : 0.0;
 
     recentLikedTitles.value = likedItems
-        .map((e) => e.title.trim())
+        .map((e) => e.poemTitle.trim())
         .where((t) => t.isNotEmpty)
         .take(3)
         .toList();
 
     recentSavedTitles.value = savedItems
-        .map((e) => e.title.trim())
+        .map((e) => e.poemTitle.trim())
         .where((t) => t.isNotEmpty)
         .take(3)
         .toList();
@@ -241,9 +259,9 @@ class ProfileController extends GetxController {
         .toList();
 
     mostReadTitle.value = _getMostRepeatedTitle([
-      ...likedItems.map((e) => e.title.trim()),
-      ...savedItems.map((e) => e.title.trim()),
-      ...highlightItems.map((e) => e.ghazalTitle.trim()),
+      ...likedItems.map((e) => e.poemTitle.trim()),
+      ...savedItems.map((e) => e.poemTitle.trim()),
+      ...highlightItems.map((e) => e.poemTitle.trim()),
     ]);
 
     favoriteQuote.value = recentHighlightTexts.isNotEmpty

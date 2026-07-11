@@ -1,28 +1,15 @@
 import 'package:hafez_poems/models/base_poem_model.dart';
-import 'package:hive/hive.dart';
 
-part 'robaeyat_model.g.dart';
-
-@HiveType(typeId: 14)
-class RobaeyatModel extends HiveObject implements BasePoem {
+class RobaeyatModel implements BasePoem {
   @override
-  @HiveField(0)
   final String id;
-
   @override
-  @HiveField(1)
   final String title;
-
   @override
-  @HiveField(2)
   String text;
-
   @override
-  @HiveField(3)
   String audioUrl;
-
   @override
-  @HiveField(4)
   bool hasFullText;
 
   RobaeyatModel({

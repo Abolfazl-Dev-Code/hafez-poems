@@ -4,12 +4,11 @@ import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:hafez_poems/collectionUnit/favorites_list.dart';
 import 'package:hafez_poems/collectionUnit/selection_mixin.dart';
+import 'package:hafez_poems/core/data/contracts/i_keyed_item_storage.dart';
 import 'package:hafez_poems/models/liked_item.dart';
-import 'package:hafez_poems/navbarHomeScreenUnit/bottomNavBar/user_actions_saver.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_cache_services.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_local_services.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_screen.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 class LikedTab extends StatefulWidget {
   const LikedTab({super.key});
@@ -19,9 +18,11 @@ class LikedTab extends StatefulWidget {
 }
 
 class _LikedTabState extends State<LikedTab> with SelectionMixin {
+  IKeyedItemStorage<LikedItem> get _storage =>
+      Get.find<IKeyedItemStorage<LikedItem>>();
+
   @override
   Widget build(BuildContext context) {
-    final box = Hive.box<LikedItem>(UserActionsSaver.likedBoxName);
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -38,23 +39,25 @@ class _LikedTabState extends State<LikedTab> with SelectionMixin {
                 icon: const Icon(Icons.close),
               )
             : null,
-        actions: selectionMode ? [_buildActions(context, box)] : null,
+        actions: selectionMode ? [_buildActions(context)] : null,
       ),
-      body: ValueListenableBuilder(
-        valueListenable: box.listenable(),
-        builder: (context, Box<LikedItem> b, _) {
+      body: StreamBuilder<void>(
+        stream: _storage.watch(),
+        builder: (context, _) {
+          final items = _storage.values().toList()
+            ..sort(
+              (a, b) => int.parse(a.poemId).compareTo(int.parse(b.poemId)),
+            );
+
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) pruneDeletedKeys(b.values.map((e) => e.key));
+            if (mounted) pruneDeletedKeys(items.map((e) => e.poemId));
           });
 
-          if (b.isEmpty) {
+          if (items.isEmpty) {
             return const Center(
               child: Text('هنوز هیچ اشعاری را علاقه‌مندی‌ نکرده‌اید.'),
             );
           }
-
-          final items = b.values.toList()
-            ..sort((a, b) => int.parse(a.id).compareTo(int.parse(b.id)));
 
           return FavoritesList(
             selectedKeys: selectedKeys,
@@ -62,25 +65,25 @@ class _LikedTabState extends State<LikedTab> with SelectionMixin {
             onToggleSelect: toggleSelection,
             onLongPress: selectOnly,
             items: items.map((ghazal) {
-              final firstLine = ghazal.text
+              final firstLine = ghazal.poemText
                   .split('\n')
                   .firstWhere(
                     (l) => l.trim().isNotEmpty,
-                    orElse: () => ghazal.text,
+                    orElse: () => ghazal.poemText,
                   );
               return FavoriteItem(
-                itemKey: ghazal.key,
-                id: ghazal.id,
-                title: ghazal.title,
+                itemKey: ghazal.poemId,
+                id: ghazal.poemId,
+                title: ghazal.poemTitle,
                 subtitle: firstLine,
                 icon: Icons.favorite,
                 iconColor: colorScheme.error,
                 onTap: () => Get.to(
                   () => PoemScreen(
                     args: PoemScreenArgs(
-                      id: ghazal.id,
-                      title: ghazal.title,
-                      text: ghazal.text,
+                      id: ghazal.poemId,
+                      title: ghazal.poemTitle,
+                      text: ghazal.poemText,
                       audioUrl: ghazal.audioUrl,
                       fetchText: (id) => GhazalLocalService.instance
                           .fetchGhazalById(id)
@@ -98,11 +101,11 @@ class _LikedTabState extends State<LikedTab> with SelectionMixin {
     );
   }
 
-  Widget _buildActions(BuildContext context, Box<LikedItem> box) {
-    return ValueListenableBuilder(
-      valueListenable: box.listenable(),
-      builder: (context, Box<LikedItem> b, _) {
-        final allKeys = b.values.map((e) => e.key);
+  Widget _buildActions(BuildContext context) {
+    return StreamBuilder<void>(
+      stream: _storage.watch(),
+      builder: (context, _) {
+        final allKeys = _storage.values().map((e) => e.poemId);
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -113,7 +116,7 @@ class _LikedTabState extends State<LikedTab> with SelectionMixin {
             IconButton(
               onPressed: selectedKeys.isEmpty
                   ? null
-                  : () => deleteSelected(context, box as Box<HiveObject>),
+                  : () => deleteSelected(context, _storage),
               icon: const Icon(Icons.delete_outline),
             ),
           ],

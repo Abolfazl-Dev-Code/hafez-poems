@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hafez_poems/models/highlight_item.dart';
-import 'package:hafez_poems/models/liked_item.dart';
-import 'package:hafez_poems/models/saved_item.dart';
-import 'package:hafez_poems/navbarHomeScreenUnit/bottomNavBar/user_actions_saver.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/notification_service.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/setting_contact_us_dialog.dart';
@@ -14,7 +10,10 @@ import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/setting_show_about_
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/setting_theme_toggle_mode.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/setting_tile.dart';
 import 'package:hafez_poems/theme/theme_controller.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hafez_poems/core/data/contracts/i_keyed_item_storage.dart';
+import 'package:hafez_poems/models/highlight_item.dart';
+import 'package:hafez_poems/models/liked_item.dart';
+import 'package:hafez_poems/models/saved_item.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -246,9 +245,9 @@ class _SettingPageState extends State<SettingPage>
 
   Future<void> _deleteAllLocalData() async {
     try {
-      await Hive.box<LikedItem>(UserActionsSaver.likedBoxName).clear();
-      await Hive.box<SavedItem>(UserActionsSaver.savedBoxName).clear();
-      await Hive.box<HighlightItem>(UserActionsSaver.highlightBoxName).clear();
+      await Get.find<IKeyedItemStorage<LikedItem>>().clear();
+      await Get.find<IKeyedItemStorage<SavedItem>>().clear();
+      await Get.find<IKeyedItemStorage<HighlightItem>>().clear();
 
       final prefs = await SharedPreferences.getInstance();
       await NotificationService.instance.cancelDailyReminder();

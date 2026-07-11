@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:hafez_poems/core/data/contracts/i_keyed_item_storage.dart';
 import 'package:hafez_poems/homeScreenUnit/faalUnit/fal_local_service.dart';
-import 'package:hafez_poems/navbarHomeScreenUnit/bottomNavBar/user_actions_saver.dart';
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_cache_services.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_local_services.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_screen.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hafez_poems/models/saved_item.dart';
 
 class FalScreen extends StatefulWidget {
@@ -160,19 +159,21 @@ class _FalScreenState extends State<FalScreen>
   Future<void> _saveFal() async {
     if (_currentFal == null || _isSaved) return;
 
-    final box = Hive.box<SavedItem>(UserActionsSaver.savedBoxName);
-
     final textToSave =
         '${_currentFal!.poem}\n\n📖 تفسیر:\n${_currentFal!.tabir}';
 
     final savedItem = SavedItem(
-      id: 'fal_${_currentFal!.id}',
-      title: _currentFal!.title,
-      text: textToSave,
+      poemId: 'fal_${_currentFal!.id}',
+      poemTitle: _currentFal!.title,
+      poemText: textToSave,
       audioUrl: '',
     );
 
-    await box.add(savedItem);
+    await Get.find<IKeyedItemStorage<SavedItem>>().put(
+      savedItem.poemId,
+      savedItem,
+    );
+
     if (!mounted) return;
     setState(() => _isSaved = true);
     _showSavedSnackBar();
@@ -250,7 +251,6 @@ class _FalScreenState extends State<FalScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // شماره فال
                         Align(
                           alignment: Alignment.center,
                           child: Container(

@@ -5,12 +5,11 @@ import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:hafez_poems/collectionUnit/collection_fal_dialog_saved.dart';
 import 'package:hafez_poems/collectionUnit/favorites_list.dart';
 import 'package:hafez_poems/collectionUnit/selection_mixin.dart';
+import 'package:hafez_poems/core/data/contracts/i_keyed_item_storage.dart';
 import 'package:hafez_poems/models/saved_item.dart';
-import 'package:hafez_poems/navbarHomeScreenUnit/bottomNavBar/user_actions_saver.dart';
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_cache_services.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_screen.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 class SavedTab extends StatefulWidget {
   const SavedTab({super.key});
@@ -20,9 +19,11 @@ class SavedTab extends StatefulWidget {
 }
 
 class _SavedTabState extends State<SavedTab> with SelectionMixin {
+  IKeyedItemStorage<SavedItem> get _storage =>
+      Get.find<IKeyedItemStorage<SavedItem>>();
+
   @override
   Widget build(BuildContext context) {
-    final box = Hive.box<SavedItem>(UserActionsSaver.savedBoxName);
     final colorScheme = Theme.of(context).colorScheme;
 
     int extractId(String id) =>
@@ -42,23 +43,25 @@ class _SavedTabState extends State<SavedTab> with SelectionMixin {
                 icon: const Icon(Icons.close),
               )
             : null,
-        actions: selectionMode ? [_buildActions(context, box)] : null,
+        actions: selectionMode ? [_buildActions(context)] : null,
       ),
-      body: ValueListenableBuilder(
-        valueListenable: box.listenable(),
-        builder: (context, Box<SavedItem> b, _) {
+      body: StreamBuilder<void>(
+        stream: _storage.watch(),
+        builder: (context, _) {
+          final items = _storage.values().toList()
+            ..sort(
+              (a, b) => extractId(b.poemId).compareTo(extractId(a.poemId)),
+            );
+
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) pruneDeletedKeys(b.values.map((e) => e.key));
+            if (mounted) pruneDeletedKeys(items.map((e) => e.poemId));
           });
 
-          if (b.isEmpty) {
+          if (items.isEmpty) {
             return const Center(
               child: Text('هنوز هیچ اشعاری را ذخیره نکرده‌اید.'),
             );
           }
-
-          final items = b.values.toList()
-            ..sort((a, b) => extractId(b.id).compareTo(extractId(a.id)));
 
           return FavoritesList(
             selectedKeys: selectedKeys,
@@ -66,8 +69,10 @@ class _SavedTabState extends State<SavedTab> with SelectionMixin {
             onToggleSelect: toggleSelection,
             onLongPress: selectOnly,
             items: items.map((item) {
-              final isFal = item.id.startsWith('fal_');
-              final falNumber = isFal ? item.id.replaceFirst('fal_', '') : '';
+              final isFal = item.poemId.startsWith('fal_');
+              final falNumber = isFal
+                  ? item.poemId.replaceFirst('fal_', '')
+                  : '';
               final isValidFalId =
                   falNumber.isNotEmpty &&
                   int.tryParse(falNumber) != null &&
@@ -75,30 +80,30 @@ class _SavedTabState extends State<SavedTab> with SelectionMixin {
               final subtitle = isFal
                   ? (isValidFalId ? 'غزل $falNumber' : 'فال حافظ')
                         .toPersianNumbers()
-                  : item.text
+                  : item.poemText
                         .split('\n')
                         .firstWhere(
                           (l) => l.trim().isNotEmpty,
-                          orElse: () => item.text,
+                          orElse: () => item.poemText,
                         );
               return FavoriteItem(
-                itemKey: item.key,
-                id: item.id,
-                title: item.title,
+                itemKey: item.poemId,
+                id: item.poemId,
+                title: item.poemTitle,
                 subtitle: subtitle,
                 icon: isFal ? Icons.auto_awesome_rounded : Icons.bookmark,
                 iconColor: isFal ? Colors.green : colorScheme.primary,
                 onTap: () {
                   if (isFal) {
-                    final parts = item.text.split('\n\n📖 تفسیر:\n');
+                    final parts = item.poemText.split('\n\n📖 تفسیر:\n');
 
                     final poemText = parts.isNotEmpty
                         ? parts[0].trim()
-                        : item.text;
+                        : item.poemText;
 
                     final tabirText = parts.length > 1 ? parts[1].trim() : '';
 
-                    final falNumber = item.id.replaceFirst('fal_', '');
+                    final falNumber = item.poemId.replaceFirst('fal_', '');
 
                     final isValid =
                         int.tryParse(falNumber) != null &&
@@ -106,7 +111,7 @@ class _SavedTabState extends State<SavedTab> with SelectionMixin {
 
                     Get.dialog(
                       FalDialog(
-                        title: item.title,
+                        title: item.poemTitle,
                         poemText: poemText,
                         tabirText: tabirText,
                         falNumber: isValid ? falNumber : '',
@@ -120,11 +125,11 @@ class _SavedTabState extends State<SavedTab> with SelectionMixin {
                   Get.to(
                     () => PoemScreen(
                       args: PoemScreenArgs(
-                        id: item.id,
-                        title: item.title,
-                        text: item.text,
+                        id: item.poemId,
+                        title: item.poemTitle,
+                        text: item.poemText,
                         fetchText: (id) async {
-                          return item.text;
+                          return item.poemText;
                         },
                         fetchAudioUrl: (id) {
                           return isFal
@@ -143,11 +148,11 @@ class _SavedTabState extends State<SavedTab> with SelectionMixin {
     );
   }
 
-  Widget _buildActions(BuildContext context, Box<SavedItem> box) {
-    return ValueListenableBuilder(
-      valueListenable: box.listenable(),
-      builder: (context, Box<SavedItem> b, _) {
-        final allKeys = b.values.map((e) => e.key);
+  Widget _buildActions(BuildContext context) {
+    return StreamBuilder<void>(
+      stream: _storage.watch(),
+      builder: (context, _) {
+        final allKeys = _storage.values().map((e) => e.poemId);
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -158,7 +163,7 @@ class _SavedTabState extends State<SavedTab> with SelectionMixin {
             IconButton(
               onPressed: selectedKeys.isEmpty
                   ? null
-                  : () => deleteSelected(context, box as Box<HiveObject>),
+                  : () => deleteSelected(context, _storage),
               icon: const Icon(Icons.delete_outline),
             ),
           ],

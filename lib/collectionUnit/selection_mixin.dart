@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/core/data/contracts/i_keyed_item_storage.dart';
 import 'package:hafez_poems/theme/text_style.dart';
-import 'package:hive/hive.dart';
 
 mixin SelectionMixin<T extends StatefulWidget> on State<T> {
   Set<dynamic> selectedKeys = {};
@@ -30,7 +30,13 @@ mixin SelectionMixin<T extends StatefulWidget> on State<T> {
     }
   }
 
-  Future<void> deleteSelected(BuildContext context, Box<HiveObject> box) async {
+  /// [E] نوع آیتم ذخیره‌شده است (LikedItem, SavedItem یا HighlightItem)؛
+  /// اسم پارامتر جنریک عمداً E است نه T، چون T از قبل توسط میکسین برای
+  /// نوع ویجت استفاده شده است.
+  Future<void> deleteSelected<E>(
+    BuildContext context,
+    IKeyedItemStorage<E> storage,
+  ) async {
     if (selectedKeys.isEmpty) return;
 
     final confirmed = await showDialog<bool>(
@@ -111,7 +117,7 @@ mixin SelectionMixin<T extends StatefulWidget> on State<T> {
       final keysToDelete = selectedKeys.toList();
 
       for (final key in keysToDelete) {
-        await box.delete(key);
+        await storage.delete(key as String);
       }
 
       clearSelection();

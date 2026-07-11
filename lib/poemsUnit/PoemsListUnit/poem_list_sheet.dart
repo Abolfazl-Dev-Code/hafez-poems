@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_controller.dart';
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
 import 'package:hafez_poems/poemsUnit/PoemsListUnit/poem_list_empty.dart';
 import 'package:hafez_poems/poemsUnit/PoemsListUnit/poem_list_loading.dart';
 import 'package:hafez_poems/poemsUnit/PoemsListUnit/poem_list_title.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_screen.dart';
-import 'package:hive/hive.dart';
 import 'package:hafez_poems/models/base_poem_model.dart';
 import 'package:hafez_poems/models/poem_list_config.dart';
+import 'package:hafez_poems/core/data/contracts/i_read_status_storage.dart';
 
 enum _ReadFilter { all, read, unread }
 
@@ -46,11 +45,11 @@ class PoemListSheet extends StatefulWidget {
 class _PoemListSheetState extends State<PoemListSheet> {
   final Set<String> _prefetching = {};
   _ReadFilter _filter = _ReadFilter.all;
-  late final Box _readBox = Hive.box(ProfileController.readBoxName);
+  late final IReadStatusStorage _readStatus = Get.find<IReadStatusStorage>();
 
   PoemListConfig get _cfg => widget.config;
   List<BasePoem> get _items => _cfg.items.cast<BasePoem>();
-  bool _isRead(String id) => _readBox.get(id) == true;
+  bool _isRead(String id) => _readStatus.isRead(id);
 
   List<MapEntry<int, BasePoem>> get _visibleEntries {
     final items = _items;

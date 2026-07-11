@@ -1,28 +1,15 @@
 import 'package:hafez_poems/models/base_poem_model.dart';
-import 'package:hive/hive.dart';
 
-part 'ghasayed_model.g.dart';
-
-@HiveType(typeId: 13)
-class GhasayedModel extends HiveObject implements BasePoem {
+class GhasayedModel implements BasePoem {
   @override
-  @HiveField(0)
   final String id;
-
   @override
-  @HiveField(1)
   final String title;
-
   @override
-  @HiveField(2)
   String text;
-
   @override
-  @HiveField(3)
   String audioUrl;
-
   @override
-  @HiveField(4)
   bool hasFullText;
 
   GhasayedModel({

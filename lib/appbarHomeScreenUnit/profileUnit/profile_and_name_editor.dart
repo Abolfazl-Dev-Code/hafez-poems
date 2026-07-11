@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_controller.dart';
+import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
 import 'package:hafez_poems/theme/color_style.dart';
 
 class ProfileAndNameEditor extends StatelessWidget {
@@ -91,19 +92,21 @@ class _EditProfileSheetContentState extends State<_EditProfileSheetContent> {
 
     final text = _nameController.text;
     final trimmed = text.trim();
-    final isTooShort = trimmed.length < 3;
-    final isTooLong = text.length > 20;
-    final hasError = trimmed.isEmpty || isTooShort || isTooLong;
+    const int minNameLength = 3;
+    const int maxNameLength = 20;
+
+    final isTooShort = trimmed.isNotEmpty && trimmed.length < minNameLength;
+    final isTooLong = text.isNotEmpty && text.length > maxNameLength;
+    final hasError = isTooShort || isTooLong;
 
     String? errorMsg;
-    if (trimmed.isEmpty) {
-      errorMsg = 'نام نمی‌تواند خالی باشد';
-    } else if (isTooShort) {
-      errorMsg = 'نام باید حداقل ۴ کاراکتر باشد';
+    if (isTooShort) {
+      errorMsg = 'نام باید حداقل دارای $minNameLength حرف باشد'
+          .toPersianNumbers();
     } else if (isTooLong) {
-      errorMsg = 'نام نمی‌تواند بیشتر از ۲۰ کاراکتر باشد';
+      errorMsg = 'نام نباید بیشتر از $maxNameLength حرف باشد'
+          .toPersianNumbers();
     }
-
     return Padding(
       padding: EdgeInsets.only(
         left: 16,
@@ -191,7 +194,7 @@ class _EditProfileSheetContentState extends State<_EditProfileSheetContent> {
             ),
             AnimatedSize(
               duration: const Duration(milliseconds: 200),
-              child: (hasError && text.isNotEmpty)
+              child: hasError
                   ? Padding(
                       padding: const EdgeInsets.only(top: 6),
                       child: Row(

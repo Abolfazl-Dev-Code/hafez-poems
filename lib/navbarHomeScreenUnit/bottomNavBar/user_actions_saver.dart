@@ -1,89 +1,94 @@
+// lib/navbarHomeScreenUnit/bottomNavBar/user_actions_saver.dart
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:hafez_poems/core/data/contracts/i_keyed_item_storage.dart';
 import 'package:hafez_poems/models/highlight_item.dart';
 import 'package:hafez_poems/models/liked_item.dart';
 import 'package:hafez_poems/models/saved_item.dart';
-import 'package:hive/hive.dart';
 
 class UserActionsSaver {
-  static const String likedBoxName = 'liked_ghazals';
-  static const String savedBoxName = 'saved_ghazals';
-  static const String highlightBoxName = 'highlighted_lines';
+  IKeyedItemStorage<LikedItem> get _likedStorage =>
+      Get.find<IKeyedItemStorage<LikedItem>>();
+  IKeyedItemStorage<SavedItem> get _savedStorage =>
+      Get.find<IKeyedItemStorage<SavedItem>>();
+  IKeyedItemStorage<HighlightItem> get _highlightStorage =>
+      Get.find<IKeyedItemStorage<HighlightItem>>();
 
-  Box<LikedItem> get _likedBox => Hive.box<LikedItem>(likedBoxName);
+  bool isLiked(String poemId) => _likedStorage.containsKey(poemId);
 
-  Box<SavedItem> get _savedBox => Hive.box<SavedItem>(savedBoxName);
-
-  Box<HighlightItem> get _highlightBox =>
-      Hive.box<HighlightItem>(highlightBoxName);
-
-  bool isLiked(String ghazalId) {
-    return _likedBox.containsKey(ghazalId);
-  }
-
-  bool isSaved(String ghazalId) {
-    return _savedBox.containsKey(ghazalId);
-  }
+  bool isSaved(String poemId) => _savedStorage.containsKey(poemId);
 
   Future<void> toggleLike({
-    required String ghazalId,
-    required String title,
-    required String text,
+    required String poemId,
+    required String poemTitle,
+    required String poemText,
     required String audioUrl,
   }) async {
-    if (isLiked(ghazalId)) {
-      await _likedBox.delete(ghazalId);
+    if (isLiked(poemId)) {
+      await _likedStorage.delete(poemId);
     } else {
-      await _likedBox.put(
-        ghazalId,
-        LikedItem(id: ghazalId, title: title, text: text, audioUrl: audioUrl),
+      await _likedStorage.put(
+        poemId,
+        LikedItem(
+          poemId: poemId,
+          poemTitle: poemTitle,
+          poemText: poemText,
+          audioUrl: audioUrl,
+        ),
       );
     }
   }
 
   Future<void> toggleSave({
-    required String ghazalId,
-    required String title,
-    required String text,
+    required String poemId,
+    required String poemTitle,
+    required String poemText,
     required String audioUrl,
   }) async {
-    if (isSaved(ghazalId)) {
-      await _savedBox.delete(ghazalId);
+    if (isSaved(poemId)) {
+      await _savedStorage.delete(poemId);
     } else {
-      await _savedBox.put(
-        ghazalId,
-        SavedItem(id: ghazalId, title: title, text: text, audioUrl: audioUrl),
+      await _savedStorage.put(
+        poemId,
+        SavedItem(
+          poemId: poemId,
+          poemTitle: poemTitle,
+          poemText: poemText,
+          audioUrl: audioUrl,
+        ),
       );
     }
   }
 
-  String _highlightKey(String ghazalId, int lineIndex) {
-    return '${ghazalId}_$lineIndex';
+  static String highlightKey(String poemId, int lineIndex) {
+    return '${poemId}_$lineIndex';
   }
 
-  bool isLineHighlighted(String ghazalId, int lineIndex) {
-    return _highlightBox.containsKey(_highlightKey(ghazalId, lineIndex));
+  bool isLineHighlighted(String poemId, int lineIndex) {
+    return _highlightStorage.containsKey(highlightKey(poemId, lineIndex));
   }
 
   Future<void> toggleHighlight({
-    required String ghazalId,
-    required String ghazalTitle,
-    required String ghazalText,
+    required String poemId,
+    required String poemTitle,
+    required String poemText,
     required String audioUrl,
     required String highlightedLine,
     required int lineIndex,
     required Color color,
   }) async {
-    final key = _highlightKey(ghazalId, lineIndex);
+    final key = highlightKey(poemId, lineIndex);
 
-    if (_highlightBox.containsKey(key)) {
-      await _highlightBox.delete(key);
+    if (_highlightStorage.containsKey(key)) {
+      await _highlightStorage.delete(key);
     } else {
-      await _highlightBox.put(
+      await _highlightStorage.put(
         key,
         HighlightItem(
-          ghazalId: ghazalId,
-          ghazalTitle: ghazalTitle,
-          ghazalText: ghazalText,
+          poemId: poemId,
+          poemTitle: poemTitle,
+          poemText: poemText,
           audioUrl: audioUrl,
           highlightedLine: highlightedLine,
           lineIndex: lineIndex,
@@ -93,22 +98,17 @@ class UserActionsSaver {
     }
   }
 
-  List<int> getHighlightedLineIndexes(String ghazalId) {
-    return _highlightBox.values
-        .where((item) => item.ghazalId == ghazalId)
+  List<int> getHighlightedLineIndexes(String poemId) {
+    return _highlightStorage
+        .values()
+        .where((item) => item.poemId == poemId)
         .map((item) => item.lineIndex)
         .toList();
   }
 
-  List<HighlightItem> getAllHighlights() {
-    return _highlightBox.values.toList();
-  }
+  List<HighlightItem> getAllHighlights() => _highlightStorage.values();
 
-  List<LikedItem> getAllLikedGhazals() {
-    return _likedBox.values.toList();
-  }
+  List<LikedItem> getAllLikedGhazals() => _likedStorage.values();
 
-  List<SavedItem> getAllSavedGhazals() {
-    return _savedBox.values.toList();
-  }
+  List<SavedItem> getAllSavedGhazals() => _savedStorage.values();
 }
