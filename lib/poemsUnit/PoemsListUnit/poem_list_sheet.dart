@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
 import 'package:hafez_poems/poemsUnit/PoemsListUnit/poem_list_empty.dart';
@@ -398,7 +399,7 @@ class _PoemListSheetState extends State<PoemListSheet> {
                     }
 
                     return ListView.builder(
-                      cacheExtent: 69 * 5,
+                      scrollCacheExtent: ScrollCacheExtent.pixels(69 * 5),
                       itemCount: entries.length,
                       itemBuilder: (context, index) {
                         final entry = entries[index];

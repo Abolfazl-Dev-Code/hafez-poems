@@ -5,13 +5,10 @@ class DriftKeyedItemStorage<T> implements IKeyedItemStorage<T> {
   DriftKeyedItemStorage({
     required this.keyOf,
     required Future<List<T>> Function() loadAll,
-    required Future<void> Function(String key, T value) writeToDb,
-    required Future<void> Function(String key) deleteFromDb,
-    required Future<void> Function() clearDb,
-  }) : _loadAllFromDb = loadAll,
-       _writeToDb = writeToDb,
-       _deleteFromDb = deleteFromDb,
-       _clearDb = clearDb;
+    required this._writeToDb,
+    required this._deleteFromDb,
+    required this._clearDb,
+  }) : _loadAllFromDb = loadAll;
 
   final String Function(T item) keyOf;
   final Future<List<T>> Function() _loadAllFromDb;

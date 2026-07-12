@@ -4,11 +4,9 @@ class DriftPoemStorage<T> implements IPoemStorage<T> {
   DriftPoemStorage({
     required this.category,
     required Future<Map<String, T>> Function() loadAll,
-    required Future<void> Function(String id, T item) writeToDb,
-    required Future<void> Function(Map<String, T> items) writeAllToDb,
-  }) : _loadAllFromDb = loadAll,
-       _writeToDb = writeToDb,
-       _writeAllToDb = writeAllToDb;
+    required this._writeToDb,
+    required this._writeAllToDb,
+  }) : _loadAllFromDb = loadAll;
 
   final String category;
   final Future<Map<String, T>> Function() _loadAllFromDb;

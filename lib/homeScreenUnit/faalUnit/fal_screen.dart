@@ -195,17 +195,16 @@ class _FalScreenState extends State<FalScreen>
           elevation: 0,
           scrolledUnderElevation: 0,
           centerTitle: true,
-          toolbarHeight: 80,
-          leadingWidth: 60,
+          toolbarHeight: 50,
           leading: Padding(
-            padding: const EdgeInsets.only(top: 30.0, right: 8.0),
+            padding: const EdgeInsets.only(top: 0.0, right: 22.0),
             child: IconButton(
               icon: const Icon(Icons.arrow_back_rounded),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ),
           title: Padding(
-            padding: const EdgeInsets.only(top: 30.0),
+            padding: const EdgeInsets.only(top: 0.0),
             child: Text(widget.title, style: textTheme.headlineMedium),
           ),
         ),
@@ -221,7 +220,7 @@ class _FalScreenState extends State<FalScreen>
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Text(
-                    'ابتدا نیت کنید:\n\n'
+                    'ابتدا نیت کنید:\n'
                     'ای حافظ شیرازی! تو محرم هر رازی!\n'
                     'تو را به خدا و به شاخ نباتت قسم می‌دهم\n'
                     'که هر چه صلاح و مصلحت می‌بینی\n برایم آشکار کن\n'
