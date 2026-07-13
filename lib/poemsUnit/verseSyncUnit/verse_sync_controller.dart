@@ -1,4 +1,3 @@
-// lib/controllers/verse_sync_controller.dart
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:hafez_poems/models/recitation_models.dart';
@@ -57,6 +56,16 @@ class VerseSyncController extends ChangeNotifier {
     _syncPoints = [];
     _activeVerseOrder = -1;
     _notify();
+  }
+
+  // ── پیدا کردن زمان صوت برای یک مصرع مشخص ──────────
+  Duration? positionForVerse(int verseOrder) {
+    for (final point in _syncPoints) {
+      if (point.verseOrder == verseOrder) {
+        return Duration(milliseconds: point.audioMilliseconds);
+      }
+    }
+    return null;
   }
 
   // ── به‌روزرسانی بر اساس position ──────────────────

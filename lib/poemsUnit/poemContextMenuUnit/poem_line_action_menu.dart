@@ -11,7 +11,7 @@ class ActionMenu extends StatelessWidget {
     required this.onCopy,
     required this.onToggleHighlight,
     required this.onShareAsImage,
-    required this.onClose,
+    required this.onPlayFromHere,
   });
 
   final bool isHighlighted;
@@ -20,7 +20,7 @@ class ActionMenu extends StatelessWidget {
   final VoidCallback onCopy;
   final VoidCallback onToggleHighlight;
   final VoidCallback onShareAsImage;
-  final VoidCallback onClose;
+  final VoidCallback onPlayFromHere;
 
   static const int itemCount = 4;
   static const double itemHeight = 46;
@@ -53,7 +53,11 @@ class ActionMenu extends StatelessWidget {
         label: 'اشتراک گذاری مصرع دلخواه',
         onTap: onShareAsImage,
       ),
-      MenuItemData(icon: Icons.close_rounded, label: 'بستن', onTap: onClose),
+      MenuItemData(
+        icon: Icons.play_circle_fill_rounded,
+        label: 'از اینجا بخوان',
+        onTap: onPlayFromHere,
+      ),
     ];
 
     return Material(

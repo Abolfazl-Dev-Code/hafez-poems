@@ -23,6 +23,7 @@ class PoemLineContextMenuController {
     required VoidCallback onCopy,
     required VoidCallback onToggleHighlight,
     required VoidCallback onShareAsImage,
+    required VoidCallback onPlayFromHere,
     required VoidCallback onClosed,
   }) {
     if (_entry != null) return;
@@ -68,6 +69,10 @@ class PoemLineContextMenuController {
             await hide();
             onShareAsImage();
           },
+          onPlayFromHere: () async {
+            await hide();
+            onPlayFromHere();
+          },
           onDismiss: hide,
         );
       },
@@ -109,6 +114,7 @@ class _PoemLineContextMenuOverlay extends StatefulWidget {
     required this.onCopy,
     required this.onToggleHighlight,
     required this.onShareAsImage,
+    required this.onPlayFromHere,
     required this.onDismiss,
   });
 
@@ -124,6 +130,7 @@ class _PoemLineContextMenuOverlay extends StatefulWidget {
   final VoidCallback onCopy;
   final VoidCallback onToggleHighlight;
   final VoidCallback onShareAsImage;
+  final VoidCallback onPlayFromHere;
   final VoidCallback onDismiss;
 
   @override
@@ -255,7 +262,7 @@ class _PoemLineContextMenuOverlayState
                       onCopy: widget.onCopy,
                       onToggleHighlight: widget.onToggleHighlight,
                       onShareAsImage: widget.onShareAsImage,
-                      onClose: widget.onDismiss,
+                      onPlayFromHere: widget.onPlayFromHere,
                     ),
                   ),
                 ),

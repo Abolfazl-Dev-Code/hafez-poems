@@ -7,7 +7,7 @@ class AppSnackBarService {
     required Color color,
     required IconData icon,
     Color textColor = Colors.white,
-    Duration duration = const Duration(milliseconds: 2800),
+    Duration duration = const Duration(milliseconds: 2400),
   }) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     final snackBar = SnackBar(
@@ -42,7 +42,7 @@ class AppSnackBarService {
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 14,
-                  vertical: 14,
+                  vertical: 10,
                 ),
                 child: Row(
                   children: [
@@ -110,7 +110,7 @@ class AppSnackBarService {
       color: const Color(0xFFFFC107),
       icon: Icons.warning_amber_rounded,
       textColor: Colors.black,
-      duration: duration ?? const Duration(milliseconds: 2800),
+      duration: duration ?? const Duration(milliseconds: 2400),
     );
   }
 
@@ -124,7 +124,7 @@ class AppSnackBarService {
       message: message,
       color: const Color(0xFF1FA855),
       icon: Icons.check_rounded,
-      duration: duration ?? const Duration(milliseconds: 2800),
+      duration: duration ?? const Duration(milliseconds: 2400),
     );
   }
 
@@ -138,7 +138,7 @@ class AppSnackBarService {
       message: message,
       color: const Color(0xFFD92D20),
       icon: Icons.close_rounded,
-      duration: duration ?? const Duration(milliseconds: 2800),
+      duration: duration ?? const Duration(milliseconds: 2400),
     );
   }
 
@@ -148,7 +148,7 @@ class AppSnackBarService {
       message: message,
       color: const Color(0xFF2563EB),
       icon: Icons.info_outline,
-      duration: duration ?? const Duration(milliseconds: 2800),
+      duration: duration ?? const Duration(milliseconds: 2400),
     );
   }
 }

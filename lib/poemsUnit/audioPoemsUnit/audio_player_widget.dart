@@ -31,10 +31,10 @@ class AudioPlayerWidget extends StatefulWidget {
   });
 
   @override
-  State<AudioPlayerWidget> createState() => _AudioPlayerWidgetState();
+  State<AudioPlayerWidget> createState() => AudioPlayerWidgetState();
 }
 
-class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
+class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   bool _initialized = false;
   bool _isExpanded = false;
 
@@ -61,12 +61,12 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   }
 
   @override
-  void didUpdateWidget(covariant AudioPlayerWidget old) {
-    super.didUpdateWidget(old);
+  void didUpdateWidget(covariant AudioPlayerWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
     final changed =
-        old.id != widget.id ||
-        old.audioUrl != widget.audioUrl ||
-        old.title != widget.title;
+        oldWidget.id != widget.id ||
+        oldWidget.audioUrl != widget.audioUrl ||
+        oldWidget.title != widget.title;
     if (changed) {
       _initialized = false;
     }
@@ -115,6 +115,35 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
           ? null
           : widget.fetchAudioUrl,
     );
+  }
+
+  Future<void> prepareForPlay() async {
+    if (!_isExpanded) {
+      await _expand();
+    }
+
+    if (!_initialized) {
+      await _loadIfNeeded();
+    }
+  }
+
+  Future<void> playFromPosition(Duration position) async {
+    final ctrl = widget.controller;
+
+    await prepareForPlay();
+
+    if (!mounted) return;
+
+    if (!ctrl.isAudioLoaded) {
+      AppSnackBarService.error(context, 'بارگیری فایل صوتی انجام نشد');
+      return;
+    }
+
+    await ctrl.seek(position);
+
+    if (!ctrl.isPlaying) {
+      await ctrl.togglePlayPause();
+    }
   }
 
   Future<void> _expand() async {

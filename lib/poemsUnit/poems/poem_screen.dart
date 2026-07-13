@@ -50,6 +50,8 @@ class PoemScreen extends StatefulWidget {
 class _PoemScreenState extends State<PoemScreen> {
   late final AudioPlayerController _audioCtrl = AudioPlayerController();
   late final VerseSyncController _verseSyncCtrl = VerseSyncController();
+  final GlobalKey<AudioPlayerWidgetState> _audioWidgetKey =
+      GlobalKey<AudioPlayerWidgetState>();
   final Map<int, GlobalKey> _lineKeys = {};
   final Map<int, LayerLink> _lineLayerLinks = {};
   final Map<int, GlobalKey> _verseTargetKeys = {};
@@ -91,7 +93,6 @@ class _PoemScreenState extends State<PoemScreen> {
   bool _isMultiLineSelecting = false;
   final Set<int> _selectedShareLines = {};
   PoemScreenArgs get _args => widget.args;
-
   List<String> get _poemLines => _poemText
       .split('\n')
       .expand((line) {
@@ -121,21 +122,25 @@ class _PoemScreenState extends State<PoemScreen> {
   }
 
   void _syncPosition() {
-    debugPrint(
-      '🎵 position: ${_audioCtrl.position}, hasSyncData: ${_verseSyncCtrl.hasSyncData}, activeOrder: ${_verseSyncCtrl.activeVerseOrder}',
-    );
+    if (!_audioCtrl.isPlaying) return;
+
     _verseSyncCtrl.updatePosition(_audioCtrl.position);
   }
 
   void _onActiveVerseChanged() {
+    // فقط هنگام پخش
+    if (!_audioCtrl.isPlaying) return;
+
     if (_userIsInteractingWithScroll) return;
     if (_isContextMenuOpen) return;
 
     final order = _verseSyncCtrl.activeVerseOrder;
+
     if (order < 0) return;
     if (order == _lastAutoScrolledVerseOrder) return;
 
     _lastAutoScrolledVerseOrder = order;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToLineIndex(order);
     });
@@ -300,7 +305,44 @@ class _PoemScreenState extends State<PoemScreen> {
         });
         _resumeAutoScrollImmediately();
       },
+      onPlayFromHere: () => _playFromVerse(index),
     );
+  }
+
+  Future<void> _playFromVerse(int verseOrder) async {
+    final player = _audioWidgetKey.currentState;
+    if (player == null) return;
+
+    final loadingTimer = Timer(const Duration(seconds: 4), () {
+      if (!mounted) return;
+      AppSnackBarService.info(
+        context,
+        'درحال بارگیری صدا، لطفاً منتظر بمانید.',
+      );
+    });
+
+    try {
+      await player.prepareForPlay();
+    } finally {
+      loadingTimer.cancel();
+    }
+
+    if (!mounted) return;
+
+    const manualOffset = Duration(milliseconds: 200);
+
+    final position = _verseSyncCtrl.positionForVerse(verseOrder);
+
+    if (position == null) {
+      AppSnackBarService.error(context, 'موقعیت این مصرع پیدا نشد.');
+      return;
+    }
+
+    final playPosition = position > manualOffset
+        ? position - manualOffset
+        : Duration.zero;
+
+    await player.playFromPosition(playPosition);
   }
 
   void _startMultiLineSelection(int index) {
@@ -649,25 +691,19 @@ class _PoemScreenState extends State<PoemScreen> {
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
           toolbarHeight: 50,
-
           automaticallyImplyLeading: false,
-
+          leadingWidth: 65,
           leading: _isMultiLineSelecting
               ? null
-              : Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: IconButton(
-                    iconSize: 25,
-                    icon: const Icon(Icons.arrow_back_rounded),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      if (_args.hasAudio) _audioCtrl.stop();
-                    },
-                  ),
+              : IconButton(
+                  iconSize: 25,
+                  icon: const Icon(Icons.arrow_back_rounded),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    if (_args.hasAudio) _audioCtrl.stop();
+                  },
                 ),
-
           titleSpacing: 35,
-
           title: _isMultiLineSelecting
               ? Align(
                   alignment: Alignment.centerRight,
@@ -940,6 +976,7 @@ class _PoemScreenState extends State<PoemScreen> {
                   if (_args.hasAudio) const SizedBox(height: 5),
                   if (_args.hasAudio)
                     AudioPlayerWidget(
+                      key: _audioWidgetKey,
                       id: _args.id,
                       audioUrl: _args.audioUrl,
                       fetchAudioUrl: _args.fetchAudioUrl,
