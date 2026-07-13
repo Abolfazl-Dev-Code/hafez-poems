@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,6 +24,11 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
   late final ScrollController _scrollCtrl;
 
   bool _autoScrolling = false;
+
+  bool _controlsVisible = true;
+  Timer? _hideControlsTimer;
+  static const _hideControlsDelay = Duration(seconds: 3);
+  static const _controlsFadeDuration = Duration(milliseconds: 450);
 
   final List<bool> _chapterVisible = List.filled(chapters.length, false);
   final List<GlobalKey> _chapterKeys = List.generate(
@@ -79,6 +85,20 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
     BiographyAudioController.play();
   }
 
+  void _showControls() {
+    _hideControlsTimer?.cancel();
+    if (!_controlsVisible && mounted) {
+      setState(() => _controlsVisible = true);
+    }
+  }
+
+  void _scheduleHideControls() {
+    _hideControlsTimer?.cancel();
+    _hideControlsTimer = Timer(_hideControlsDelay, () {
+      if (mounted) setState(() => _controlsVisible = false);
+    });
+  }
+
   Future<void> _startAutoScroll() async {
     if (!mounted || !_scrollCtrl.hasClients) return;
 
@@ -93,6 +113,7 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
     final ms = (remaining / scrollSpeed * 1000).round().clamp(3000, 120000);
 
     setState(() => _autoScrolling = true);
+    _scheduleHideControls();
 
     try {
       await _scrollCtrl.animateTo(
@@ -109,6 +130,7 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
     if (!_scrollCtrl.hasClients) return;
     _scrollCtrl.jumpTo(_scrollCtrl.offset);
     if (mounted) setState(() => _autoScrolling = false);
+    _showControls();
   }
 
   void _toggleAutoScroll() {
@@ -179,6 +201,7 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
   void dispose() {
     _ambientCtrl.dispose();
     _scrollCtrl.dispose();
+    _hideControlsTimer?.cancel();
     routeObserver.unsubscribe(this);
     BiographyAudioController.release();
     super.dispose();
@@ -208,18 +231,27 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
         ),
 
         floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-        floatingActionButton: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildAudioControls(),
-            const SizedBox(height: 12),
-            _buildControls(),
-          ],
+        floatingActionButton: AnimatedOpacity(
+          opacity: _controlsVisible ? 1 : 0,
+          duration: _controlsFadeDuration,
+          curve: Curves.easeInOut,
+          child: IgnorePointer(
+            ignoring: !_controlsVisible,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildAudioControls(),
+                const SizedBox(height: 12),
+                _buildControls(),
+              ],
+            ),
+          ),
         ),
 
         body: NotificationListener<ScrollNotification>(
           onNotification: (n) {
             if (n is ScrollStartNotification && n.dragDetails != null) {
+              _showControls();
               if (_autoScrolling) _stopAutoScroll();
             }
             return false;
