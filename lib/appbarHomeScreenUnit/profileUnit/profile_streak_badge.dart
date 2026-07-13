@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
 
-/// نمایش شماره روز شمار فعلی در یک بج کوچک و جذاب
 class StreakBadge extends StatelessWidget {
   final int streak;
 
@@ -47,7 +46,6 @@ class StreakBadge extends StatelessWidget {
   }
 }
 
-/// نمایش پیام اطلاعات روز شمار — وضعیت فعلی و تعداد روزهای باقی‌مانده تا رکورد
 void showStreakInfo(BuildContext context, int streak, int bestStreak) {
   final String message;
   if (streak <= 0) {
@@ -64,7 +62,6 @@ void showStreakInfo(BuildContext context, int streak, int bestStreak) {
   AppSnackBarService.info(context, message);
 }
 
-/// نمایش راهنمای روز شمار — توضیح منطق و قوانین روز شمار
 void showStreakGuide(BuildContext context) {
   AppSnackBarService.info(
     duration: const Duration(seconds: 7),
@@ -75,7 +72,6 @@ void showStreakGuide(BuildContext context) {
   );
 }
 
-/// کارت انگیزشی روز شمار — نمایش رکورد فعلی، بهترین رکورد و پیام انگیزشی
 class StreakMotivationCard extends StatelessWidget {
   final int currentStreak;
   final int bestStreak;

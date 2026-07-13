@@ -23,7 +23,6 @@ class HeroAnimationBiography extends StatelessWidget {
       height: size.height,
       child: Stack(
         children: [
-          // Background
           Container(
             decoration: const BoxDecoration(
               gradient: RadialGradient(
@@ -33,8 +32,6 @@ class HeroAnimationBiography extends StatelessWidget {
               ),
             ),
           ),
-
-          // Particles
           AnimatedBuilder(
             animation: animation,
             builder: (_, _) {
@@ -44,8 +41,6 @@ class HeroAnimationBiography extends StatelessWidget {
               );
             },
           ),
-
-          // Moon
           Positioned(
             top: size.height * 0.08,
             right: size.width * 0.12,
@@ -76,8 +71,6 @@ class HeroAnimationBiography extends StatelessWidget {
               },
             ),
           ),
-
-          // Skyline
           Positioned(
             bottom: 0,
             left: 0,
@@ -87,8 +80,6 @@ class HeroAnimationBiography extends StatelessWidget {
               painter: SkylinePainter(),
             ),
           ),
-
-          // Text
           Positioned(
             bottom: size.height * 0.30,
             left: 24,
@@ -117,7 +108,7 @@ class HeroAnimationBiography extends StatelessWidget {
                 const SizedBox(height: 40),
 
                 Transform.translate(
-                  offset: const Offset(0, -30), // فقط این جمله بالا میاد
+                  offset: const Offset(0, -30),
                   child: Text(
                     'خواجه شمس‌الدین محمد\nزبان غزل پارسی و صدای جانِ شیراز',
                     textAlign: TextAlign.center,
@@ -132,7 +123,6 @@ class HeroAnimationBiography extends StatelessWidget {
               ],
             ),
           ),
-          // Hint
           Positioned(
             bottom: 22,
             left: 0,

@@ -1,5 +1,3 @@
-// lib/core/constants/app_icons.dart
-
 class AppIcons {
   AppIcons._();
 

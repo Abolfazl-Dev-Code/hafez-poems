@@ -10,6 +10,7 @@ class ActionMenu extends StatelessWidget {
     required this.isDark,
     required this.onCopy,
     required this.onToggleHighlight,
+    required this.onShareAsImage,
     required this.onClose,
   });
 
@@ -18,7 +19,15 @@ class ActionMenu extends StatelessWidget {
   final bool isDark;
   final VoidCallback onCopy;
   final VoidCallback onToggleHighlight;
+  final VoidCallback onShareAsImage;
   final VoidCallback onClose;
+
+  static const int itemCount = 4;
+  static const double itemHeight = 46;
+  static const double dividerHeight = 1;
+
+  static double estimatedHeight() =>
+      itemCount * itemHeight + (itemCount - 1) * dividerHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -39,13 +48,18 @@ class ActionMenu extends StatelessWidget {
         label: isHighlighted ? 'حذف هایلایت' : 'هایلایت مصرع',
         onTap: onToggleHighlight,
       ),
+      MenuItemData(
+        icon: Icons.image_rounded,
+        label: 'اشتراک گذاری مصرع دلخواه',
+        onTap: onShareAsImage,
+      ),
       MenuItemData(icon: Icons.close_rounded, label: 'بستن', onTap: onClose),
     ];
 
     return Material(
       color: Colors.transparent,
       child: Container(
-        width: 210,
+        width: 230,
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: bg,

@@ -28,14 +28,9 @@ class ThemeRevealService {
     final overlay = Overlay.of(context);
     final size = MediaQuery.of(context).size;
     final pixelRatio = MediaQuery.of(context).devicePixelRatio;
-
-    // ۱) اسکرین‌شات بدون هیچ تبدیلی — ui.Image مستقیم، بدون PNG
     final ui.Image snapshot = await boundary.toImage(pixelRatio: pixelRatio);
-
     final maxRadius = _maxRadiusFromOrigin(origin, size);
 
-    // ۲) ابتدا overlay را اضافه کن تا صفحه پوشانده بشه
-    //    سپس تم رو عوض کن — این ترتیب فلیکر را حذف می‌کند
     _entry = OverlayEntry(
       builder: (_) => _CircleRevealOverlay(
         snapshot: snapshot,
@@ -53,8 +48,6 @@ class ThemeRevealService {
     );
 
     overlay.insert(_entry!);
-
-    // ۳) تم را در فریم بعدی عوض کن (overlay الان روی صفحه است)
     WidgetsBinding.instance.addPostFrameCallback((_) => onSwitch());
   }
 
@@ -177,15 +170,12 @@ class _RevealPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     canvas.save();
 
-    // کلیپ دایره‌ای — مستقیم روی canvas بدون ClipPath widget
     final circlePath = Path()
       ..addOval(Rect.fromCircle(center: origin, radius: radius));
 
     if (toDark) {
-      // تم شب: دایره قدیمی (روشن) کوچک می‌شه
       canvas.clipPath(circlePath);
     } else {
-      // تم روز: دایره قدیمی (تاریک) کوچک می‌شه
       final fullPath = Path()
         ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
       final invertedPath = Path.combine(
@@ -196,7 +186,6 @@ class _RevealPainter extends CustomPainter {
       canvas.clipPath(invertedPath);
     }
 
-    // رسم ui.Image مستقیم — بدون encode/decode PNG
     final src = Rect.fromLTWH(
       0,
       0,

@@ -14,10 +14,9 @@ class AudioPlayerWidget extends StatefulWidget {
   final String title;
   final Future<String> Function(String id)? fetchAudioUrl;
   final AudioPlayerController controller;
-  final VerseSyncController? verseSyncController; // ← اضافه کن
-  final void Function(RecitationInfo recitation)?
-  onRecitationChanged; // ← اضافه
-  final ValueChanged<bool>? onExpansionChanged; // ← اضافه
+  final VerseSyncController? verseSyncController;
+  final void Function(RecitationInfo recitation)? onRecitationChanged;
+  final ValueChanged<bool>? onExpansionChanged;
 
   const AudioPlayerWidget({
     super.key,
@@ -26,9 +25,9 @@ class AudioPlayerWidget extends StatefulWidget {
     required this.title,
     required this.controller,
     this.fetchAudioUrl,
-    this.verseSyncController, // ← اضافه کن
-    this.onRecitationChanged, // ← اضافه
-    this.onExpansionChanged, // ← اضافه
+    this.verseSyncController,
+    this.onRecitationChanged,
+    this.onExpansionChanged,
   });
 
   @override
@@ -37,7 +36,7 @@ class AudioPlayerWidget extends StatefulWidget {
 
 class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   bool _initialized = false;
-  bool _isExpanded = false; // ← اضافه: حالت باز/بسته پلیر
+  bool _isExpanded = false;
 
   @override
   void initState() {
@@ -57,7 +56,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
   @override
   void dispose() {
-    widget.controller.onUserMessage = null; // ← این خط را هم اضافه کن
+    widget.controller.onUserMessage = null;
     super.dispose();
   }
 
@@ -100,16 +99,11 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
         ctrl.selectedRecitation != null &&
         ctrl.selectedRecitation!.xmlText.isNotEmpty) {
       widget.verseSyncController!.loadSyncPoints(
-        ctrl.selectedRecitation!.xmlText, // ← به جای id
+        ctrl.selectedRecitation!.xmlText,
       );
     } else {
       debugPrint('SYNC_CHECK_5 SKIPPED');
     }
-
-    // ====================== CHANGE ======================
-    // فایل صوتی فقط بعد از باز شدن پلیر لود می‌شود.
-    // دیگر هنگام ورود به صفحه هیچ بررسی‌ای انجام نمی‌شود.
-    // ====================================================
 
     final selectedUrl = ctrl.selectedRecitation?.mp3Url ?? widget.audioUrl;
 
@@ -156,7 +150,6 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     );
   }
 
-  /// ── نوار بسته‌شده: شبیه نوار اکشن؛ کلیک فقط پلیر را باز می‌کند ──
   Widget _buildCollapsedBar() {
     return Material(
       color: Colors.transparent,
@@ -194,7 +187,6 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     );
   }
 
-  /// ── پلیر کامل و باز: عیناً طراحی اصلی + دکمه‌ای برای جمع کردن دوباره ──
   Widget _buildExpandedPlayer(
     BuildContext context,
     AudioPlayerController ctrl,
@@ -227,18 +219,14 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // ── ۱. انتخاب خواننده ──────────────────────────
             RecitationDropdown(
               ctrl: ctrl,
               poemId: widget.id,
               theme: theme,
               cs: cs,
-              onRecitationChanged: widget.onRecitationChanged, // ← اضافه
+              onRecitationChanged: widget.onRecitationChanged,
             ),
-
             const SizedBox(height: 4),
-
-            // ── ۲. Slider ────────────────────────────────────
             SliderTheme(
               data: SliderTheme.of(context).copyWith(
                 trackHeight: 4.0,
@@ -262,8 +250,6 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                     : null,
               ),
             ),
-
-            // ── ۳. زمان ──────────────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
@@ -285,12 +271,9 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
               ),
             ),
             const SizedBox(height: 0),
-
-            // ── ۵. دکمه‌های کنترل + سرعت پخش در گوشه ────────────
             Stack(
               alignment: Alignment.center,
               children: [
-                // ── stop و play/pause دقیقاً وسط ──
                 Directionality(
                   textDirection: TextDirection.rtl,
                   child: Row(
@@ -310,8 +293,6 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                     ],
                   ),
                 ),
-
-                // ── سرعت پخش — گوشه راست ──
                 Positioned(
                   right: 10,
                   child: SpeedButtons(ctrl: ctrl, cs: cs, theme: theme),

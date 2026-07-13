@@ -12,10 +12,6 @@ class RecitationService {
   static const String _prefKeyPrefix = 'selected_recitation_';
 
   // ── دریافت لیست خوانندگان ─────────────────────────────
-
-  /// لیست تمام خوانندگان موجود برای یک شعر
-  /// endpoint: GET /api/ganjoor/poem/{id}/recitations
-  // lib/services/recitation_service.dart
   Future<List<RecitationInfo>> fetchRecitations(String poemId) async {
     try {
       final url = Uri.parse('$_base/api/ganjoor/poem/$poemId/recitations');
@@ -48,10 +44,6 @@ class RecitationService {
   }
 
   // ── دریافت زمان‌بندی مصراع‌ها ─────────────────────────
-
-  /// زمان‌بندی هر مصراع برای یک خواننده خاص
-  /// endpoint: GET /api/ganjoor/poem/{id}/recitations/{recitationId}
-  /// فیلد syncArray در پاسخ حاوی verseOrder و audioMiliseconds است
   Future<List<VerseSyncPoint>> fetchSyncPoints(String xmlUrl) async {
     if (xmlUrl.isEmpty) return [];
     try {
@@ -93,8 +85,6 @@ class RecitationService {
   }
 
   // ── ذخیره و بازیابی انتخاب خواننده ───────────────────
-
-  /// ذخیره انتخاب خواننده برای این شعر
   Future<void> saveSelectedRecitation(
     String poemId,
     RecitationInfo recitation,
@@ -108,7 +98,6 @@ class RecitationService {
     );
   }
 
-  /// بازیابی خواننده ذخیره‌شده برای این شعر
   Future<RecitationInfo?> loadSelectedRecitation(String poemId) async {
     final prefs = await SharedPreferences.getInstance();
     final id = prefs.getInt('${_prefKeyPrefix}id_$poemId');

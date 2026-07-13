@@ -19,20 +19,11 @@ class ThemeModeIconToggle extends StatefulWidget {
 class _ThemeModeIconToggleState extends State<ThemeModeIconToggle>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
-
-  // همه انیمیشن‌ها یک بار ساخته می‌شن — بدون rebuild
-  late final Animation<double> _rotateAnim; // همیشه 0 → 1
+  late final Animation<double> _rotateAnim;
   late final Animation<double> _scaleAnim;
   late final Animation<double> _glowAnim;
-
-  // جهت چرخش: +1.0 = راست (خورشید)، -1.0 = چپ (ماه)
-  // این یه متغیر ساده‌ست — نه Animation، نه Tween جدید
   double _rotateDirection = 1.0;
-
-  // آیکون مبدا انیمیشن (قبل از تعویض)
   late bool _animFrom;
-
-  // وقتی tap شروع کرده، از didUpdateWidget جلوگیری می‌کنه
   bool _tapInProgress = false;
 
   @override
@@ -44,8 +35,6 @@ class _ThemeModeIconToggleState extends State<ThemeModeIconToggle>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
-
-    // ساخت یک‌باره همه انیمیشن‌ها
     _rotateAnim = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -61,8 +50,6 @@ class _ThemeModeIconToggleState extends State<ThemeModeIconToggle>
       TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 50),
       TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 50),
     ]).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
-
-    // وقتی انیمیشن تموم شد، flag رو پاک کن
     _ctrl.addStatusListener((status) {
       if (status == AnimationStatus.completed ||
           status == AnimationStatus.dismissed) {
@@ -74,10 +61,8 @@ class _ThemeModeIconToggleState extends State<ThemeModeIconToggle>
   @override
   void didUpdateWidget(ThemeModeIconToggle old) {
     super.didUpdateWidget(old);
-    // فقط برای تغییر تم از بیرون (مثل تم سیستم) — نه از tap این دکمه
     if (old.isDarkMode != widget.isDarkMode && !_tapInProgress) {
       if (!_ctrl.isAnimating) {
-        // تغییر خارجی: جهت و مبدا رو آپدیت کن و انیمیشن بزن
         _rotateDirection = widget.isDarkMode ? -1.0 : 1.0;
         setState(() => _animFrom = old.isDarkMode);
         _ctrl.forward(from: 0);
@@ -102,12 +87,6 @@ class _ThemeModeIconToggleState extends State<ThemeModeIconToggle>
 
     return GestureDetector(
       onTap: () {
-        // ─── جهت چرخش ───────────────────────────────────────────────────────
-        // رفتن به تم شب (ماه)  → چرخش چپ  -1.0
-        // رفتن به تم روز (خورشید) → چرخش راست +1.0
-        // !widget.isDarkMode = مقصد:
-        //   مقصد=true  (شب/ماه)   → -1.0
-        //   مقصد=false (روز/خورشید) → +1.0
         _rotateDirection = !widget.isDarkMode ? -1.0 : 1.0;
 
         _tapInProgress = true;
@@ -129,10 +108,6 @@ class _ThemeModeIconToggleState extends State<ThemeModeIconToggle>
       child: AnimatedBuilder(
         animation: _ctrl,
         builder: (context, _) {
-          // آیکون فعلی:
-          //   وقتی انیمیشن اجرا نمی‌شه → همیشه widget.isDarkMode
-          //   قبل از نقطه ۵۰٪       → _animFrom (آیکون قدیمی)
-          //   بعد از نقطه ۵۰٪       → !_animFrom (آیکون جدید)
           final bool currentIsDark;
           if (!_ctrl.isAnimating) {
             currentIsDark = widget.isDarkMode;
@@ -141,8 +116,6 @@ class _ThemeModeIconToggleState extends State<ThemeModeIconToggle>
           } else {
             currentIsDark = !_animFrom;
           }
-
-          // چرخش واقعی: مقدار 0→1 ضربدر جهت (+1 یا -1) = زاویه کامل
           final double rotationAngle =
               _rotateAnim.value * _rotateDirection * 2 * math.pi;
 
@@ -168,7 +141,6 @@ class _ThemeModeIconToggleState extends State<ThemeModeIconToggle>
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // پس‌زمینه گرادیان
                   Positioned.fill(
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 560),
@@ -193,8 +165,6 @@ class _ThemeModeIconToggleState extends State<ThemeModeIconToggle>
                       ),
                     ),
                   ),
-
-                  // آیکون واحد با چرخش جهت‌دار
                   Transform.scale(
                     scale: _scaleAnim.value,
                     child: Transform.rotate(

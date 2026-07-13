@@ -1,5 +1,3 @@
-// lib/services/poem_local_services.dart
-
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:hafez_poems/models/ghasayed_model.dart';

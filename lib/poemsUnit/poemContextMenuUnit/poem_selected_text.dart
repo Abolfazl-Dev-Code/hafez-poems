@@ -1,5 +1,3 @@
-// ── کاشی مصراع — دست نخورده نسبت به نسخه اصلی ────────────────────────────
-
 import 'package:flutter/material.dart';
 
 class PoemSelectedText extends StatelessWidget {
@@ -13,8 +11,8 @@ class PoemSelectedText extends StatelessWidget {
     required this.fontFamily,
     required this.fontColor,
     required this.onTap,
-    required this.isFlashing, // ← اضافه
-    this.onLongPress, // ← اضافه
+    required this.isFlashing,
+    this.onLongPress,
   });
 
   final String text;

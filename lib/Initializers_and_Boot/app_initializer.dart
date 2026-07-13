@@ -15,16 +15,10 @@ class AppInitializer {
     final themeController = ThemeController();
     await themeController.loadTheme();
     Get.put(themeController, permanent: true);
-
     Get.put(ProfileController(), permanent: true);
-
-    // 5: سرویس‌های غیر Hive
     await AudioBoot.init();
     await NotificationService.instance.init();
-
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-
-    // سرویس‌های کش + UserActionsController + preload
     await CacheServicesBoot.init();
     Get.put<UserActionsSaver>(UserActionsSaver(), permanent: true);
     CacheServicesBoot.preloadAll();

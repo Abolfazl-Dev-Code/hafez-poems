@@ -6,7 +6,7 @@ import 'package:hafez_poems/poemsUnit/poems/poem_screen.dart';
 
 class SearchResultTitle extends StatelessWidget {
   final SearchResult item;
-  final String query; // ← اضافه
+  final String query;
   const SearchResultTitle({super.key, required this.item, required this.query});
 
   List<TextSpan> _highlight(
@@ -62,8 +62,6 @@ class SearchResultTitle extends StatelessWidget {
     );
   }
 
-  /// بر اساس نوع نتیجه، fetchAudioUrl متناظرش رو برمی‌گردونه تا پلیر صدا
-  /// توی PoemScreen درست فعال بشه (نه فقط وابسته به audioUrl کش‌شده‌ی احتمالاً خالی)
   Future<String> Function(String id) _fetchAudioUrlFor(SearchResultType type) {
     switch (type) {
       case SearchResultType.ghazal:
@@ -132,10 +130,7 @@ class SearchResultTitle extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         text: TextSpan(
                           children: _highlight(
-                            _findMatchingLine(
-                              item.text,
-                              query,
-                            ), // ← تغییر اینجاست
+                            _findMatchingLine(item.text, query),
                             query,
                             theme.textTheme.bodySmall?.copyWith(
                               color: colorScheme.onSurfaceVariant,

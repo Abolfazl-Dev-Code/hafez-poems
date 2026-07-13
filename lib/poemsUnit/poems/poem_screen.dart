@@ -9,9 +9,9 @@ import 'package:hafez_poems/poemsUnit/poemContextMenuUnit/poem_line_context_menu
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
 import 'package:hafez_poems/poemsUnit/poemsActionBarUnit/poem_action_bar.dart';
 import 'package:hafez_poems/poemsUnit/poemContextMenuUnit/poem_selected_text.dart';
+import 'package:hafez_poems/poemsUnit/verseShareUnit/verse_share_sheet.dart';
 import 'package:hafez_poems/poemsUnit/verseSyncUnit/active_verse_indicator_widget.dart';
 import 'package:hafez_poems/poemsUnit/verseSyncUnit/verse_sync_controller.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/core/data/contracts/i_read_status_storage.dart';
@@ -23,7 +23,7 @@ class PoemScreenArgs {
   final String audioUrl;
   final Future<String> Function(String id) fetchText;
   final Future<String> Function(String id)? fetchAudioUrl;
-  final int? highlightLineIndex; // ← اضافه
+  final int? highlightLineIndex;
 
   const PoemScreenArgs({
     required this.id,
@@ -32,7 +32,7 @@ class PoemScreenArgs {
     required this.fetchText,
     this.audioUrl = '',
     this.fetchAudioUrl,
-    this.highlightLineIndex, // ← اضافه
+    this.highlightLineIndex,
   });
 
   bool get hasAudio => audioUrl.isNotEmpty || fetchAudioUrl != null;
@@ -69,12 +69,10 @@ class _PoemScreenState extends State<PoemScreen> {
   static const String _lineHeightKey = 'reading_line_height';
   static const String _fontFamilyKey = 'reading_font_family';
   static const String _fontColorKey = 'reading_font_color';
-  // ← اضافه: برای اندازه‌گیری واقعی ارتفاع نوار پایین
   final GlobalKey _bottomOverlayKey = GlobalKey();
   bool _isAudioExpanded = false;
   double? _collapsedOverlayHeight;
   double? _expandedOverlayHeight;
-  // ← اضافه: حداقل زمان حضور در صفحه برای ثبت «خوانده‌شده»
   static const Duration _minReadDuration = Duration(seconds: 9);
   Timer? _markAsReadTimer;
 
@@ -90,7 +88,8 @@ class _PoemScreenState extends State<PoemScreen> {
   bool _isSaved = false;
   int? _selectedLineIndex;
   final Set<int> _highlightedLineIndexes = {};
-
+  bool _isMultiLineSelecting = false;
+  final Set<int> _selectedShareLines = {};
   PoemScreenArgs get _args => widget.args;
 
   List<String> get _poemLines => _poemText
@@ -113,12 +112,12 @@ class _PoemScreenState extends State<PoemScreen> {
   void initState() {
     super.initState();
     _audioCtrl.addListener(_syncPosition);
-    _verseSyncCtrl.addListener(_onActiveVerseChanged); // ← اضافه
+    _verseSyncCtrl.addListener(_onActiveVerseChanged);
     _loadReadingSettings();
     _loadInitialActionsState();
-    _scheduleMarkAsRead(); // ← قبلاً: _markAsRead();
+    _scheduleMarkAsRead();
     _initText();
-    _scheduleMeasureBottomOverlay(); // ← اضافه
+    _scheduleMeasureBottomOverlay();
   }
 
   void _syncPosition() {
@@ -128,11 +127,9 @@ class _PoemScreenState extends State<PoemScreen> {
     _verseSyncCtrl.updatePosition(_audioCtrl.position);
   }
 
-  // ── اسکرول خودکار بر اساس خطِ سینک‌شده ─────────────
-
   void _onActiveVerseChanged() {
     if (_userIsInteractingWithScroll) return;
-    if (_isContextMenuOpen) return; // ← اضافه کن
+    if (_isContextMenuOpen) return;
 
     final order = _verseSyncCtrl.activeVerseOrder;
     if (order < 0) return;
@@ -144,14 +141,13 @@ class _PoemScreenState extends State<PoemScreen> {
     });
   }
 
-  /// اسکرول نرم به خطِ مشخص‌شده، با لنگرگاهِ تقریباً یک‌سومِ بالای صفحه
   Future<void> _scrollToLineIndex(
     int index, {
     Duration duration = const Duration(milliseconds: 450),
     double anchorFraction = 1 / 3,
   }) async {
     if (!mounted) return;
-    if (_isContextMenuOpen) return; // ← اضافه کن
+    if (_isContextMenuOpen) return;
     final key = _lineKeys[index];
     final ctx = key?.currentContext;
     if (ctx == null) return;
@@ -189,7 +185,6 @@ class _PoemScreenState extends State<PoemScreen> {
     _resumeAutoScrollTimer = Timer(const Duration(seconds: 4), () {
       if (!mounted) return;
       _userIsInteractingWithScroll = false;
-      // اجازه بده با موقعیت فعلیِ پخش دوباره سینک شه
       _lastAutoScrolledVerseOrder = null;
       _onActiveVerseChanged();
     });
@@ -231,18 +226,7 @@ class _PoemScreenState extends State<PoemScreen> {
   void _sharePoem() {
     if (_isTextLoading || _poemText.isEmpty) return;
 
-    final buffer = StringBuffer();
-    buffer.writeln('📜 ${_args.title}');
-    buffer.writeln();
-    buffer.writeln(_poemText.trim());
-    buffer.writeln();
-    buffer.writeln('—');
-    buffer.writeln('اشعار حافظ - دیوان');
-    buffer.writeln(
-      'https://github.com/Abolfazl-Dev-Code/hafez-poems/releases/',
-    );
-
-    SharePlus.instance.share(ShareParams(text: buffer.toString()));
+    showVerseShareSheet(context, verseText: _poemText, poemTitle: _args.title);
   }
 
   void _initText() {
@@ -266,7 +250,6 @@ class _PoemScreenState extends State<PoemScreen> {
     });
   }
 
-  //new
   Future<void> _showLineMenu(int index, LongPressStartDetails details) async {
     if (_contextMenuController.isOpen) return;
 
@@ -278,7 +261,7 @@ class _PoemScreenState extends State<PoemScreen> {
     final targetOffset = renderObject.localToGlobal(Offset.zero);
 
     HapticFeedback.mediumImpact();
-    _pauseAutoScroll(); // ← اضافه کن
+    _pauseAutoScroll();
     setState(() {
       _selectedLineIndex = index;
       _menuOpenLineIndex = index;
@@ -294,7 +277,7 @@ class _PoemScreenState extends State<PoemScreen> {
       isHighlighted: _highlightedLineIndexes.contains(index),
       lineBuilder: (ctx) => PoemSelectedText(
         text: _poemLines[index],
-        isSelected: true,
+        isSelected: _selectedShareLines.contains(index),
         isHighlighted: _highlightedLineIndexes.contains(index),
         fontSize: _fontSize,
         lineHeight: _lineHeight,
@@ -308,17 +291,199 @@ class _PoemScreenState extends State<PoemScreen> {
         _selectedLineIndex = index;
         _toggleHighlight();
       },
+      onShareAsImage: () => _showShareModeSheet(index),
       onClosed: () {
         if (!mounted) return;
         setState(() {
           _menuOpenLineIndex = null;
           _selectedLineIndex = null;
         });
-        _resumeAutoScrollImmediately(); // ← اضافه کن
+        _resumeAutoScrollImmediately();
       },
     );
   }
-  //new
+
+  void _startMultiLineSelection(int index) {
+    setState(() {
+      _isMultiLineSelecting = true;
+      _selectedShareLines
+        ..clear()
+        ..add(index);
+    });
+  }
+
+  void _showShareModeSheet(int index) {
+    final theme = Theme.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      builder: (_) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'اشتراک‌گذاری مصرع',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  'انتخاب کنید فقط همین مصرع یا چند مصرع را به اشتراک بگذارید.',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () {
+                    Navigator.pop(context);
+
+                    showVerseShareSheet(
+                      context,
+                      verseText: _poemLines[index],
+                      poemTitle: _args.title,
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 14,
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 22,
+                          backgroundColor: theme.colorScheme.primary.withValues(
+                            alpha: .12,
+                          ),
+                          child: Icon(
+                            Icons.text_fields_rounded,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+
+                        const SizedBox(width: 16),
+
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'همین مصرع',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'اشتراک‌گذاری فقط همین مصرع',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        Icon(
+                          Icons.chevron_left_rounded,
+                          color: theme.colorScheme.outline,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                Divider(
+                  height: 20,
+                  color: theme.dividerColor.withValues(alpha: .5),
+                ),
+
+                InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _startMultiLineSelection(index);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 14,
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 22,
+                          backgroundColor: theme.colorScheme.primary.withValues(
+                            alpha: .12,
+                          ),
+                          child: Icon(
+                            Icons.library_books_rounded,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+
+                        const SizedBox(width: 16),
+
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'انتخاب چند مصرع',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'ادامه انتخاب و اشتراک چند مصرع',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        Icon(
+                          Icons.chevron_left_rounded,
+                          color: theme.colorScheme.outline,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _toggleShareLineSelection(int index) {
+    setState(() {
+      if (_selectedShareLines.contains(index)) {
+        _selectedShareLines.remove(index);
+      } else {
+        _selectedShareLines.add(index);
+      }
+    });
+  }
 
   Future<void> _fetchPoemText() async {
     setState(() {
@@ -451,7 +616,7 @@ class _PoemScreenState extends State<PoemScreen> {
 
   @override
   void dispose() {
-    _contextMenuController.dispose(); // ← اضافه
+    _contextMenuController.dispose();
     _markAsReadTimer?.cancel();
     _resumeAutoScrollTimer?.cancel();
     _verseSyncCtrl.removeListener(_onActiveVerseChanged);
@@ -467,16 +632,14 @@ class _PoemScreenState extends State<PoemScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
-    const double breathingRoom = 16; // فاصله‌ی نفس بین متن شعر و نوار اکشن
-    final double bottomInset = _args.hasAudio
-        ? 10
-        : 110; // همون bottom پایین Positioned
+    const double breathingRoom = 16;
+    final double bottomInset = _args.hasAudio ? 10 : 110;
     final double overlayHeight = !_args.hasAudio
         ? 0
         : (_isAudioExpanded
                   ? _expandedOverlayHeight
                   : _collapsedOverlayHeight) ??
-              150; // تخمین اولیه تا قبل از اولین اندازه‌گیری
+              150;
     final double bottomPadding =
         (_args.hasAudio ? overlayHeight + bottomInset : 110) + breathingRoom;
 
@@ -485,33 +648,93 @@ class _PoemScreenState extends State<PoemScreen> {
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          toolbarHeight: 50, // پیش‌فرض 56 هست، می‌تونی هر عددی که خواستی بگذاری
-          title: Text(
-            _args.title.toPersianNumbers(),
-            style: textTheme.headlineMedium,
-          ),
-          leading: Padding(
-            padding: const EdgeInsets.only(right: 22.0),
-            child: IconButton(
-              iconSize: 25,
-              icon: const Icon(Icons.arrow_back_rounded),
-              onPressed: () {
-                Navigator.of(context).pop();
-                if (_args.hasAudio) _audioCtrl.stop();
-              },
-            ),
-          ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(left: 18.0),
-              child: IconButton(
-                icon: const Icon(Icons.share_rounded),
-                iconSize: 21,
-                onPressed: _isTextLoading ? null : _sharePoem,
-                tooltip: 'اشتراک‌گذاری',
-              ),
-            ),
-          ],
+          toolbarHeight: 50,
+
+          automaticallyImplyLeading: false,
+
+          leading: _isMultiLineSelecting
+              ? null
+              : Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: IconButton(
+                    iconSize: 25,
+                    icon: const Icon(Icons.arrow_back_rounded),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      if (_args.hasAudio) _audioCtrl.stop();
+                    },
+                  ),
+                ),
+
+          titleSpacing: 35,
+
+          title: _isMultiLineSelecting
+              ? Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    '${_selectedShareLines.length} مصرع انتخاب شده'
+                        .toPersianNumbers(),
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                )
+              : Text(_args.title, style: textTheme.headlineMedium),
+
+          actions: _isMultiLineSelecting
+              ? [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _isMultiLineSelecting = false;
+                              _selectedShareLines.clear();
+                            });
+                          },
+                          child: const Text('لغو'),
+                        ),
+                        TextButton(
+                          onPressed: _selectedShareLines.isEmpty
+                              ? null
+                              : () {
+                                  final indexes = _selectedShareLines.toList()
+                                    ..sort();
+
+                                  final text = indexes
+                                      .map((i) => _poemLines[i])
+                                      .join('\n');
+
+                                  setState(() {
+                                    _isMultiLineSelecting = false;
+                                    _selectedShareLines.clear();
+                                  });
+
+                                  showVerseShareSheet(
+                                    context,
+                                    verseText: text,
+                                    poemTitle: _args.title,
+                                  );
+                                },
+                          child: const Text('تایید'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ]
+              : [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: IconButton(
+                      icon: const Icon(Icons.share_rounded),
+                      iconSize: 21,
+                      onPressed: _isTextLoading ? null : _sharePoem,
+                    ),
+                  ),
+                ],
         ),
         body: Stack(
           children: [
@@ -589,13 +812,16 @@ class _PoemScreenState extends State<PoemScreen> {
                                       child: KeyedSubtree(
                                         key: verseKey,
                                         child: Opacity(
-                                          // هنگام باز بودن منو، نسخه‌ی اصلی مخفی می‌شود چون کپی شناورش دیده می‌شود
                                           opacity: _menuOpenLineIndex == i
                                               ? 0
                                               : 1,
                                           child: PoemSelectedText(
                                             text: _poemLines[i],
-                                            isSelected: _selectedLineIndex == i,
+                                            isSelected: _isMultiLineSelecting
+                                                ? _selectedShareLines.contains(
+                                                    i,
+                                                  )
+                                                : _selectedLineIndex == i,
                                             isHighlighted:
                                                 _highlightedLineIndexes
                                                     .contains(i),
@@ -604,20 +830,25 @@ class _PoemScreenState extends State<PoemScreen> {
                                             isFlashing: isFlashing,
                                             fontFamily: _fontFamily,
                                             fontColor: _fontColor,
-                                            onTap: () => setState(() {
-                                              _selectedLineIndex =
-                                                  _selectedLineIndex == i
-                                                  ? null
-                                                  : i;
-                                            }),
+                                            onTap: () {
+                                              if (_isMultiLineSelecting) {
+                                                _toggleShareLineSelection(i);
+                                                return;
+                                              }
+
+                                              setState(() {
+                                                _selectedLineIndex =
+                                                    _selectedLineIndex == i
+                                                    ? null
+                                                    : i;
+                                              });
+                                            },
                                             onLongPress: (details) =>
                                                 _showLineMenu(i, details),
                                           ),
                                         ),
                                       ),
                                     );
-                                    // space between indicator and text
-
                                     return Padding(
                                       key: _lineKeys[i] ??= GlobalKey(),
                                       padding: const EdgeInsets.only(
@@ -631,8 +862,7 @@ class _PoemScreenState extends State<PoemScreen> {
                                               children: [
                                                 SizedBox(
                                                   width: indicatorSlotSize,
-                                                  height:
-                                                      indicatorSlotSize, // ← این خط کلید حل مسئله است
+                                                  height: indicatorSlotSize,
                                                   child: Center(
                                                     child: AnimatedSwitcher(
                                                       duration: const Duration(
@@ -685,13 +915,12 @@ class _PoemScreenState extends State<PoemScreen> {
                       ),
                     ),
             ),
-            // ── نوار اکشن + پلیر صدا (دقیقاً زیر هم، فاصله ۵ پیکسل) ──
             Positioned(
               left: 12,
               right: 12,
               bottom: _args.hasAudio ? 10 : 100,
               child: Column(
-                key: _bottomOverlayKey, // ← اضافه
+                key: _bottomOverlayKey,
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -723,9 +952,7 @@ class _PoemScreenState extends State<PoemScreen> {
                         }
                       },
                       onExpansionChanged: (expanded) {
-                        // ← اضافه
                         setState(() => _isAudioExpanded = expanded);
-                        // صبر تا انیمیشن AnimatedSize پلیر (۲۲۰ms) کامل شود، بعد اندازه واقعی گرفته شود
                         _scheduleMeasureBottomOverlay(
                           delay: const Duration(milliseconds: 260),
                         );

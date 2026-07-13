@@ -4,14 +4,14 @@ class PoemListTitle extends StatelessWidget {
   final String title;
   final bool hasFullText;
   final VoidCallback onTap;
-  final bool isRead; // ← اضافه
+  final bool isRead;
 
   const PoemListTitle({
     super.key,
     required this.title,
     required this.hasFullText,
     required this.onTap,
-    this.isRead = false, // ← اضافه
+    this.isRead = false,
   });
 
   @override

@@ -28,7 +28,6 @@ class SettingPage extends StatefulWidget {
   State<SettingPage> createState() => _SettingPageState();
 }
 
-// ✅ تغییر ۱: AutomaticKeepAliveClientMixin اضافه شد تا صفحه در حافظه بماند
 class _SettingPageState extends State<SettingPage>
     with AutomaticKeepAliveClientMixin {
   static const String _fontSizePrefKey = 'reading_font_size';
@@ -46,8 +45,6 @@ class _SettingPageState extends State<SettingPage>
   int _reminderMinute = 0;
   String _appVersion = '...';
   bool _isTogglingReminder = false;
-
-  // ✅ تغییر ۲: AnimationController بلااستفاده حذف شد
 
   static const fontOptions = [
     {'label': 'وزیر', 'value': 'vazir'},
@@ -69,18 +66,15 @@ class _SettingPageState extends State<SettingPage>
     Color(0xFFFFFFFF),
   ];
 
-  // ✅ تغییر ۱: وانت‌کیپ‌الایو برای ماندن صفحه در حافظه
   @override
   bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
-    // ✅ تغییر ۳: لودها موازی اجرا می‌شوند
     Future.wait([_loadSettings(), _loadAppVersion()]);
   }
 
-  // ✅ تغییر ۲: dispose فقط چیزهایی که واقعاً وجود دارند
   @override
   void dispose() {
     super.dispose();
@@ -98,8 +92,6 @@ class _SettingPageState extends State<SettingPage>
 
     final savedFont = prefs.getString(_fontFamilyPrefKey) ?? 'vazir';
     final savedReminder = prefs.getBool(_dailyReminderPrefKey) ?? false;
-
-    // ✅ تغییر ۴: timeout برای جلوگیری از hang شدن
     final isReminderScheduled = await NotificationService.instance
         .isDailyReminderScheduled()
         .timeout(
@@ -304,7 +296,6 @@ class _SettingPageState extends State<SettingPage>
 
   @override
   Widget build(BuildContext context) {
-    // ✅ تغییر ۱: این خط الزامی است برای AutomaticKeepAliveClientMixin
     super.build(context);
 
     final ThemeController themeController = Get.find<ThemeController>();
@@ -374,7 +365,6 @@ class _SettingPageState extends State<SettingPage>
                                 darkMode
                                     ? 'حالت تیره فعال است'
                                     : 'حالت روشن فعال است',
-                                // ✅ key الزامی است — بدون آن AnimatedSwitcher تفاوت را تشخیص نمی‌دهد
                                 key: ValueKey(darkMode),
                                 style: textTheme.bodySmall?.copyWith(
                                   color: colorScheme.onSurface.withValues(
@@ -732,7 +722,6 @@ class _SettingPageState extends State<SettingPage>
                   ),
                 ],
               ),
-
               // ── اشتراک‌گذاری و حمایت ──────────────────────────────────
               SectionCard(
                 title: 'اشتراک‌گذاری و حمایت',

@@ -7,23 +7,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class VerseSyncController extends ChangeNotifier {
   bool _disposed = false;
-
   List<VerseSyncPoint> _syncPoints = [];
   int _activeVerseOrder = -1;
   bool _isLoadingSync = false;
-
   int get activeVerseOrder => _activeVerseOrder;
   bool get isLoadingSync => _isLoadingSync;
   bool get hasSyncData => _syncPoints.isNotEmpty;
-
   final _service = RecitationService();
-
-  // ── لید دستی (کاربر می‌تواند جلوتر/عقب‌تر ببرد) ─────
-  // مثبت = indicator جلوتر می‌رود (سریع‌تر واکنش می‌دهد)
-  // منفی = indicator عقب‌تر می‌رود
   int _manualLeadMs = 800;
   int get manualLeadMs => _manualLeadMs;
-
   static const _prefKeyLead = 'verse_sync_manual_lead_ms';
 
   Future<void> loadManualLead() async {

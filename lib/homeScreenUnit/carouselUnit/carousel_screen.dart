@@ -42,8 +42,6 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
   bool _videoPlaying = false;
   bool _isDark = false;
   Timer? _completionTimer;
-
-  // بعد
   Future<void>? _videoInitFuture;
   bool _isInitializingVideo = false;
 
@@ -58,7 +56,6 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
     _displayedGhazalNumber = widget.ghazalNumber;
   }
 
-  // بعد
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -102,7 +99,6 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
     return lines.join('\n');
   }
 
-  // بعد
   Future<void> _initFlipVideo(bool isDark) async {
     if (_isInitializingVideo) return;
     _isInitializingVideo = true;
@@ -156,8 +152,6 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
 
   Future<void> _handleRefreshTap() async {
     if (_isRefreshing) return;
-
-    // اگر ویدیو هنوز در حال آماده‌سازیه، کمی صبر کن
     if (_videoController == null && _videoInitFuture != null) {
       await _videoInitFuture!.timeout(
         const Duration(milliseconds: 1200),
@@ -293,7 +287,6 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
                     child: SlideTransition(position: slide, child: child),
                   );
                 },
-                // بعد
                 child: Align(
                   key: ValueKey(_displayedGhazal),
                   alignment: Alignment.centerRight,

@@ -7,13 +7,13 @@ class FalDialog extends StatefulWidget {
   final String title;
   final String poemText;
   final String tabirText;
-  final String falNumber; // ← اضافه
+  final String falNumber;
   const FalDialog({
     super.key,
     required this.title,
     required this.poemText,
     required this.tabirText,
-    required this.falNumber, // ← اضافه
+    required this.falNumber,
   });
 
   @override

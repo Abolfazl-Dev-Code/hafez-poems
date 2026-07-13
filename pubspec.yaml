@@ -36,6 +36,7 @@ dependencies:
   video_player: ^2.11.1
   drift: ^2.34.1
   drift_flutter: ^0.3.0
+  auto_size_text: ^3.0.0
 
 dev_dependencies:
   flutter_test:
@@ -56,20 +57,14 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/badge/github-badge.png
-    - assets/videos/hafez_flip_light_v2.webm
-    - assets/videos/hafez_flip_dark_v2.webm
+    - assets/images/
+    - assets/badge/
+    - assets/videos/
     - assets/audio/
-    - assets/audio/Jalal_Naghsh_Nilchi.mp3
-    - assets/sounds/page_flip.mp3
+    - assets/sounds/
     - assets/icons/
-    - assets/json/hafez_fal.json
-    - assets/json/hafez_ghazals.json
-    - assets/json/hafez_ghataat.json
-    - assets/json/hafez_qasaid.json
-    - assets/json/hafez_robaee.json
-    - assets/json/hafez_montasab.json
-    - assets/json/hafez_other.json
+    - assets/json/
+
   fonts:
     - family: morvarid
       fonts:

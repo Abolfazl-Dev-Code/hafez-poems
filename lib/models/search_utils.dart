@@ -1,6 +1,5 @@
 String normalize(String text) {
   return text
-      // ✅ تبدیل اعداد فارسی و عربی به انگلیسی
       .replaceAll('۰', '0')
       .replaceAll('٠', '0')
       .replaceAll('۱', '1')
@@ -21,7 +20,6 @@ String normalize(String text) {
       .replaceAll('٨', '8')
       .replaceAll('۹', '9')
       .replaceAll('٩', '9')
-      // موارد قبلی
       .replaceAll('\u064a', '\u06cc')
       .replaceAll('\u0643', '\u06a9')
       .replaceAll('\u200c', ' ')

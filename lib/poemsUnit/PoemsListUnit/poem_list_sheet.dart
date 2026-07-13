@@ -19,14 +19,12 @@ extension _ReadFilterLabel on _ReadFilter {
     _ReadFilter.unread => 'خوانده‌نشده',
   };
 
-  // آیکون غیرفعال — همیشه outline
   IconData get icon => switch (this) {
     _ReadFilter.all => Icons.format_list_bulleted_rounded,
     _ReadFilter.read => Icons.radio_button_unchecked_rounded,
     _ReadFilter.unread => Icons.radio_button_unchecked_rounded,
   };
 
-  // آیکون فعال — همیشه filled
   IconData get activeIcon => switch (this) {
     _ReadFilter.all => Icons.format_list_bulleted_rounded,
     _ReadFilter.read => Icons.check_circle_rounded,
@@ -98,11 +96,10 @@ class _PoemListSheetState extends State<PoemListSheet> {
     Get.to(() => PoemScreen(args: args));
   }
 
-  // ── Dropdown فیلتر ──
   void _showFilterDropdown(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final currentFilter = _filter; // ← snapshot صریح از مقدار فعلی
+    final currentFilter = _filter;
 
     final RenderBox button = context.findRenderObject() as RenderBox;
     final RenderBox overlay =
@@ -114,8 +111,6 @@ class _PoemListSheetState extends State<PoemListSheet> {
     );
     final Size buttonSize = button.size;
     final Size overlaySize = overlay.size;
-
-    // ── محاسبه‌ی موقعیت صحیح برای RTL ──
     final RelativeRect position = RelativeRect.fromLTRB(
       buttonOffset.dx,
       buttonOffset.dy + buttonSize.height + 4,
@@ -129,13 +124,11 @@ class _PoemListSheetState extends State<PoemListSheet> {
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       color: cs.surface,
-      // ← initialValue حذف شد؛ انتخاب بصری رو خودمون مدیریت می‌کنیم
       items: _ReadFilter.values.map((f) {
-        final isActive = currentFilter == f; // ← از snapshot استفاده می‌کنیم
+        final isActive = currentFilter == f;
         return PopupMenuItem<_ReadFilter>(
           value: f,
           padding: EdgeInsets.only(left: 12),
-          // ← enabled: true ولی هیچ selected state داخلی نداریم
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 120),
             width: 150,
@@ -164,7 +157,7 @@ class _PoemListSheetState extends State<PoemListSheet> {
                 ),
                 const SizedBox(width: 10),
                 Icon(
-                  isActive ? f.activeIcon : f.icon, // ← این خط
+                  isActive ? f.activeIcon : f.icon,
                   size: 18,
                   color: isActive
                       ? cs.primary
@@ -289,8 +282,6 @@ class _PoemListSheetState extends State<PoemListSheet> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-
-                    // ── دکمه‌ی فیلتر + badge ──
                     Builder(
                       builder: (btnCtx) => InkWell(
                         onTap: () => _showFilterDropdown(btnCtx),
@@ -346,8 +337,6 @@ class _PoemListSheetState extends State<PoemListSheet> {
                         ),
                       ),
                     ),
-
-                    // ── پیشرفت ایندکس‌گذاری ──
                     Obx(() {
                       final indexing = _cfg.isIndexing.value;
                       final progress = _cfg.loadingProgress.value;

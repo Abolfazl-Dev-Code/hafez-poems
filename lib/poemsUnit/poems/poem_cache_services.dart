@@ -45,7 +45,6 @@ abstract class BasePoemCacheService<T> extends GetxService {
     }
   }
 
-  // ── زیرکلاس پیاده‌سازی می‌کند ──────────────────
   String idOf(T item);
   String titleOf(T item);
   String textOf(T item);

@@ -1,4 +1,3 @@
-// ── تک‌خواننده ──
 import 'package:flutter/material.dart';
 
 class ArtistChip extends StatelessWidget {

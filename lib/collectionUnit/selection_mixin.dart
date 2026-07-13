@@ -30,9 +30,6 @@ mixin SelectionMixin<T extends StatefulWidget> on State<T> {
     }
   }
 
-  /// [E] نوع آیتم ذخیره‌شده است (LikedItem, SavedItem یا HighlightItem)؛
-  /// اسم پارامتر جنریک عمداً E است نه T، چون T از قبل توسط میکسین برای
-  /// نوع ویجت استفاده شده است.
   Future<void> deleteSelected<E>(
     BuildContext context,
     IKeyedItemStorage<E> storage,

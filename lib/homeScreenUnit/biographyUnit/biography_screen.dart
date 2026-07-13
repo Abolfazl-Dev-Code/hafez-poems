@@ -69,7 +69,6 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
     }
   }
 
-  /// توقف صدای بیوگرافی هنگام جابه‌جایی صفحه
   @override
   void didPushNext() {
     BiographyAudioController.stop();
@@ -119,7 +118,6 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
 
   void _onScroll() => _checkChapterVisibility();
 
-  /// بررسی دید‌پذیری فصل‌های بیوگرافی هنگام scroll
   void _checkChapterVisibility() {
     final screenH = MediaQuery.of(context).size.height;
     bool changed = false;
@@ -144,7 +142,6 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
     if (changed && mounted) setState(() {});
   }
 
-  /// دکمه کنترل پخش صدای بیوگرافی
   Widget _buildAudioControls() {
     return ValueListenableBuilder<bool>(
       valueListenable: BiographyAudioController.isPlayingNotifier,
@@ -166,7 +163,6 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
     );
   }
 
-  /// دکمه کنترل scroll خودکار صفحه
   Widget _buildControls() {
     return FloatingActionButton(
       heroTag: 'scroll_btn',

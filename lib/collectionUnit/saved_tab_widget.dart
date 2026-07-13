@@ -120,8 +120,6 @@ class _SavedTabState extends State<SavedTab> with SelectionMixin {
 
                     return;
                   }
-
-                  // غزل معمولی
                   Get.to(
                     () => PoemScreen(
                       args: PoemScreenArgs(

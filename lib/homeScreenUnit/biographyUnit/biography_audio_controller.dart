@@ -67,7 +67,6 @@ class BiographyAudioController {
     } catch (_) {}
   }
 
-  // ✅ توقف فوری (بدون آزاد کردن AudioTrack) — برای رفتن به صفحه‌ی فال
   static Future<void> stop() async {
     _generation++;
     isPlayingNotifier.value = false;
@@ -80,7 +79,6 @@ class BiographyAudioController {
     } catch (_) {}
   }
 
-  // ✅ NEW: آزادسازی کامل AudioTrack — برای خروج نهایی از صفحه‌ی بیوگرافی
   static Future<void> release() async {
     _generation++;
     isPlayingNotifier.value = false;

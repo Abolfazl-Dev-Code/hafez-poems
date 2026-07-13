@@ -67,18 +67,14 @@ class _BottomNavBarState extends State<BottomNavBar> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      // بدون bottomNavigationBar — نویگیشن بار داخل Stack روی body قرار می‌گیرد
       body: Stack(
         children: [
-          // PageView تمام صفحه را پر می‌کند
           PageView(
             controller: _pageController,
             onPageChanged: _onPageChanged,
             reverse: false,
             children: _pages,
           ),
-
-          // نویگیشن بار شناور روی محتوا
           Positioned(
             bottom: 0,
             left: 0,

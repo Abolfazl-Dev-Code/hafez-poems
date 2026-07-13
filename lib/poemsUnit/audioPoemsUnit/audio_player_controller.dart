@@ -1,3 +1,4 @@
+// ignore_for_file: empty_catches
 import 'dart:async';
 import 'dart:io';
 import 'package:audio_session/audio_session.dart';
@@ -8,13 +9,10 @@ import 'package:hafez_poems/Initializers_and_Boot/globals.dart';
 import 'package:hafez_poems/models/recitation_models.dart';
 import 'package:hafez_poems/poemsUnit/verseSyncUnit/recitation_service.dart';
 
-/// وضعیت ساده‌شده پلیر — جایگزین PlayerState از audioplayers
 enum HafezPlayerState { stopped, loading, paused, playing }
 
-/// دسته‌بندی داخلی مشکلاتی که ممکن است حین لود پیش بیاید
 enum _AudioIssue { noInternet, noAudioFile, slowConnection, ganjoorServerError }
 
-/// نتیجه‌ی بررسیِ اولیه‌ی در دسترس بودن فایل صوتی
 enum _AudioAvailability { available, notFound, noInternet, slow, serverError }
 
 class AudioPlayerController extends ChangeNotifier {
@@ -75,7 +73,6 @@ class AudioPlayerController extends ChangeNotifier {
     _onPositionChanged = callback;
   }
 
-  /// پخش صوت از حالت آماده (بدون نیاز به load مجدد)
   Future<void> playFromPrepared() async {
     if (!isAudioLoaded) {
       await load(
@@ -91,7 +88,6 @@ class AudioPlayerController extends ChangeNotifier {
     }
   }
 
-  /// آخرین وضعیت پخش‌کننده
   PlaybackState? _lastPlaybackState;
   Timer? _positionTicker;
   static const _tickInterval = Duration(milliseconds: 50);
@@ -180,17 +176,12 @@ class AudioPlayerController extends ChangeNotifier {
     _positionTicker = null;
   }
 
-  /// تنظیم سخنگو‌ی دستگاه (اسپیکر یا هدفون)
   Future<void> _setSpeaker(bool on) async {
     try {
       await _channel.invokeMethod(on ? 'setSpeakerOn' : 'setSpeakerOff');
-    } catch (e) {
-      // خطا در تنظیم اسپیکر نادیده گرفته می‌شود
-    }
+    } catch (e) {}
   }
 
-  /// بررسی اتصال مستقیم به اینترنت از طریق IP سرویس‌های معتبر
-  /// این روش از DNS استفاده نمی‌کند و از فیلترینگ DNS جلوگیری می‌کند
   Future<bool> _hasInternetConnection() async {
     const probes = ['1.1.1.1', '8.8.8.8'];
     for (final ip in probes) {
@@ -211,8 +202,6 @@ class AudioPlayerController extends ChangeNotifier {
     return false;
   }
 
-  /// بررسی وجود و دسترسی‌پذیری فایل صوتی از طریق درخواست Range
-  /// این روش نسبت به HEAD بسیار گسترده‌تر پشتیبانی می‌شود
   Future<_AudioAvailability> _checkAudioAvailability(String url) async {
     HttpClient? client;
     try {
@@ -303,9 +292,7 @@ class AudioPlayerController extends ChangeNotifier {
       try {
         url = await fetchAudioUrl(id).timeout(const Duration(seconds: 10));
         _lastAudioUrl = url;
-      } catch (e) {
-        // خطای دریافت URL نادیده گرفته می‌شود
-      }
+      } catch (e) {}
     }
 
     if (_disposed || myGeneration != _loadGeneration) return;
@@ -417,12 +404,9 @@ class AudioPlayerController extends ChangeNotifier {
       } else {
         await audioHandler.play();
       }
-    } catch (e) {
-      // خطا در toggle play/pause نادیده گرفته می‌شود
-    }
+    } catch (e) {}
   }
 
-  /// توقف پخش و آزادسازی منابع
   Future<void> stop() async {
     if (_disposed) return;
 
@@ -433,12 +417,9 @@ class AudioPlayerController extends ChangeNotifier {
       _state = HafezPlayerState.stopped;
       position = Duration.zero;
       _notify();
-    } catch (e) {
-      // خطا در توقف نادیده گرفته می‌شود
-    }
+    } catch (e) {}
   }
 
-  /// تغییر موقعیت پخش
   Future<void> seek(Duration pos) async {
     if (_disposed || !isAudioLoaded) return;
 
@@ -447,24 +428,18 @@ class AudioPlayerController extends ChangeNotifier {
       position = pos;
       _onPositionChanged?.call();
       _notify();
-    } catch (e) {
-      // خطا در seek نادیده گرفته می‌شود
-    }
+    } catch (e) {}
   }
 
-  /// تنظیم سرعت پخش
   Future<void> setPlaybackSpeed(double speed) async {
     if (_disposed) return;
     _playbackSpeed = speed;
     try {
       await audioHandler.customAction('setSpeed', {'speed': speed});
-    } catch (e) {
-      // خطا در تنظیم سرعت نادیده گرفته می‌شود
-    }
+    } catch (e) {}
     _notify();
   }
 
-  /// بارگذاری لیست تلاوت‌کنندگان برای شعر
   Future<void> loadRecitations(String poemId) async {
     if (_disposed) return;
 
@@ -489,7 +464,6 @@ class AudioPlayerController extends ChangeNotifier {
         _selectedRecitation = null;
       }
     } catch (e) {
-      // خطا در بارگذاری تلاوت‌کنندگان نادیده گرفته می‌شود
     } finally {
       if (!_disposed) {
         _isLoadingRecitations = false;

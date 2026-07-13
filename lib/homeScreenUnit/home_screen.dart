@@ -19,7 +19,6 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-// ✅ تغییر: AutomaticKeepAliveClientMixin اضافه شد
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   final CarouselSliderController _carouselController =
@@ -27,14 +26,9 @@ class _HomeScreenState extends State<HomeScreen>
   final GhazalCacheService _cache = Get.find<GhazalCacheService>();
   Worker? _textsReadyWorker;
   Worker? _indexingWorker;
-
   List<GhazalExcerpt> _allTexts = [];
   List<GhazalExcerpt> _carouselTexts = [];
-
-  // Shimmer animation
   late final AnimationController _shimmerController;
-
-  // ✅ تغییر: wantKeepAlive برای ماندن صفحه در حافظه
   @override
   bool get wantKeepAlive => true;
 
@@ -102,7 +96,6 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    // ✅ تغییر: این خط الزامی است برای AutomaticKeepAliveClientMixin
     super.build(context);
 
     final theme = Theme.of(context);
@@ -126,10 +119,8 @@ class _HomeScreenState extends State<HomeScreen>
                   const SizedBox(height: 16),
                   const CustomAppBar(title: "اشعار حافظ"),
                   const SizedBox(height: 8),
-                  // ── Greeting ──
                   GreetingCard(theme),
                   const SizedBox(height: 15),
-
                   CarouselSlider.builder(
                     carouselController: _carouselController,
                     options: CarouselOptions(
@@ -150,14 +141,11 @@ class _HomeScreenState extends State<HomeScreen>
                       onChangeGhazal: () => _refreshSlide(index),
                     ),
                   ),
-
                   const SizedBox(height: 26),
-                  // ── بخش دیوان ──
                   SectionHeader(title: 'دیوان حافظ'),
                   const SizedBox(height: 16),
                   PoemBoxGridsHomePage(theme),
                   const SizedBox(height: 8),
-                  // ── بخش فال — جدا و برجسته ──
                   SectionHeader(title: 'ویژه‌ها'),
                   const SizedBox(height: 16),
                   FalBanner(theme),

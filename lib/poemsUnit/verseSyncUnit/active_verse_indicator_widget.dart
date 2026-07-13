@@ -30,8 +30,6 @@ class _ActiveVerseIndicatorState extends State<ActiveVerseIndicator>
 
   @override
   Widget build(BuildContext context) {
-    // سایز پایه بر اساس مقیاس فونت کاربر اسکیل می‌شود تا با بزرگ/کوچک
-    // شدن فونت سیستم، نسبت اندازه‌ی این نشانگر به متن مصرع ثابت بماند.
     final textScale = MediaQuery.textScalerOf(context).scale(1.0);
     final baseSize = 24.0 * textScale.clamp(1.0, 1.6);
 
@@ -39,10 +37,8 @@ class _ActiveVerseIndicatorState extends State<ActiveVerseIndicator>
       animation: _pulseCtrl,
       builder: (context, _) {
         final t = _pulseCtrl.value;
-        // حلقه‌ی بیرونی: محو می‌شود و کمی بزرگ‌تر می‌شود (حس امواج صدا)
         final ringScale = 1.0 + (t * 0.45);
         final ringOpacity = (1.0 - t) * 0.35;
-        // هسته‌ی مرکزی: نفس می‌کشد
         final coreScale = 0.85 + (t * 0.15);
 
         return SizedBox(
@@ -51,7 +47,6 @@ class _ActiveVerseIndicatorState extends State<ActiveVerseIndicator>
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // حلقه‌ی پالس‌دار بیرونی
               Transform.scale(
                 scale: ringScale,
                 child: Container(
@@ -66,7 +61,6 @@ class _ActiveVerseIndicatorState extends State<ActiveVerseIndicator>
                   ),
                 ),
               ),
-              // هسته‌ی مرکزی
               Transform.scale(
                 scale: coreScale,
                 child: Container(

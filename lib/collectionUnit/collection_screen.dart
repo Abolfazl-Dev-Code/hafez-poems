@@ -57,7 +57,7 @@ class _CollectionScreenState extends State<CollectionScreen>
       child: Scaffold(
         appBar: widget.showTabs
             ? AppBar(
-                title: Text(_tabTitles[_currentTab]), // ← title تب فعلی
+                title: Text(_tabTitles[_currentTab]),
                 centerTitle: true,
                 bottom: TabBar(
                   controller: _tabController,

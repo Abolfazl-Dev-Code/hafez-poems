@@ -19,44 +19,34 @@ class BottomNavBarAnimation extends CustomPainter {
 
     final double centerX = (loc + s / 2) * size.width;
 
-    const double notchRadius = 32.0; // دقیقاً مثل کد اصلی - عمق تغییر نمی‌کند
-    const double cornerRadius = 6.0; // گردی گوشه‌های چپ و راست نوار
-    const double filletRadius =
-        0.0; // گردی اتصال به نیم‌دایره (نرم و بدون افزایش عمق)
+    const double notchRadius = 32.0;
+    const double cornerRadius = 6.0;
+    const double filletRadius = 0.0;
 
     final path = Path()
-      // شروع از پایین چپ
       ..moveTo(0, size.height)
       ..lineTo(0, cornerRadius)
-      // گوشه بالا-چپ نوار
       ..quadraticBezierTo(0, 0, cornerRadius, 0)
-      // خط مستقیم تا قبل از اتصال گرد به نیم‌دایره
       ..lineTo(centerX - notchRadius - filletRadius, 0)
-      // === اتصال نرم (گرد) به سمت چپ نیم‌دایره ===
       ..quadraticBezierTo(
         centerX - notchRadius,
         0,
         centerX - notchRadius,
         filletRadius,
       )
-      // === نیم‌دایره اصلی (عمق دقیقاً مثل کد اولیه) ===
       ..arcToPoint(
         Offset(centerX + notchRadius, filletRadius),
         radius: const Radius.circular(notchRadius),
         clockwise: false,
       )
-      // === اتصال نرم (گرد) به سمت راست ===
       ..quadraticBezierTo(
         centerX + notchRadius,
         0,
         centerX + notchRadius + filletRadius,
         0,
       )
-      // خط مستقیم تا قبل از گوشه راست نوار
       ..lineTo(size.width - cornerRadius, 0)
-      // گوشه بالا-راست نوار
       ..quadraticBezierTo(size.width, 0, size.width, cornerRadius)
-      // پایین نوار
       ..lineTo(size.width, size.height)
       ..lineTo(0, size.height)
       ..close();

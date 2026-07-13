@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class BiographyColors {
-  BiographyColors._(); // جلوگیری از instantiate شدن
+  BiographyColors._();
 
   static const Color night = Color(0xFF0C1029);
   static const Color panel = Color(0xFF141A3A);

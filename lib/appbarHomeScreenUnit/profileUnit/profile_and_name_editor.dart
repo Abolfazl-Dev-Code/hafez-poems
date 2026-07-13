@@ -39,7 +39,6 @@ class ProfileAndNameEditor extends StatelessWidget {
   }
 }
 
-/// نمایش باتم‌شیت ویرایش پروفایل — انتخاب عکس، نام و متن دلخواه
 Future<void> showEditProfileSheet(
   BuildContext context,
   ProfileController controller,
@@ -229,9 +228,7 @@ class _EditProfileSheetContentState extends State<_EditProfileSheetContent> {
             ),
             const SizedBox(height: 8),
             Obx(() {
-              final currentBio = controller
-                  .bio
-                  .value; // ← خوانده‌شده هم‌زمان، حالا trackable است
+              final currentBio = controller.bio.value;
               final customList = controller.customBios;
               final allBios = [...ProfileController.presetBios, ...customList];
               return ConstrainedBox(
@@ -242,8 +239,7 @@ class _EditProfileSheetContentState extends State<_EditProfileSheetContent> {
                   separatorBuilder: (_, _) => const SizedBox(height: 2),
                   itemBuilder: (_, index) {
                     final bioText = allBios[index];
-                    final isSelected =
-                        currentBio == bioText; // ← استفاده از مقدار snapshot
+                    final isSelected = currentBio == bioText;
                     final isCustom = customList.contains(bioText);
                     return ListTile(
                       dense: true,

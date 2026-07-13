@@ -21,11 +21,7 @@ class SearchController extends GetxController {
   final RobaeyatCacheService robaeyatCache = Get.find();
   final MontasabCacheService montasabCache = Get.find();
   final OtherPoemCacheService otherPoemCache = Get.find();
-
-  // حداقل طول کوئری برای شروع جستجو (جلوگیری از جستجوی سنگین با ۱ حرف)
   static const int _minQueryLength = 2;
-
-  // حداکثر تعداد نتایج نمایشی
   static const int _maxResults = 50;
 
   @override

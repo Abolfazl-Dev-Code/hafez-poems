@@ -20,17 +20,14 @@ class PoemSearchIndex<T> {
   final String Function(T item) idOf;
   final String Function(T item) titleOf;
   final String Function(T item) textOf;
-
   final List<IndexedPoem<T>> _entries = [];
 
-  /// ایندکس را کامل از نو می‌سازد. معمولاً بعد از init یا preload صدا زده می‌شود.
   void rebuild(Iterable<T> items) {
     _entries
       ..clear()
       ..addAll(items.map(_toIndexed));
   }
 
-  /// فقط یک آیتم را در ایندکس به‌روزرسانی می‌کند (مثلاً بعد از getDetail).
   void updateEntry(T item) {
     final idx = _entries.indexWhere((e) => idOf(e.original) == idOf(item));
     final entry = _toIndexed(item);

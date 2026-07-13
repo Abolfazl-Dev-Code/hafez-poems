@@ -3,8 +3,6 @@ import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart' as ja;
 
-/// هندلر صدا — just_audio + audio_service
-/// سینک کامل بین پلیر برنامه و نوتیفیکیشن
 class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
   late final ja.AudioPlayer _player;
 
@@ -19,13 +17,11 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
     _listenToPosition();
     _listenToDuration();
   }
-  //edited
+
   double _playbackSpeed = 1.0;
   double get playbackSpeed => _playbackSpeed;
-  //edited
 
   // ───────────────── listeners ─────────────────
-  /// وضعیت پخش، pause، completed، loading و غیره
   void _listenToPlayerState() {
     _player.playerStateStream.listen((state) async {
       final processingState = _mapProcessingState(state.processingState);
@@ -57,7 +53,6 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
     });
   }
 
-  /// موقعیت فعلی پخش
   void _listenToPosition() {
     _player.positionStream.listen((position) {
       if (_player.processingState == ja.ProcessingState.completed) {
@@ -71,7 +66,6 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
     });
   }
 
-  /// مدت زمان کل فایل
   void _listenToDuration() {
     _player.durationStream.listen((duration) {
       final item = mediaItem.value;
@@ -113,7 +107,6 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   // ───────────────── audio session ─────────────────
-  // داخل کلاس HafezAudioHandler
   @override
   Future<dynamic> customAction(
     String name, [
@@ -127,12 +120,10 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
         debugPrint('🎵 Loading URL: $url');
         await load(url!, title: title);
         return null;
-      //edited
       case 'setSpeed':
         final speed = (extras?['speed'] as num?)?.toDouble() ?? 1.0;
         await setSpeed(speed);
         return null;
-      //edited
       default:
         return super.customAction(name, extras);
     }
@@ -155,7 +146,6 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
       ),
     );
 
-    // بعد از تموم شدن تماس، ادامه پخش
     bool wasPlaying = false;
     session.interruptionEventStream.listen((event) {
       if (event.begin) {
@@ -169,7 +159,6 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   // ───────────────── public API ─────────────────
-  /// بارگذاری فایل صوتی جدید
   Future<void> load(String url, {String? title}) async {
     mediaItem.add(
       MediaItem(id: url, title: title ?? 'Hafez Poems', artist: 'اشعار حافظ'),
@@ -211,7 +200,6 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
     }
   }
 
-  //edited
   @override
   Future<void> setSpeed(double speed) async {
     _playbackSpeed = speed.clamp(0.25, 2.0);
@@ -242,8 +230,6 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<void> stop() async {
     await _player.pause();
     await _player.seek(Duration.zero);
-
-    // session رو آزاد کن
     final session = await AudioSession.instance;
     await session.setActive(false);
 
@@ -262,7 +248,7 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
     await _player.seek(position);
 
     final session = await AudioSession.instance;
-    await session.setActive(true); // ← focus رو دوباره بگیر
+    await session.setActive(true);
 
     playbackState.add(playbackState.value.copyWith(updatePosition: position));
   }
@@ -296,7 +282,6 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
     }
   }
 
-  /// آزادسازی منابع
   Future<void> disposePlayer() async {
     await _player.dispose();
   }

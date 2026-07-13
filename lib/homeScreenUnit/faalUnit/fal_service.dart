@@ -30,8 +30,6 @@ class TabirService {
     if (lines.isEmpty) return null;
 
     final firstLine = _normalize(lines.first);
-
-    // جستجوی دقیق روی مصراع اول
     for (final entry in _data) {
       final norm = (entry['firstLineNorm'] as String? ?? '');
       if (norm == firstLine) {

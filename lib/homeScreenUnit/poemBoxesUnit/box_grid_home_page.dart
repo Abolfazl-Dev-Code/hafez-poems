@@ -239,7 +239,7 @@ class PoemBoxGridsHomePage extends StatelessWidget {
           return Column(
             children: [
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start, // ← اضافه
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   buildCell(items[0]),
                   const SizedBox(width: gap),
@@ -250,7 +250,7 @@ class PoemBoxGridsHomePage extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start, // ← اضافه
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   buildCell(items[3]),
                   const SizedBox(width: gap),

@@ -1,11 +1,11 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/poemsUnit/poemContextMenuUnit/poem_line_action_menu.dart';
 import 'package:hafez_poems/theme/color_style.dart';
 
 typedef LineWidgetBuilder = Widget Function(BuildContext context);
 
-/// کنترلر مدیریت چرخه‌ی حیات منوی شناور
 class PoemLineContextMenuController {
   OverlayEntry? _entry;
   GlobalKey<_PoemLineContextMenuOverlayState>? _overlayKey;
@@ -22,24 +22,31 @@ class PoemLineContextMenuController {
     required bool isHighlighted,
     required VoidCallback onCopy,
     required VoidCallback onToggleHighlight,
+    required VoidCallback onShareAsImage,
     required VoidCallback onClosed,
   }) {
     if (_entry != null) return;
+
     _overlayKey = GlobalKey<_PoemLineContextMenuOverlayState>();
-    final mediaQuery = MediaQuery.of(context);
-    const menuHeight = 170.0;
-    const menuGap = 10.0;
-    final screenHeight = mediaQuery.size.height;
-    final topSpace = targetOffset.dy - mediaQuery.padding.top;
+
+    final media = MediaQuery.of(context);
+
+    const menuGap = 0.0;
+
+    final menuHeight = ActionMenu.estimatedHeight();
+
+    final topSpace = targetOffset.dy - media.padding.top;
+
     final bottomSpace =
-        screenHeight -
-        mediaQuery.padding.bottom -
+        media.size.height -
+        media.padding.bottom -
         (targetOffset.dy + targetSize.height);
+
     final showBelow =
         bottomSpace >= menuHeight + menuGap || bottomSpace >= topSpace;
 
     _entry = OverlayEntry(
-      builder: (overlayContext) {
+      builder: (_) {
         return _PoemLineContextMenuOverlay(
           key: _overlayKey,
           layerLink: layerLink,
@@ -47,15 +54,19 @@ class PoemLineContextMenuController {
           lineBuilder: lineBuilder,
           isHighlighted: isHighlighted,
           showBelow: showBelow,
-
+          menuGap: menuGap,
+          menuHeight: menuHeight,
           onCopy: () {
             onCopy();
             hide();
           },
-
           onToggleHighlight: () {
             onToggleHighlight();
             hide();
+          },
+          onShareAsImage: () async {
+            await hide();
+            onShareAsImage();
           },
           onDismiss: hide,
         );
@@ -63,14 +74,18 @@ class PoemLineContextMenuController {
     );
 
     Overlay.of(context).insert(_entry!);
+
     _onClosedCallback = onClosed;
   }
 
   Future<void> hide() async {
     if (_entry == null) return;
+
     await _overlayKey?.currentState?.reverse();
+
     _entry?.remove();
     _entry = null;
+
     _onClosedCallback?.call();
     _onClosedCallback = null;
   }
@@ -89,8 +104,11 @@ class _PoemLineContextMenuOverlay extends StatefulWidget {
     required this.lineBuilder,
     required this.isHighlighted,
     required this.showBelow,
+    required this.menuGap,
+    required this.menuHeight,
     required this.onCopy,
     required this.onToggleHighlight,
+    required this.onShareAsImage,
     required this.onDismiss,
   });
 
@@ -99,8 +117,13 @@ class _PoemLineContextMenuOverlay extends StatefulWidget {
   final LineWidgetBuilder lineBuilder;
   final bool isHighlighted;
   final bool showBelow;
+
+  final double menuGap;
+  final double menuHeight;
+
   final VoidCallback onCopy;
   final VoidCallback onToggleHighlight;
+  final VoidCallback onShareAsImage;
   final VoidCallback onDismiss;
 
   @override
@@ -111,18 +134,17 @@ class _PoemLineContextMenuOverlay extends StatefulWidget {
 class _PoemLineContextMenuOverlayState
     extends State<_PoemLineContextMenuOverlay>
     with SingleTickerProviderStateMixin {
+  static const double _liftDistance = 14;
+
   late final AnimationController _controller;
   late final Animation<double> _scale;
   late final Animation<double> _fade;
   late final Animation<double> _lift;
-  static const double _liftDistance = 14.0;
-
-  // ارتفاع واقعی منو (به جای 170)
-  double get _menuHeight => 155;
 
   @override
   void initState() {
     super.initState();
+
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 240),
@@ -130,14 +152,17 @@ class _PoemLineContextMenuOverlayState
     );
 
     _scale = Tween<double>(
-      begin: 0.92,
+      begin: .92,
       end: 1,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+
     _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+
     _lift = Tween<double>(
       begin: 0,
       end: widget.showBelow ? -_liftDistance : _liftDistance,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
     _controller.forward();
   }
 
@@ -152,14 +177,16 @@ class _PoemLineContextMenuOverlayState
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
     final blurTint = isDark ? AppColors.darkBackground : AppColors.textPrimary;
+
     final cardColor = isDark ? AppColors.darkSurface : AppColors.surface;
 
     return Directionality(
       textDirection: TextDirection.rtl,
       child: AnimatedBuilder(
         animation: _controller,
-        builder: (context, _) {
+        builder: (_, _) {
           return Stack(
             children: [
               Positioned.fill(
@@ -171,13 +198,12 @@ class _PoemLineContextMenuOverlayState
                       sigmaY: 6 * _fade.value,
                     ),
                     child: Container(
-                      color: blurTint.withValues(alpha: 0.28 * _fade.value),
+                      color: blurTint.withValues(alpha: .28 * _fade.value),
                     ),
                   ),
                 ),
               ),
 
-              // کارت مصرع
               CompositedTransformFollower(
                 link: widget.layerLink,
                 showWhenUnlinked: false,
@@ -205,15 +231,15 @@ class _PoemLineContextMenuOverlayState
                   ),
                 ),
               ),
-              // منوی اکشن
+
               CompositedTransformFollower(
                 link: widget.layerLink,
                 showWhenUnlinked: false,
                 offset: Offset(
-                  widget.targetSize.width - 210,
+                  widget.targetSize.width - 230,
                   widget.showBelow
-                      ? widget.targetSize.height + -5
-                      : -_menuHeight - -17,
+                      ? widget.targetSize.height + widget.menuGap
+                      : -(widget.menuHeight + widget.menuGap),
                 ),
                 child: Opacity(
                   opacity: _fade.value,
@@ -228,6 +254,7 @@ class _PoemLineContextMenuOverlayState
                       isDark: isDark,
                       onCopy: widget.onCopy,
                       onToggleHighlight: widget.onToggleHighlight,
+                      onShareAsImage: widget.onShareAsImage,
                       onClose: widget.onDismiss,
                     ),
                   ),

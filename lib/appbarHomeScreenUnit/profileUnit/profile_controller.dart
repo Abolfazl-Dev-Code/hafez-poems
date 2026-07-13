@@ -49,7 +49,7 @@ class ProfileController extends GetxController {
   static const _kName = 'name';
   static const _kAvatarPath = 'avatarPath';
   static const String readBoxName = 'read_poems_box';
-  static const int totalGhazals = 495; // 👈 پایین توضیح دادم
+  static const int totalGhazals = 495;
   static const _kHasSeenEditHint = 'hasSeenEditHint';
 
   final likedCount = 0.obs;
@@ -91,9 +91,6 @@ class ProfileController extends GetxController {
         ? storedBio!.trim()
         : presetBios.first;
 
-    // نکته: get<List> (بدون پارامتر نوع دقیق) عمداً است — همان دفاعی که
-    // نسخه‌ی قبلی هم داشت، چون Hive ممکن است List را به‌صورت List<dynamic>
-    // برگرداند و cast مستقیم به List<String> خطا می‌دهد.
     final storedCustomBios = _settings.get<List>(_kCustomBios);
     if (storedCustomBios != null) {
       customBios.value = storedCustomBios.cast<String>();
