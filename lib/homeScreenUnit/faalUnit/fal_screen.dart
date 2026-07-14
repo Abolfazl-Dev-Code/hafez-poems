@@ -164,13 +164,14 @@ class _FalScreenState extends State<FalScreen>
 
     final savedItem = SavedItem(
       poemId: 'fal_${_currentFal!.id}',
+      category: 'fal',
       poemTitle: _currentFal!.title,
       poemText: textToSave,
       audioUrl: '',
     );
 
     await Get.find<IKeyedItemStorage<SavedItem>>().put(
-      savedItem.poemId,
+      '${savedItem.poemId}|${savedItem.category}',
       savedItem,
     );
 
@@ -421,6 +422,7 @@ class _FalScreenState extends State<FalScreen>
                             () => PoemScreen(
                               args: PoemScreenArgs(
                                 id: ghazal.id,
+                                category: 'ghazal',
                                 title: ghazal.title,
                                 text: ghazal.text,
                                 fetchText: (id) => GhazalLocalService.instance

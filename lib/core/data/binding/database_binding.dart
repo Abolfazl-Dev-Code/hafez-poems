@@ -1,5 +1,7 @@
 import 'package:get/get.dart' hide Value;
 import 'package:drift/drift.dart';
+import 'package:hafez_poems/core/data/contracts/i_audio_download_storage.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_download_repository.dart';
 import '../contracts/i_read_status_storage.dart';
 import '../contracts/i_keyed_item_storage.dart';
 import '../contracts/i_settings_storage.dart';
@@ -28,6 +30,12 @@ class DatabaseBinding {
     await _bindUserActions(db);
     await _bindProfileSettings(db);
     await _bindPoemCache(db);
+    await _bindAudioDownloads(db);
+  }
+
+  static Future<void> _bindAudioDownloads(AppDatabase db) async {
+    final repository = AudioDownloadRepository(db);
+    Get.put<IAudioDownloadStorage>(repository, permanent: true);
   }
 
   static Future<void> _bindReadStatus(AppDatabase db) async {
@@ -38,13 +46,14 @@ class DatabaseBinding {
 
   static Future<void> _bindUserActions(AppDatabase db) async {
     final liked = DriftKeyedItemStorage<LikedItem>(
-      keyOf: (item) => item.poemId,
+      keyOf: (item) => '${item.poemId}|${item.category}',
       loadAll: () async {
         final rows = await db.select(db.likedItemsTable).get();
         return rows
             .map(
               (r) => LikedItem(
                 poemId: r.poemId,
+                category: r.category,
                 poemTitle: r.poemTitle,
                 poemText: r.poemText,
                 audioUrl: r.audioUrl,
@@ -56,27 +65,33 @@ class DatabaseBinding {
           .into(db.likedItemsTable)
           .insertOnConflictUpdate(
             LikedItemsTableCompanion.insert(
-              poemId: key,
+              poemId: value.poemId,
+              category: value.category,
               poemTitle: value.poemTitle,
               poemText: value.poemText,
               audioUrl: Value(value.audioUrl),
             ),
           ),
-      deleteFromDb: (key) => (db.delete(
-        db.likedItemsTable,
-      )..where((t) => t.poemId.equals(key))).go(),
+      deleteFromDb: (key) {
+        final parts = key.split('|');
+        return (db.delete(db.likedItemsTable)..where(
+              (t) => t.poemId.equals(parts[0]) & t.category.equals(parts[1]),
+            ))
+            .go();
+      },
       clearDb: () => db.delete(db.likedItemsTable).go(),
     );
     await liked.open();
 
     final saved = DriftKeyedItemStorage<SavedItem>(
-      keyOf: (item) => item.poemId,
+      keyOf: (item) => '${item.poemId}|${item.category}',
       loadAll: () async {
         final rows = await db.select(db.savedItemsTable).get();
         return rows
             .map(
               (r) => SavedItem(
                 poemId: r.poemId,
+                category: r.category,
                 poemTitle: r.poemTitle,
                 poemText: r.poemText,
                 audioUrl: r.audioUrl,
@@ -88,27 +103,33 @@ class DatabaseBinding {
           .into(db.savedItemsTable)
           .insertOnConflictUpdate(
             SavedItemsTableCompanion.insert(
-              poemId: key,
+              poemId: value.poemId,
+              category: value.category,
               poemTitle: value.poemTitle,
               poemText: value.poemText,
               audioUrl: Value(value.audioUrl),
             ),
           ),
-      deleteFromDb: (key) => (db.delete(
-        db.savedItemsTable,
-      )..where((t) => t.poemId.equals(key))).go(),
+      deleteFromDb: (key) {
+        final parts = key.split('|');
+        return (db.delete(db.savedItemsTable)..where(
+              (t) => t.poemId.equals(parts[0]) & t.category.equals(parts[1]),
+            ))
+            .go();
+      },
       clearDb: () => db.delete(db.savedItemsTable).go(),
     );
     await saved.open();
 
     final highlighted = DriftKeyedItemStorage<HighlightItem>(
-      keyOf: (item) => '${item.poemId}_${item.lineIndex}',
+      keyOf: (item) => '${item.poemId}|${item.category}|${item.lineIndex}',
       loadAll: () async {
         final rows = await db.select(db.highlightItemsTable).get();
         return rows
             .map(
               (r) => HighlightItem(
                 poemId: r.poemId,
+                category: r.category,
                 poemTitle: r.poemTitle,
                 poemText: r.poemText,
                 audioUrl: r.audioUrl,
@@ -125,6 +146,7 @@ class DatabaseBinding {
             HighlightItemsTableCompanion.insert(
               itemKey: key,
               poemId: value.poemId,
+              category: value.category,
               poemTitle: value.poemTitle,
               poemText: value.poemText,
               audioUrl: Value(value.audioUrl),

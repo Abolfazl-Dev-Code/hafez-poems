@@ -44,6 +44,7 @@ class PoemBoxGridsHomePage extends StatelessWidget {
                   .then((_) {}),
               onRetry: Get.find<GhazalCacheService>().preload,
               buildArgs: (item) => PoemScreenArgs(
+                category: 'ghazal',
                 id: item.id,
                 title: item.title,
                 text: item.hasFullText ? item.text : '',
@@ -78,6 +79,7 @@ class PoemBoxGridsHomePage extends StatelessWidget {
                   Get.find<GhasayedCacheService>().getQasaidDetail(id),
               onRetry: Get.find<GhasayedCacheService>().preload,
               buildArgs: (item) => PoemScreenArgs(
+                category: 'ghasayed',
                 id: item.id,
                 title: item.title,
                 text: item.hasFullText ? item.text : '',
@@ -111,6 +113,7 @@ class PoemBoxGridsHomePage extends StatelessWidget {
                   Get.find<RobaeyatCacheService>().getRobaeyatDetail(id),
               onRetry: Get.find<RobaeyatCacheService>().preload,
               buildArgs: (item) => PoemScreenArgs(
+                category: 'robaeyat',
                 id: item.id,
                 title: item.title,
                 text: item.hasFullText ? item.text : '',
@@ -144,6 +147,7 @@ class PoemBoxGridsHomePage extends StatelessWidget {
                   Get.find<GhataatCacheService>().getGhataatDetail(id),
               onRetry: Get.find<GhataatCacheService>().preload,
               buildArgs: (item) => PoemScreenArgs(
+                category: 'ghataat',
                 id: item.id,
                 title: item.title,
                 text: item.hasFullText ? item.text : '',
@@ -177,6 +181,7 @@ class PoemBoxGridsHomePage extends StatelessWidget {
                   Get.find<MontasabCacheService>().getMontasabDetail(id),
               onRetry: Get.find<MontasabCacheService>().preload,
               buildArgs: (item) => PoemScreenArgs(
+                category: 'montasab',
                 id: item.id,
                 title: item.title,
                 text: item.hasFullText ? item.text : '',
@@ -210,6 +215,7 @@ class PoemBoxGridsHomePage extends StatelessWidget {
                   Get.find<OtherPoemCacheService>().getOtherPoemDetail(id),
               onRetry: Get.find<OtherPoemCacheService>().preload,
               buildArgs: (item) => PoemScreenArgs(
+                category: 'other',
                 id: item.id,
                 title: item.title,
                 text: item.hasFullText ? item.text : '',

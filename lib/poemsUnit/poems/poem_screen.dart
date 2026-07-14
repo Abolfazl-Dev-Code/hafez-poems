@@ -18,6 +18,7 @@ import 'package:hafez_poems/core/data/contracts/i_read_status_storage.dart';
 
 class PoemScreenArgs {
   final String id;
+  final String category;
   final String title;
   final String text;
   final String audioUrl;
@@ -27,6 +28,7 @@ class PoemScreenArgs {
 
   const PoemScreenArgs({
     required this.id,
+    required this.category,
     required this.title,
     required this.text,
     required this.fetchText,
@@ -577,10 +579,10 @@ class _PoemScreenState extends State<PoemScreen> {
   }
 
   void _loadInitialActionsState() {
-    _isLiked = _actionController.isLiked(_args.id);
-    _isSaved = _actionController.isSaved(_args.id);
+    _isLiked = _actionController.isLiked(_args.id, _args.category);
+    _isSaved = _actionController.isSaved(_args.id, _args.category);
     _highlightedLineIndexes.addAll(
-      _actionController.getHighlightedLineIndexes(_args.id),
+      _actionController.getHighlightedLineIndexes(_args.id, _args.category),
     );
   }
 
@@ -598,24 +600,30 @@ class _PoemScreenState extends State<PoemScreen> {
   Future<void> _toggleLike() async {
     await _actionController.toggleLike(
       poemId: _args.id,
+      category: _args.category,
       poemTitle: _args.title,
       poemText: _poemText,
       audioUrl: _args.audioUrl,
     );
     if (mounted) {
-      setState(() => _isLiked = _actionController.isLiked(_args.id));
+      setState(
+        () => _isLiked = _actionController.isLiked(_args.id, _args.category),
+      );
     }
   }
 
   Future<void> _toggleSave() async {
     await _actionController.toggleSave(
       poemId: _args.id,
+      category: _args.category,
       poemTitle: _args.title,
       poemText: _poemText,
       audioUrl: _args.audioUrl,
     );
     if (mounted) {
-      setState(() => _isSaved = _actionController.isSaved(_args.id));
+      setState(
+        () => _isSaved = _actionController.isSaved(_args.id, _args.category),
+      );
     }
   }
 
@@ -638,6 +646,7 @@ class _PoemScreenState extends State<PoemScreen> {
 
     await _actionController.toggleHighlight(
       poemId: _args.id,
+      category: _args.category,
       poemTitle: _args.title,
       poemText: _poemText,
       audioUrl: _args.audioUrl,
@@ -648,7 +657,11 @@ class _PoemScreenState extends State<PoemScreen> {
 
     if (!mounted) return;
     setState(() {
-      if (_actionController.isLineHighlighted(_args.id, index)) {
+      if (_actionController.isLineHighlighted(
+        _args.id,
+        _args.category,
+        index,
+      )) {
         _highlightedLineIndexes.add(index);
       } else {
         _highlightedLineIndexes.remove(index);
@@ -978,6 +991,7 @@ class _PoemScreenState extends State<PoemScreen> {
                     AudioPlayerWidget(
                       key: _audioWidgetKey,
                       id: _args.id,
+                      category: _args.category,
                       audioUrl: _args.audioUrl,
                       fetchAudioUrl: _args.fetchAudioUrl,
                       controller: _audioCtrl,

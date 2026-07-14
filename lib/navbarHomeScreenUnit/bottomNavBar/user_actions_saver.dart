@@ -13,23 +13,31 @@ class UserActionsSaver {
   IKeyedItemStorage<HighlightItem> get _highlightStorage =>
       Get.find<IKeyedItemStorage<HighlightItem>>();
 
-  bool isLiked(String poemId) => _likedStorage.containsKey(poemId);
+  static String _likeSaveKey(String poemId, String category) =>
+      '$poemId|$category';
 
-  bool isSaved(String poemId) => _savedStorage.containsKey(poemId);
+  bool isLiked(String poemId, String category) =>
+      _likedStorage.containsKey(_likeSaveKey(poemId, category));
+
+  bool isSaved(String poemId, String category) =>
+      _savedStorage.containsKey(_likeSaveKey(poemId, category));
 
   Future<void> toggleLike({
     required String poemId,
+    required String category,
     required String poemTitle,
     required String poemText,
     required String audioUrl,
   }) async {
-    if (isLiked(poemId)) {
-      await _likedStorage.delete(poemId);
+    final key = _likeSaveKey(poemId, category);
+    if (isLiked(poemId, category)) {
+      await _likedStorage.delete(key);
     } else {
       await _likedStorage.put(
-        poemId,
+        key,
         LikedItem(
           poemId: poemId,
+          category: category,
           poemTitle: poemTitle,
           poemText: poemText,
           audioUrl: audioUrl,
@@ -40,17 +48,20 @@ class UserActionsSaver {
 
   Future<void> toggleSave({
     required String poemId,
+    required String category,
     required String poemTitle,
     required String poemText,
     required String audioUrl,
   }) async {
-    if (isSaved(poemId)) {
-      await _savedStorage.delete(poemId);
+    final key = _likeSaveKey(poemId, category);
+    if (isSaved(poemId, category)) {
+      await _savedStorage.delete(key);
     } else {
       await _savedStorage.put(
-        poemId,
+        key,
         SavedItem(
           poemId: poemId,
+          category: category,
           poemTitle: poemTitle,
           poemText: poemText,
           audioUrl: audioUrl,
@@ -59,16 +70,19 @@ class UserActionsSaver {
     }
   }
 
-  static String highlightKey(String poemId, int lineIndex) {
-    return '${poemId}_$lineIndex';
+  static String highlightKey(String poemId, String category, int lineIndex) {
+    return '$poemId|$category|$lineIndex';
   }
 
-  bool isLineHighlighted(String poemId, int lineIndex) {
-    return _highlightStorage.containsKey(highlightKey(poemId, lineIndex));
+  bool isLineHighlighted(String poemId, String category, int lineIndex) {
+    return _highlightStorage.containsKey(
+      highlightKey(poemId, category, lineIndex),
+    );
   }
 
   Future<void> toggleHighlight({
     required String poemId,
+    required String category,
     required String poemTitle,
     required String poemText,
     required String audioUrl,
@@ -76,7 +90,7 @@ class UserActionsSaver {
     required int lineIndex,
     required Color color,
   }) async {
-    final key = highlightKey(poemId, lineIndex);
+    final key = highlightKey(poemId, category, lineIndex);
 
     if (_highlightStorage.containsKey(key)) {
       await _highlightStorage.delete(key);
@@ -85,6 +99,7 @@ class UserActionsSaver {
         key,
         HighlightItem(
           poemId: poemId,
+          category: category,
           poemTitle: poemTitle,
           poemText: poemText,
           audioUrl: audioUrl,
@@ -96,10 +111,10 @@ class UserActionsSaver {
     }
   }
 
-  List<int> getHighlightedLineIndexes(String poemId) {
+  List<int> getHighlightedLineIndexes(String poemId, String category) {
     return _highlightStorage
         .values()
-        .where((item) => item.poemId == poemId)
+        .where((item) => item.poemId == poemId && item.category == category)
         .map((item) => item.lineIndex)
         .toList();
   }

@@ -8,7 +8,7 @@ import 'package:hafez_poems/collectionUnit/selection_mixin.dart';
 import 'package:hafez_poems/core/data/contracts/i_keyed_item_storage.dart';
 import 'package:hafez_poems/models/saved_item.dart';
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
-import 'package:hafez_poems/poemsUnit/poems/poem_cache_services.dart';
+import 'package:hafez_poems/poemsUnit/poems/poem_category_resolver.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_screen.dart';
 
 class SavedTab extends StatefulWidget {
@@ -21,6 +21,8 @@ class SavedTab extends StatefulWidget {
 class _SavedTabState extends State<SavedTab> with SelectionMixin {
   IKeyedItemStorage<SavedItem> get _storage =>
       Get.find<IKeyedItemStorage<SavedItem>>();
+
+  String _keyOf(SavedItem item) => '${item.poemId}|${item.category}';
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +56,7 @@ class _SavedTabState extends State<SavedTab> with SelectionMixin {
             );
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) pruneDeletedKeys(items.map((e) => e.poemId));
+            if (mounted) pruneDeletedKeys(items.map(_keyOf));
           });
 
           if (items.isEmpty) {
@@ -87,7 +89,7 @@ class _SavedTabState extends State<SavedTab> with SelectionMixin {
                           orElse: () => item.poemText,
                         );
               return FavoriteItem(
-                itemKey: item.poemId,
+                itemKey: _keyOf(item),
                 id: item.poemId,
                 title: item.poemTitle,
                 subtitle: subtitle,
@@ -124,15 +126,16 @@ class _SavedTabState extends State<SavedTab> with SelectionMixin {
                     () => PoemScreen(
                       args: PoemScreenArgs(
                         id: item.poemId,
+                        category: item.category,
                         title: item.poemTitle,
                         text: item.poemText,
-                        fetchText: (id) async {
-                          return item.poemText;
-                        },
+                        fetchText: (id) async => item.poemText,
                         fetchAudioUrl: (id) {
                           return isFal
                               ? Future.value('')
-                              : Get.find<GhazalCacheService>().getAudioUrl(id);
+                              : PoemCategoryResolver.fetchAudioUrlFor(
+                                  item.category,
+                                )(id);
                         },
                       ),
                     ),
@@ -150,7 +153,7 @@ class _SavedTabState extends State<SavedTab> with SelectionMixin {
     return StreamBuilder<void>(
       stream: _storage.watch(),
       builder: (context, _) {
-        final allKeys = _storage.values().map((e) => e.poemId);
+        final allKeys = _storage.values().map(_keyOf);
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [

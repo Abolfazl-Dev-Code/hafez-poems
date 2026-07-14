@@ -485,6 +485,17 @@ class $LikedItemsTableTable extends LikedItemsTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _poemTitleMeta = const VerificationMeta(
     'poemTitle',
   );
@@ -520,7 +531,13 @@ class $LikedItemsTableTable extends LikedItemsTable
     defaultValue: const Constant(''),
   );
   @override
-  List<GeneratedColumn> get $columns => [poemId, poemTitle, poemText, audioUrl];
+  List<GeneratedColumn> get $columns => [
+    poemId,
+    category,
+    poemTitle,
+    poemText,
+    audioUrl,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -540,6 +557,14 @@ class $LikedItemsTableTable extends LikedItemsTable
       );
     } else if (isInserting) {
       context.missing(_poemIdMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
     }
     if (data.containsKey('poem_title')) {
       context.handle(
@@ -567,7 +592,7 @@ class $LikedItemsTableTable extends LikedItemsTable
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {poemId};
+  Set<GeneratedColumn> get $primaryKey => {poemId, category};
   @override
   LikedItemsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -575,6 +600,10 @@ class $LikedItemsTableTable extends LikedItemsTable
       poemId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}poem_id'],
+      )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
       )!,
       poemTitle: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -600,11 +629,13 @@ class $LikedItemsTableTable extends LikedItemsTable
 class LikedItemsTableData extends DataClass
     implements Insertable<LikedItemsTableData> {
   final String poemId;
+  final String category;
   final String poemTitle;
   final String poemText;
   final String audioUrl;
   const LikedItemsTableData({
     required this.poemId,
+    required this.category,
     required this.poemTitle,
     required this.poemText,
     required this.audioUrl,
@@ -613,6 +644,7 @@ class LikedItemsTableData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['poem_id'] = Variable<String>(poemId);
+    map['category'] = Variable<String>(category);
     map['poem_title'] = Variable<String>(poemTitle);
     map['poem_text'] = Variable<String>(poemText);
     map['audio_url'] = Variable<String>(audioUrl);
@@ -622,6 +654,7 @@ class LikedItemsTableData extends DataClass
   LikedItemsTableCompanion toCompanion(bool nullToAbsent) {
     return LikedItemsTableCompanion(
       poemId: Value(poemId),
+      category: Value(category),
       poemTitle: Value(poemTitle),
       poemText: Value(poemText),
       audioUrl: Value(audioUrl),
@@ -635,6 +668,7 @@ class LikedItemsTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return LikedItemsTableData(
       poemId: serializer.fromJson<String>(json['poemId']),
+      category: serializer.fromJson<String>(json['category']),
       poemTitle: serializer.fromJson<String>(json['poemTitle']),
       poemText: serializer.fromJson<String>(json['poemText']),
       audioUrl: serializer.fromJson<String>(json['audioUrl']),
@@ -645,6 +679,7 @@ class LikedItemsTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'poemId': serializer.toJson<String>(poemId),
+      'category': serializer.toJson<String>(category),
       'poemTitle': serializer.toJson<String>(poemTitle),
       'poemText': serializer.toJson<String>(poemText),
       'audioUrl': serializer.toJson<String>(audioUrl),
@@ -653,11 +688,13 @@ class LikedItemsTableData extends DataClass
 
   LikedItemsTableData copyWith({
     String? poemId,
+    String? category,
     String? poemTitle,
     String? poemText,
     String? audioUrl,
   }) => LikedItemsTableData(
     poemId: poemId ?? this.poemId,
+    category: category ?? this.category,
     poemTitle: poemTitle ?? this.poemTitle,
     poemText: poemText ?? this.poemText,
     audioUrl: audioUrl ?? this.audioUrl,
@@ -665,6 +702,7 @@ class LikedItemsTableData extends DataClass
   LikedItemsTableData copyWithCompanion(LikedItemsTableCompanion data) {
     return LikedItemsTableData(
       poemId: data.poemId.present ? data.poemId.value : this.poemId,
+      category: data.category.present ? data.category.value : this.category,
       poemTitle: data.poemTitle.present ? data.poemTitle.value : this.poemTitle,
       poemText: data.poemText.present ? data.poemText.value : this.poemText,
       audioUrl: data.audioUrl.present ? data.audioUrl.value : this.audioUrl,
@@ -675,6 +713,7 @@ class LikedItemsTableData extends DataClass
   String toString() {
     return (StringBuffer('LikedItemsTableData(')
           ..write('poemId: $poemId, ')
+          ..write('category: $category, ')
           ..write('poemTitle: $poemTitle, ')
           ..write('poemText: $poemText, ')
           ..write('audioUrl: $audioUrl')
@@ -683,12 +722,14 @@ class LikedItemsTableData extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(poemId, poemTitle, poemText, audioUrl);
+  int get hashCode =>
+      Object.hash(poemId, category, poemTitle, poemText, audioUrl);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is LikedItemsTableData &&
           other.poemId == this.poemId &&
+          other.category == this.category &&
           other.poemTitle == this.poemTitle &&
           other.poemText == this.poemText &&
           other.audioUrl == this.audioUrl);
@@ -696,12 +737,14 @@ class LikedItemsTableData extends DataClass
 
 class LikedItemsTableCompanion extends UpdateCompanion<LikedItemsTableData> {
   final Value<String> poemId;
+  final Value<String> category;
   final Value<String> poemTitle;
   final Value<String> poemText;
   final Value<String> audioUrl;
   final Value<int> rowid;
   const LikedItemsTableCompanion({
     this.poemId = const Value.absent(),
+    this.category = const Value.absent(),
     this.poemTitle = const Value.absent(),
     this.poemText = const Value.absent(),
     this.audioUrl = const Value.absent(),
@@ -709,15 +752,18 @@ class LikedItemsTableCompanion extends UpdateCompanion<LikedItemsTableData> {
   });
   LikedItemsTableCompanion.insert({
     required String poemId,
+    required String category,
     required String poemTitle,
     required String poemText,
     this.audioUrl = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : poemId = Value(poemId),
+       category = Value(category),
        poemTitle = Value(poemTitle),
        poemText = Value(poemText);
   static Insertable<LikedItemsTableData> custom({
     Expression<String>? poemId,
+    Expression<String>? category,
     Expression<String>? poemTitle,
     Expression<String>? poemText,
     Expression<String>? audioUrl,
@@ -725,6 +771,7 @@ class LikedItemsTableCompanion extends UpdateCompanion<LikedItemsTableData> {
   }) {
     return RawValuesInsertable({
       if (poemId != null) 'poem_id': poemId,
+      if (category != null) 'category': category,
       if (poemTitle != null) 'poem_title': poemTitle,
       if (poemText != null) 'poem_text': poemText,
       if (audioUrl != null) 'audio_url': audioUrl,
@@ -734,6 +781,7 @@ class LikedItemsTableCompanion extends UpdateCompanion<LikedItemsTableData> {
 
   LikedItemsTableCompanion copyWith({
     Value<String>? poemId,
+    Value<String>? category,
     Value<String>? poemTitle,
     Value<String>? poemText,
     Value<String>? audioUrl,
@@ -741,6 +789,7 @@ class LikedItemsTableCompanion extends UpdateCompanion<LikedItemsTableData> {
   }) {
     return LikedItemsTableCompanion(
       poemId: poemId ?? this.poemId,
+      category: category ?? this.category,
       poemTitle: poemTitle ?? this.poemTitle,
       poemText: poemText ?? this.poemText,
       audioUrl: audioUrl ?? this.audioUrl,
@@ -753,6 +802,9 @@ class LikedItemsTableCompanion extends UpdateCompanion<LikedItemsTableData> {
     final map = <String, Expression>{};
     if (poemId.present) {
       map['poem_id'] = Variable<String>(poemId.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
     }
     if (poemTitle.present) {
       map['poem_title'] = Variable<String>(poemTitle.value);
@@ -773,6 +825,7 @@ class LikedItemsTableCompanion extends UpdateCompanion<LikedItemsTableData> {
   String toString() {
     return (StringBuffer('LikedItemsTableCompanion(')
           ..write('poemId: $poemId, ')
+          ..write('category: $category, ')
           ..write('poemTitle: $poemTitle, ')
           ..write('poemText: $poemText, ')
           ..write('audioUrl: $audioUrl, ')
@@ -792,6 +845,17 @@ class $SavedItemsTableTable extends SavedItemsTable
   @override
   late final GeneratedColumn<String> poemId = GeneratedColumn<String>(
     'poem_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -832,7 +896,13 @@ class $SavedItemsTableTable extends SavedItemsTable
     defaultValue: const Constant(''),
   );
   @override
-  List<GeneratedColumn> get $columns => [poemId, poemTitle, poemText, audioUrl];
+  List<GeneratedColumn> get $columns => [
+    poemId,
+    category,
+    poemTitle,
+    poemText,
+    audioUrl,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -852,6 +922,14 @@ class $SavedItemsTableTable extends SavedItemsTable
       );
     } else if (isInserting) {
       context.missing(_poemIdMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
     }
     if (data.containsKey('poem_title')) {
       context.handle(
@@ -879,7 +957,7 @@ class $SavedItemsTableTable extends SavedItemsTable
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {poemId};
+  Set<GeneratedColumn> get $primaryKey => {poemId, category};
   @override
   SavedItemsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -887,6 +965,10 @@ class $SavedItemsTableTable extends SavedItemsTable
       poemId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}poem_id'],
+      )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
       )!,
       poemTitle: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -912,11 +994,13 @@ class $SavedItemsTableTable extends SavedItemsTable
 class SavedItemsTableData extends DataClass
     implements Insertable<SavedItemsTableData> {
   final String poemId;
+  final String category;
   final String poemTitle;
   final String poemText;
   final String audioUrl;
   const SavedItemsTableData({
     required this.poemId,
+    required this.category,
     required this.poemTitle,
     required this.poemText,
     required this.audioUrl,
@@ -925,6 +1009,7 @@ class SavedItemsTableData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['poem_id'] = Variable<String>(poemId);
+    map['category'] = Variable<String>(category);
     map['poem_title'] = Variable<String>(poemTitle);
     map['poem_text'] = Variable<String>(poemText);
     map['audio_url'] = Variable<String>(audioUrl);
@@ -934,6 +1019,7 @@ class SavedItemsTableData extends DataClass
   SavedItemsTableCompanion toCompanion(bool nullToAbsent) {
     return SavedItemsTableCompanion(
       poemId: Value(poemId),
+      category: Value(category),
       poemTitle: Value(poemTitle),
       poemText: Value(poemText),
       audioUrl: Value(audioUrl),
@@ -947,6 +1033,7 @@ class SavedItemsTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return SavedItemsTableData(
       poemId: serializer.fromJson<String>(json['poemId']),
+      category: serializer.fromJson<String>(json['category']),
       poemTitle: serializer.fromJson<String>(json['poemTitle']),
       poemText: serializer.fromJson<String>(json['poemText']),
       audioUrl: serializer.fromJson<String>(json['audioUrl']),
@@ -957,6 +1044,7 @@ class SavedItemsTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'poemId': serializer.toJson<String>(poemId),
+      'category': serializer.toJson<String>(category),
       'poemTitle': serializer.toJson<String>(poemTitle),
       'poemText': serializer.toJson<String>(poemText),
       'audioUrl': serializer.toJson<String>(audioUrl),
@@ -965,11 +1053,13 @@ class SavedItemsTableData extends DataClass
 
   SavedItemsTableData copyWith({
     String? poemId,
+    String? category,
     String? poemTitle,
     String? poemText,
     String? audioUrl,
   }) => SavedItemsTableData(
     poemId: poemId ?? this.poemId,
+    category: category ?? this.category,
     poemTitle: poemTitle ?? this.poemTitle,
     poemText: poemText ?? this.poemText,
     audioUrl: audioUrl ?? this.audioUrl,
@@ -977,6 +1067,7 @@ class SavedItemsTableData extends DataClass
   SavedItemsTableData copyWithCompanion(SavedItemsTableCompanion data) {
     return SavedItemsTableData(
       poemId: data.poemId.present ? data.poemId.value : this.poemId,
+      category: data.category.present ? data.category.value : this.category,
       poemTitle: data.poemTitle.present ? data.poemTitle.value : this.poemTitle,
       poemText: data.poemText.present ? data.poemText.value : this.poemText,
       audioUrl: data.audioUrl.present ? data.audioUrl.value : this.audioUrl,
@@ -987,6 +1078,7 @@ class SavedItemsTableData extends DataClass
   String toString() {
     return (StringBuffer('SavedItemsTableData(')
           ..write('poemId: $poemId, ')
+          ..write('category: $category, ')
           ..write('poemTitle: $poemTitle, ')
           ..write('poemText: $poemText, ')
           ..write('audioUrl: $audioUrl')
@@ -995,12 +1087,14 @@ class SavedItemsTableData extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(poemId, poemTitle, poemText, audioUrl);
+  int get hashCode =>
+      Object.hash(poemId, category, poemTitle, poemText, audioUrl);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SavedItemsTableData &&
           other.poemId == this.poemId &&
+          other.category == this.category &&
           other.poemTitle == this.poemTitle &&
           other.poemText == this.poemText &&
           other.audioUrl == this.audioUrl);
@@ -1008,12 +1102,14 @@ class SavedItemsTableData extends DataClass
 
 class SavedItemsTableCompanion extends UpdateCompanion<SavedItemsTableData> {
   final Value<String> poemId;
+  final Value<String> category;
   final Value<String> poemTitle;
   final Value<String> poemText;
   final Value<String> audioUrl;
   final Value<int> rowid;
   const SavedItemsTableCompanion({
     this.poemId = const Value.absent(),
+    this.category = const Value.absent(),
     this.poemTitle = const Value.absent(),
     this.poemText = const Value.absent(),
     this.audioUrl = const Value.absent(),
@@ -1021,15 +1117,18 @@ class SavedItemsTableCompanion extends UpdateCompanion<SavedItemsTableData> {
   });
   SavedItemsTableCompanion.insert({
     required String poemId,
+    required String category,
     required String poemTitle,
     required String poemText,
     this.audioUrl = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : poemId = Value(poemId),
+       category = Value(category),
        poemTitle = Value(poemTitle),
        poemText = Value(poemText);
   static Insertable<SavedItemsTableData> custom({
     Expression<String>? poemId,
+    Expression<String>? category,
     Expression<String>? poemTitle,
     Expression<String>? poemText,
     Expression<String>? audioUrl,
@@ -1037,6 +1136,7 @@ class SavedItemsTableCompanion extends UpdateCompanion<SavedItemsTableData> {
   }) {
     return RawValuesInsertable({
       if (poemId != null) 'poem_id': poemId,
+      if (category != null) 'category': category,
       if (poemTitle != null) 'poem_title': poemTitle,
       if (poemText != null) 'poem_text': poemText,
       if (audioUrl != null) 'audio_url': audioUrl,
@@ -1046,6 +1146,7 @@ class SavedItemsTableCompanion extends UpdateCompanion<SavedItemsTableData> {
 
   SavedItemsTableCompanion copyWith({
     Value<String>? poemId,
+    Value<String>? category,
     Value<String>? poemTitle,
     Value<String>? poemText,
     Value<String>? audioUrl,
@@ -1053,6 +1154,7 @@ class SavedItemsTableCompanion extends UpdateCompanion<SavedItemsTableData> {
   }) {
     return SavedItemsTableCompanion(
       poemId: poemId ?? this.poemId,
+      category: category ?? this.category,
       poemTitle: poemTitle ?? this.poemTitle,
       poemText: poemText ?? this.poemText,
       audioUrl: audioUrl ?? this.audioUrl,
@@ -1065,6 +1167,9 @@ class SavedItemsTableCompanion extends UpdateCompanion<SavedItemsTableData> {
     final map = <String, Expression>{};
     if (poemId.present) {
       map['poem_id'] = Variable<String>(poemId.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
     }
     if (poemTitle.present) {
       map['poem_title'] = Variable<String>(poemTitle.value);
@@ -1085,6 +1190,7 @@ class SavedItemsTableCompanion extends UpdateCompanion<SavedItemsTableData> {
   String toString() {
     return (StringBuffer('SavedItemsTableCompanion(')
           ..write('poemId: $poemId, ')
+          ..write('category: $category, ')
           ..write('poemTitle: $poemTitle, ')
           ..write('poemText: $poemText, ')
           ..write('audioUrl: $audioUrl, ')
@@ -1115,6 +1221,17 @@ class $HighlightItemsTableTable extends HighlightItemsTable
   @override
   late final GeneratedColumn<String> poemId = GeneratedColumn<String>(
     'poem_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -1191,6 +1308,7 @@ class $HighlightItemsTableTable extends HighlightItemsTable
   List<GeneratedColumn> get $columns => [
     itemKey,
     poemId,
+    category,
     poemTitle,
     poemText,
     audioUrl,
@@ -1225,6 +1343,14 @@ class $HighlightItemsTableTable extends HighlightItemsTable
       );
     } else if (isInserting) {
       context.missing(_poemIdMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
     }
     if (data.containsKey('poem_title')) {
       context.handle(
@@ -1295,6 +1421,10 @@ class $HighlightItemsTableTable extends HighlightItemsTable
         DriftSqlType.string,
         data['${effectivePrefix}poem_id'],
       )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
       poemTitle: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}poem_title'],
@@ -1332,6 +1462,7 @@ class HighlightItemsTableData extends DataClass
     implements Insertable<HighlightItemsTableData> {
   final String itemKey;
   final String poemId;
+  final String category;
   final String poemTitle;
   final String poemText;
   final String audioUrl;
@@ -1341,6 +1472,7 @@ class HighlightItemsTableData extends DataClass
   const HighlightItemsTableData({
     required this.itemKey,
     required this.poemId,
+    required this.category,
     required this.poemTitle,
     required this.poemText,
     required this.audioUrl,
@@ -1353,6 +1485,7 @@ class HighlightItemsTableData extends DataClass
     final map = <String, Expression>{};
     map['item_key'] = Variable<String>(itemKey);
     map['poem_id'] = Variable<String>(poemId);
+    map['category'] = Variable<String>(category);
     map['poem_title'] = Variable<String>(poemTitle);
     map['poem_text'] = Variable<String>(poemText);
     map['audio_url'] = Variable<String>(audioUrl);
@@ -1366,6 +1499,7 @@ class HighlightItemsTableData extends DataClass
     return HighlightItemsTableCompanion(
       itemKey: Value(itemKey),
       poemId: Value(poemId),
+      category: Value(category),
       poemTitle: Value(poemTitle),
       poemText: Value(poemText),
       audioUrl: Value(audioUrl),
@@ -1383,6 +1517,7 @@ class HighlightItemsTableData extends DataClass
     return HighlightItemsTableData(
       itemKey: serializer.fromJson<String>(json['itemKey']),
       poemId: serializer.fromJson<String>(json['poemId']),
+      category: serializer.fromJson<String>(json['category']),
       poemTitle: serializer.fromJson<String>(json['poemTitle']),
       poemText: serializer.fromJson<String>(json['poemText']),
       audioUrl: serializer.fromJson<String>(json['audioUrl']),
@@ -1397,6 +1532,7 @@ class HighlightItemsTableData extends DataClass
     return <String, dynamic>{
       'itemKey': serializer.toJson<String>(itemKey),
       'poemId': serializer.toJson<String>(poemId),
+      'category': serializer.toJson<String>(category),
       'poemTitle': serializer.toJson<String>(poemTitle),
       'poemText': serializer.toJson<String>(poemText),
       'audioUrl': serializer.toJson<String>(audioUrl),
@@ -1409,6 +1545,7 @@ class HighlightItemsTableData extends DataClass
   HighlightItemsTableData copyWith({
     String? itemKey,
     String? poemId,
+    String? category,
     String? poemTitle,
     String? poemText,
     String? audioUrl,
@@ -1418,6 +1555,7 @@ class HighlightItemsTableData extends DataClass
   }) => HighlightItemsTableData(
     itemKey: itemKey ?? this.itemKey,
     poemId: poemId ?? this.poemId,
+    category: category ?? this.category,
     poemTitle: poemTitle ?? this.poemTitle,
     poemText: poemText ?? this.poemText,
     audioUrl: audioUrl ?? this.audioUrl,
@@ -1429,6 +1567,7 @@ class HighlightItemsTableData extends DataClass
     return HighlightItemsTableData(
       itemKey: data.itemKey.present ? data.itemKey.value : this.itemKey,
       poemId: data.poemId.present ? data.poemId.value : this.poemId,
+      category: data.category.present ? data.category.value : this.category,
       poemTitle: data.poemTitle.present ? data.poemTitle.value : this.poemTitle,
       poemText: data.poemText.present ? data.poemText.value : this.poemText,
       audioUrl: data.audioUrl.present ? data.audioUrl.value : this.audioUrl,
@@ -1447,6 +1586,7 @@ class HighlightItemsTableData extends DataClass
     return (StringBuffer('HighlightItemsTableData(')
           ..write('itemKey: $itemKey, ')
           ..write('poemId: $poemId, ')
+          ..write('category: $category, ')
           ..write('poemTitle: $poemTitle, ')
           ..write('poemText: $poemText, ')
           ..write('audioUrl: $audioUrl, ')
@@ -1461,6 +1601,7 @@ class HighlightItemsTableData extends DataClass
   int get hashCode => Object.hash(
     itemKey,
     poemId,
+    category,
     poemTitle,
     poemText,
     audioUrl,
@@ -1474,6 +1615,7 @@ class HighlightItemsTableData extends DataClass
       (other is HighlightItemsTableData &&
           other.itemKey == this.itemKey &&
           other.poemId == this.poemId &&
+          other.category == this.category &&
           other.poemTitle == this.poemTitle &&
           other.poemText == this.poemText &&
           other.audioUrl == this.audioUrl &&
@@ -1486,6 +1628,7 @@ class HighlightItemsTableCompanion
     extends UpdateCompanion<HighlightItemsTableData> {
   final Value<String> itemKey;
   final Value<String> poemId;
+  final Value<String> category;
   final Value<String> poemTitle;
   final Value<String> poemText;
   final Value<String> audioUrl;
@@ -1496,6 +1639,7 @@ class HighlightItemsTableCompanion
   const HighlightItemsTableCompanion({
     this.itemKey = const Value.absent(),
     this.poemId = const Value.absent(),
+    this.category = const Value.absent(),
     this.poemTitle = const Value.absent(),
     this.poemText = const Value.absent(),
     this.audioUrl = const Value.absent(),
@@ -1507,6 +1651,7 @@ class HighlightItemsTableCompanion
   HighlightItemsTableCompanion.insert({
     required String itemKey,
     required String poemId,
+    required String category,
     required String poemTitle,
     required String poemText,
     this.audioUrl = const Value.absent(),
@@ -1516,6 +1661,7 @@ class HighlightItemsTableCompanion
     this.rowid = const Value.absent(),
   }) : itemKey = Value(itemKey),
        poemId = Value(poemId),
+       category = Value(category),
        poemTitle = Value(poemTitle),
        poemText = Value(poemText),
        highlightedLine = Value(highlightedLine),
@@ -1524,6 +1670,7 @@ class HighlightItemsTableCompanion
   static Insertable<HighlightItemsTableData> custom({
     Expression<String>? itemKey,
     Expression<String>? poemId,
+    Expression<String>? category,
     Expression<String>? poemTitle,
     Expression<String>? poemText,
     Expression<String>? audioUrl,
@@ -1535,6 +1682,7 @@ class HighlightItemsTableCompanion
     return RawValuesInsertable({
       if (itemKey != null) 'item_key': itemKey,
       if (poemId != null) 'poem_id': poemId,
+      if (category != null) 'category': category,
       if (poemTitle != null) 'poem_title': poemTitle,
       if (poemText != null) 'poem_text': poemText,
       if (audioUrl != null) 'audio_url': audioUrl,
@@ -1548,6 +1696,7 @@ class HighlightItemsTableCompanion
   HighlightItemsTableCompanion copyWith({
     Value<String>? itemKey,
     Value<String>? poemId,
+    Value<String>? category,
     Value<String>? poemTitle,
     Value<String>? poemText,
     Value<String>? audioUrl,
@@ -1559,6 +1708,7 @@ class HighlightItemsTableCompanion
     return HighlightItemsTableCompanion(
       itemKey: itemKey ?? this.itemKey,
       poemId: poemId ?? this.poemId,
+      category: category ?? this.category,
       poemTitle: poemTitle ?? this.poemTitle,
       poemText: poemText ?? this.poemText,
       audioUrl: audioUrl ?? this.audioUrl,
@@ -1577,6 +1727,9 @@ class HighlightItemsTableCompanion
     }
     if (poemId.present) {
       map['poem_id'] = Variable<String>(poemId.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
     }
     if (poemTitle.present) {
       map['poem_title'] = Variable<String>(poemTitle.value);
@@ -1607,6 +1760,7 @@ class HighlightItemsTableCompanion
     return (StringBuffer('HighlightItemsTableCompanion(')
           ..write('itemKey: $itemKey, ')
           ..write('poemId: $poemId, ')
+          ..write('category: $category, ')
           ..write('poemTitle: $poemTitle, ')
           ..write('poemText: $poemText, ')
           ..write('audioUrl: $audioUrl, ')
@@ -2066,6 +2220,1167 @@ class SettingsTableCompanion extends UpdateCompanion<SettingsTableData> {
   }
 }
 
+class $DownloadedAudioTableTable extends DownloadedAudioTable
+    with TableInfo<$DownloadedAudioTableTable, DownloadedAudioRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DownloadedAudioTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _poemIdMeta = const VerificationMeta('poemId');
+  @override
+  late final GeneratedColumn<String> poemId = GeneratedColumn<String>(
+    'poem_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _poemCategoryMeta = const VerificationMeta(
+    'poemCategory',
+  );
+  @override
+  late final GeneratedColumn<String> poemCategory = GeneratedColumn<String>(
+    'poem_category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reciterKeyMeta = const VerificationMeta(
+    'reciterKey',
+  );
+  @override
+  late final GeneratedColumn<String> reciterKey = GeneratedColumn<String>(
+    'reciter_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reciterDisplayNameMeta =
+      const VerificationMeta('reciterDisplayName');
+  @override
+  late final GeneratedColumn<String> reciterDisplayName =
+      GeneratedColumn<String>(
+        'reciter_display_name',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _sourceRecitationIdMeta =
+      const VerificationMeta('sourceRecitationId');
+  @override
+  late final GeneratedColumn<int> sourceRecitationId = GeneratedColumn<int>(
+    'source_recitation_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _localFilePathMeta = const VerificationMeta(
+    'localFilePath',
+  );
+  @override
+  late final GeneratedColumn<String> localFilePath = GeneratedColumn<String>(
+    'local_file_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceUrlMeta = const VerificationMeta(
+    'sourceUrl',
+  );
+  @override
+  late final GeneratedColumn<String> sourceUrl = GeneratedColumn<String>(
+    'source_url',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fileNameMeta = const VerificationMeta(
+    'fileName',
+  );
+  @override
+  late final GeneratedColumn<String> fileName = GeneratedColumn<String>(
+    'file_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fileSizeBytesMeta = const VerificationMeta(
+    'fileSizeBytes',
+  );
+  @override
+  late final GeneratedColumn<int> fileSizeBytes = GeneratedColumn<int>(
+    'file_size_bytes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _durationMsMeta = const VerificationMeta(
+    'durationMs',
+  );
+  @override
+  late final GeneratedColumn<int> durationMs = GeneratedColumn<int>(
+    'duration_ms',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _checksumMeta = const VerificationMeta(
+    'checksum',
+  );
+  @override
+  late final GeneratedColumn<String> checksum = GeneratedColumn<String>(
+    'checksum',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _downloadedAtMeta = const VerificationMeta(
+    'downloadedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> downloadedAt = GeneratedColumn<DateTime>(
+    'downloaded_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastPlayedAtMeta = const VerificationMeta(
+    'lastPlayedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastPlayedAt = GeneratedColumn<DateTime>(
+    'last_played_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _playCountMeta = const VerificationMeta(
+    'playCount',
+  );
+  @override
+  late final GeneratedColumn<int> playCount = GeneratedColumn<int>(
+    'play_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<DownloadStatus, String> status =
+      GeneratedColumn<String>(
+        'status',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('notDownloaded'),
+      ).withConverter<DownloadStatus>(
+        $DownloadedAudioTableTable.$converterstatus,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    poemId,
+    poemCategory,
+    reciterKey,
+    reciterDisplayName,
+    sourceRecitationId,
+    localFilePath,
+    sourceUrl,
+    fileName,
+    fileSizeBytes,
+    durationMs,
+    checksum,
+    downloadedAt,
+    lastPlayedAt,
+    playCount,
+    status,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'downloaded_audio_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DownloadedAudioRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('poem_id')) {
+      context.handle(
+        _poemIdMeta,
+        poemId.isAcceptableOrUnknown(data['poem_id']!, _poemIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_poemIdMeta);
+    }
+    if (data.containsKey('poem_category')) {
+      context.handle(
+        _poemCategoryMeta,
+        poemCategory.isAcceptableOrUnknown(
+          data['poem_category']!,
+          _poemCategoryMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_poemCategoryMeta);
+    }
+    if (data.containsKey('reciter_key')) {
+      context.handle(
+        _reciterKeyMeta,
+        reciterKey.isAcceptableOrUnknown(data['reciter_key']!, _reciterKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reciterKeyMeta);
+    }
+    if (data.containsKey('reciter_display_name')) {
+      context.handle(
+        _reciterDisplayNameMeta,
+        reciterDisplayName.isAcceptableOrUnknown(
+          data['reciter_display_name']!,
+          _reciterDisplayNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_reciterDisplayNameMeta);
+    }
+    if (data.containsKey('source_recitation_id')) {
+      context.handle(
+        _sourceRecitationIdMeta,
+        sourceRecitationId.isAcceptableOrUnknown(
+          data['source_recitation_id']!,
+          _sourceRecitationIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('local_file_path')) {
+      context.handle(
+        _localFilePathMeta,
+        localFilePath.isAcceptableOrUnknown(
+          data['local_file_path']!,
+          _localFilePathMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_localFilePathMeta);
+    }
+    if (data.containsKey('source_url')) {
+      context.handle(
+        _sourceUrlMeta,
+        sourceUrl.isAcceptableOrUnknown(data['source_url']!, _sourceUrlMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceUrlMeta);
+    }
+    if (data.containsKey('file_name')) {
+      context.handle(
+        _fileNameMeta,
+        fileName.isAcceptableOrUnknown(data['file_name']!, _fileNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fileNameMeta);
+    }
+    if (data.containsKey('file_size_bytes')) {
+      context.handle(
+        _fileSizeBytesMeta,
+        fileSizeBytes.isAcceptableOrUnknown(
+          data['file_size_bytes']!,
+          _fileSizeBytesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('duration_ms')) {
+      context.handle(
+        _durationMsMeta,
+        durationMs.isAcceptableOrUnknown(data['duration_ms']!, _durationMsMeta),
+      );
+    }
+    if (data.containsKey('checksum')) {
+      context.handle(
+        _checksumMeta,
+        checksum.isAcceptableOrUnknown(data['checksum']!, _checksumMeta),
+      );
+    }
+    if (data.containsKey('downloaded_at')) {
+      context.handle(
+        _downloadedAtMeta,
+        downloadedAt.isAcceptableOrUnknown(
+          data['downloaded_at']!,
+          _downloadedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_played_at')) {
+      context.handle(
+        _lastPlayedAtMeta,
+        lastPlayedAt.isAcceptableOrUnknown(
+          data['last_played_at']!,
+          _lastPlayedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('play_count')) {
+      context.handle(
+        _playCountMeta,
+        playCount.isAcceptableOrUnknown(data['play_count']!, _playCountMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {poemId, poemCategory, reciterKey},
+  ];
+  @override
+  DownloadedAudioRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DownloadedAudioRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      poemId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}poem_id'],
+      )!,
+      poemCategory: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}poem_category'],
+      )!,
+      reciterKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reciter_key'],
+      )!,
+      reciterDisplayName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reciter_display_name'],
+      )!,
+      sourceRecitationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}source_recitation_id'],
+      ),
+      localFilePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}local_file_path'],
+      )!,
+      sourceUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_url'],
+      )!,
+      fileName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}file_name'],
+      )!,
+      fileSizeBytes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}file_size_bytes'],
+      )!,
+      durationMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_ms'],
+      ),
+      checksum: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}checksum'],
+      ),
+      downloadedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}downloaded_at'],
+      ),
+      lastPlayedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_played_at'],
+      ),
+      playCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}play_count'],
+      )!,
+      status: $DownloadedAudioTableTable.$converterstatus.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}status'],
+        )!,
+      ),
+    );
+  }
+
+  @override
+  $DownloadedAudioTableTable createAlias(String alias) {
+    return $DownloadedAudioTableTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<DownloadStatus, String, String> $converterstatus =
+      const EnumNameConverter<DownloadStatus>(DownloadStatus.values);
+}
+
+class DownloadedAudioRow extends DataClass
+    implements Insertable<DownloadedAudioRow> {
+  final int id;
+  final String poemId;
+  final String poemCategory;
+  final String reciterKey;
+  final String reciterDisplayName;
+  final int? sourceRecitationId;
+  final String localFilePath;
+  final String sourceUrl;
+  final String fileName;
+  final int fileSizeBytes;
+  final int? durationMs;
+  final String? checksum;
+  final DateTime? downloadedAt;
+  final DateTime? lastPlayedAt;
+  final int playCount;
+  final DownloadStatus status;
+  const DownloadedAudioRow({
+    required this.id,
+    required this.poemId,
+    required this.poemCategory,
+    required this.reciterKey,
+    required this.reciterDisplayName,
+    this.sourceRecitationId,
+    required this.localFilePath,
+    required this.sourceUrl,
+    required this.fileName,
+    required this.fileSizeBytes,
+    this.durationMs,
+    this.checksum,
+    this.downloadedAt,
+    this.lastPlayedAt,
+    required this.playCount,
+    required this.status,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['poem_id'] = Variable<String>(poemId);
+    map['poem_category'] = Variable<String>(poemCategory);
+    map['reciter_key'] = Variable<String>(reciterKey);
+    map['reciter_display_name'] = Variable<String>(reciterDisplayName);
+    if (!nullToAbsent || sourceRecitationId != null) {
+      map['source_recitation_id'] = Variable<int>(sourceRecitationId);
+    }
+    map['local_file_path'] = Variable<String>(localFilePath);
+    map['source_url'] = Variable<String>(sourceUrl);
+    map['file_name'] = Variable<String>(fileName);
+    map['file_size_bytes'] = Variable<int>(fileSizeBytes);
+    if (!nullToAbsent || durationMs != null) {
+      map['duration_ms'] = Variable<int>(durationMs);
+    }
+    if (!nullToAbsent || checksum != null) {
+      map['checksum'] = Variable<String>(checksum);
+    }
+    if (!nullToAbsent || downloadedAt != null) {
+      map['downloaded_at'] = Variable<DateTime>(downloadedAt);
+    }
+    if (!nullToAbsent || lastPlayedAt != null) {
+      map['last_played_at'] = Variable<DateTime>(lastPlayedAt);
+    }
+    map['play_count'] = Variable<int>(playCount);
+    {
+      map['status'] = Variable<String>(
+        $DownloadedAudioTableTable.$converterstatus.toSql(status),
+      );
+    }
+    return map;
+  }
+
+  DownloadedAudioTableCompanion toCompanion(bool nullToAbsent) {
+    return DownloadedAudioTableCompanion(
+      id: Value(id),
+      poemId: Value(poemId),
+      poemCategory: Value(poemCategory),
+      reciterKey: Value(reciterKey),
+      reciterDisplayName: Value(reciterDisplayName),
+      sourceRecitationId: sourceRecitationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceRecitationId),
+      localFilePath: Value(localFilePath),
+      sourceUrl: Value(sourceUrl),
+      fileName: Value(fileName),
+      fileSizeBytes: Value(fileSizeBytes),
+      durationMs: durationMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(durationMs),
+      checksum: checksum == null && nullToAbsent
+          ? const Value.absent()
+          : Value(checksum),
+      downloadedAt: downloadedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(downloadedAt),
+      lastPlayedAt: lastPlayedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastPlayedAt),
+      playCount: Value(playCount),
+      status: Value(status),
+    );
+  }
+
+  factory DownloadedAudioRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DownloadedAudioRow(
+      id: serializer.fromJson<int>(json['id']),
+      poemId: serializer.fromJson<String>(json['poemId']),
+      poemCategory: serializer.fromJson<String>(json['poemCategory']),
+      reciterKey: serializer.fromJson<String>(json['reciterKey']),
+      reciterDisplayName: serializer.fromJson<String>(
+        json['reciterDisplayName'],
+      ),
+      sourceRecitationId: serializer.fromJson<int?>(json['sourceRecitationId']),
+      localFilePath: serializer.fromJson<String>(json['localFilePath']),
+      sourceUrl: serializer.fromJson<String>(json['sourceUrl']),
+      fileName: serializer.fromJson<String>(json['fileName']),
+      fileSizeBytes: serializer.fromJson<int>(json['fileSizeBytes']),
+      durationMs: serializer.fromJson<int?>(json['durationMs']),
+      checksum: serializer.fromJson<String?>(json['checksum']),
+      downloadedAt: serializer.fromJson<DateTime?>(json['downloadedAt']),
+      lastPlayedAt: serializer.fromJson<DateTime?>(json['lastPlayedAt']),
+      playCount: serializer.fromJson<int>(json['playCount']),
+      status: $DownloadedAudioTableTable.$converterstatus.fromJson(
+        serializer.fromJson<String>(json['status']),
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'poemId': serializer.toJson<String>(poemId),
+      'poemCategory': serializer.toJson<String>(poemCategory),
+      'reciterKey': serializer.toJson<String>(reciterKey),
+      'reciterDisplayName': serializer.toJson<String>(reciterDisplayName),
+      'sourceRecitationId': serializer.toJson<int?>(sourceRecitationId),
+      'localFilePath': serializer.toJson<String>(localFilePath),
+      'sourceUrl': serializer.toJson<String>(sourceUrl),
+      'fileName': serializer.toJson<String>(fileName),
+      'fileSizeBytes': serializer.toJson<int>(fileSizeBytes),
+      'durationMs': serializer.toJson<int?>(durationMs),
+      'checksum': serializer.toJson<String?>(checksum),
+      'downloadedAt': serializer.toJson<DateTime?>(downloadedAt),
+      'lastPlayedAt': serializer.toJson<DateTime?>(lastPlayedAt),
+      'playCount': serializer.toJson<int>(playCount),
+      'status': serializer.toJson<String>(
+        $DownloadedAudioTableTable.$converterstatus.toJson(status),
+      ),
+    };
+  }
+
+  DownloadedAudioRow copyWith({
+    int? id,
+    String? poemId,
+    String? poemCategory,
+    String? reciterKey,
+    String? reciterDisplayName,
+    Value<int?> sourceRecitationId = const Value.absent(),
+    String? localFilePath,
+    String? sourceUrl,
+    String? fileName,
+    int? fileSizeBytes,
+    Value<int?> durationMs = const Value.absent(),
+    Value<String?> checksum = const Value.absent(),
+    Value<DateTime?> downloadedAt = const Value.absent(),
+    Value<DateTime?> lastPlayedAt = const Value.absent(),
+    int? playCount,
+    DownloadStatus? status,
+  }) => DownloadedAudioRow(
+    id: id ?? this.id,
+    poemId: poemId ?? this.poemId,
+    poemCategory: poemCategory ?? this.poemCategory,
+    reciterKey: reciterKey ?? this.reciterKey,
+    reciterDisplayName: reciterDisplayName ?? this.reciterDisplayName,
+    sourceRecitationId: sourceRecitationId.present
+        ? sourceRecitationId.value
+        : this.sourceRecitationId,
+    localFilePath: localFilePath ?? this.localFilePath,
+    sourceUrl: sourceUrl ?? this.sourceUrl,
+    fileName: fileName ?? this.fileName,
+    fileSizeBytes: fileSizeBytes ?? this.fileSizeBytes,
+    durationMs: durationMs.present ? durationMs.value : this.durationMs,
+    checksum: checksum.present ? checksum.value : this.checksum,
+    downloadedAt: downloadedAt.present ? downloadedAt.value : this.downloadedAt,
+    lastPlayedAt: lastPlayedAt.present ? lastPlayedAt.value : this.lastPlayedAt,
+    playCount: playCount ?? this.playCount,
+    status: status ?? this.status,
+  );
+  DownloadedAudioRow copyWithCompanion(DownloadedAudioTableCompanion data) {
+    return DownloadedAudioRow(
+      id: data.id.present ? data.id.value : this.id,
+      poemId: data.poemId.present ? data.poemId.value : this.poemId,
+      poemCategory: data.poemCategory.present
+          ? data.poemCategory.value
+          : this.poemCategory,
+      reciterKey: data.reciterKey.present
+          ? data.reciterKey.value
+          : this.reciterKey,
+      reciterDisplayName: data.reciterDisplayName.present
+          ? data.reciterDisplayName.value
+          : this.reciterDisplayName,
+      sourceRecitationId: data.sourceRecitationId.present
+          ? data.sourceRecitationId.value
+          : this.sourceRecitationId,
+      localFilePath: data.localFilePath.present
+          ? data.localFilePath.value
+          : this.localFilePath,
+      sourceUrl: data.sourceUrl.present ? data.sourceUrl.value : this.sourceUrl,
+      fileName: data.fileName.present ? data.fileName.value : this.fileName,
+      fileSizeBytes: data.fileSizeBytes.present
+          ? data.fileSizeBytes.value
+          : this.fileSizeBytes,
+      durationMs: data.durationMs.present
+          ? data.durationMs.value
+          : this.durationMs,
+      checksum: data.checksum.present ? data.checksum.value : this.checksum,
+      downloadedAt: data.downloadedAt.present
+          ? data.downloadedAt.value
+          : this.downloadedAt,
+      lastPlayedAt: data.lastPlayedAt.present
+          ? data.lastPlayedAt.value
+          : this.lastPlayedAt,
+      playCount: data.playCount.present ? data.playCount.value : this.playCount,
+      status: data.status.present ? data.status.value : this.status,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DownloadedAudioRow(')
+          ..write('id: $id, ')
+          ..write('poemId: $poemId, ')
+          ..write('poemCategory: $poemCategory, ')
+          ..write('reciterKey: $reciterKey, ')
+          ..write('reciterDisplayName: $reciterDisplayName, ')
+          ..write('sourceRecitationId: $sourceRecitationId, ')
+          ..write('localFilePath: $localFilePath, ')
+          ..write('sourceUrl: $sourceUrl, ')
+          ..write('fileName: $fileName, ')
+          ..write('fileSizeBytes: $fileSizeBytes, ')
+          ..write('durationMs: $durationMs, ')
+          ..write('checksum: $checksum, ')
+          ..write('downloadedAt: $downloadedAt, ')
+          ..write('lastPlayedAt: $lastPlayedAt, ')
+          ..write('playCount: $playCount, ')
+          ..write('status: $status')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    poemId,
+    poemCategory,
+    reciterKey,
+    reciterDisplayName,
+    sourceRecitationId,
+    localFilePath,
+    sourceUrl,
+    fileName,
+    fileSizeBytes,
+    durationMs,
+    checksum,
+    downloadedAt,
+    lastPlayedAt,
+    playCount,
+    status,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DownloadedAudioRow &&
+          other.id == this.id &&
+          other.poemId == this.poemId &&
+          other.poemCategory == this.poemCategory &&
+          other.reciterKey == this.reciterKey &&
+          other.reciterDisplayName == this.reciterDisplayName &&
+          other.sourceRecitationId == this.sourceRecitationId &&
+          other.localFilePath == this.localFilePath &&
+          other.sourceUrl == this.sourceUrl &&
+          other.fileName == this.fileName &&
+          other.fileSizeBytes == this.fileSizeBytes &&
+          other.durationMs == this.durationMs &&
+          other.checksum == this.checksum &&
+          other.downloadedAt == this.downloadedAt &&
+          other.lastPlayedAt == this.lastPlayedAt &&
+          other.playCount == this.playCount &&
+          other.status == this.status);
+}
+
+class DownloadedAudioTableCompanion
+    extends UpdateCompanion<DownloadedAudioRow> {
+  final Value<int> id;
+  final Value<String> poemId;
+  final Value<String> poemCategory;
+  final Value<String> reciterKey;
+  final Value<String> reciterDisplayName;
+  final Value<int?> sourceRecitationId;
+  final Value<String> localFilePath;
+  final Value<String> sourceUrl;
+  final Value<String> fileName;
+  final Value<int> fileSizeBytes;
+  final Value<int?> durationMs;
+  final Value<String?> checksum;
+  final Value<DateTime?> downloadedAt;
+  final Value<DateTime?> lastPlayedAt;
+  final Value<int> playCount;
+  final Value<DownloadStatus> status;
+  const DownloadedAudioTableCompanion({
+    this.id = const Value.absent(),
+    this.poemId = const Value.absent(),
+    this.poemCategory = const Value.absent(),
+    this.reciterKey = const Value.absent(),
+    this.reciterDisplayName = const Value.absent(),
+    this.sourceRecitationId = const Value.absent(),
+    this.localFilePath = const Value.absent(),
+    this.sourceUrl = const Value.absent(),
+    this.fileName = const Value.absent(),
+    this.fileSizeBytes = const Value.absent(),
+    this.durationMs = const Value.absent(),
+    this.checksum = const Value.absent(),
+    this.downloadedAt = const Value.absent(),
+    this.lastPlayedAt = const Value.absent(),
+    this.playCount = const Value.absent(),
+    this.status = const Value.absent(),
+  });
+  DownloadedAudioTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String poemId,
+    required String poemCategory,
+    required String reciterKey,
+    required String reciterDisplayName,
+    this.sourceRecitationId = const Value.absent(),
+    required String localFilePath,
+    required String sourceUrl,
+    required String fileName,
+    this.fileSizeBytes = const Value.absent(),
+    this.durationMs = const Value.absent(),
+    this.checksum = const Value.absent(),
+    this.downloadedAt = const Value.absent(),
+    this.lastPlayedAt = const Value.absent(),
+    this.playCount = const Value.absent(),
+    this.status = const Value.absent(),
+  }) : poemId = Value(poemId),
+       poemCategory = Value(poemCategory),
+       reciterKey = Value(reciterKey),
+       reciterDisplayName = Value(reciterDisplayName),
+       localFilePath = Value(localFilePath),
+       sourceUrl = Value(sourceUrl),
+       fileName = Value(fileName);
+  static Insertable<DownloadedAudioRow> custom({
+    Expression<int>? id,
+    Expression<String>? poemId,
+    Expression<String>? poemCategory,
+    Expression<String>? reciterKey,
+    Expression<String>? reciterDisplayName,
+    Expression<int>? sourceRecitationId,
+    Expression<String>? localFilePath,
+    Expression<String>? sourceUrl,
+    Expression<String>? fileName,
+    Expression<int>? fileSizeBytes,
+    Expression<int>? durationMs,
+    Expression<String>? checksum,
+    Expression<DateTime>? downloadedAt,
+    Expression<DateTime>? lastPlayedAt,
+    Expression<int>? playCount,
+    Expression<String>? status,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (poemId != null) 'poem_id': poemId,
+      if (poemCategory != null) 'poem_category': poemCategory,
+      if (reciterKey != null) 'reciter_key': reciterKey,
+      if (reciterDisplayName != null)
+        'reciter_display_name': reciterDisplayName,
+      if (sourceRecitationId != null)
+        'source_recitation_id': sourceRecitationId,
+      if (localFilePath != null) 'local_file_path': localFilePath,
+      if (sourceUrl != null) 'source_url': sourceUrl,
+      if (fileName != null) 'file_name': fileName,
+      if (fileSizeBytes != null) 'file_size_bytes': fileSizeBytes,
+      if (durationMs != null) 'duration_ms': durationMs,
+      if (checksum != null) 'checksum': checksum,
+      if (downloadedAt != null) 'downloaded_at': downloadedAt,
+      if (lastPlayedAt != null) 'last_played_at': lastPlayedAt,
+      if (playCount != null) 'play_count': playCount,
+      if (status != null) 'status': status,
+    });
+  }
+
+  DownloadedAudioTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? poemId,
+    Value<String>? poemCategory,
+    Value<String>? reciterKey,
+    Value<String>? reciterDisplayName,
+    Value<int?>? sourceRecitationId,
+    Value<String>? localFilePath,
+    Value<String>? sourceUrl,
+    Value<String>? fileName,
+    Value<int>? fileSizeBytes,
+    Value<int?>? durationMs,
+    Value<String?>? checksum,
+    Value<DateTime?>? downloadedAt,
+    Value<DateTime?>? lastPlayedAt,
+    Value<int>? playCount,
+    Value<DownloadStatus>? status,
+  }) {
+    return DownloadedAudioTableCompanion(
+      id: id ?? this.id,
+      poemId: poemId ?? this.poemId,
+      poemCategory: poemCategory ?? this.poemCategory,
+      reciterKey: reciterKey ?? this.reciterKey,
+      reciterDisplayName: reciterDisplayName ?? this.reciterDisplayName,
+      sourceRecitationId: sourceRecitationId ?? this.sourceRecitationId,
+      localFilePath: localFilePath ?? this.localFilePath,
+      sourceUrl: sourceUrl ?? this.sourceUrl,
+      fileName: fileName ?? this.fileName,
+      fileSizeBytes: fileSizeBytes ?? this.fileSizeBytes,
+      durationMs: durationMs ?? this.durationMs,
+      checksum: checksum ?? this.checksum,
+      downloadedAt: downloadedAt ?? this.downloadedAt,
+      lastPlayedAt: lastPlayedAt ?? this.lastPlayedAt,
+      playCount: playCount ?? this.playCount,
+      status: status ?? this.status,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (poemId.present) {
+      map['poem_id'] = Variable<String>(poemId.value);
+    }
+    if (poemCategory.present) {
+      map['poem_category'] = Variable<String>(poemCategory.value);
+    }
+    if (reciterKey.present) {
+      map['reciter_key'] = Variable<String>(reciterKey.value);
+    }
+    if (reciterDisplayName.present) {
+      map['reciter_display_name'] = Variable<String>(reciterDisplayName.value);
+    }
+    if (sourceRecitationId.present) {
+      map['source_recitation_id'] = Variable<int>(sourceRecitationId.value);
+    }
+    if (localFilePath.present) {
+      map['local_file_path'] = Variable<String>(localFilePath.value);
+    }
+    if (sourceUrl.present) {
+      map['source_url'] = Variable<String>(sourceUrl.value);
+    }
+    if (fileName.present) {
+      map['file_name'] = Variable<String>(fileName.value);
+    }
+    if (fileSizeBytes.present) {
+      map['file_size_bytes'] = Variable<int>(fileSizeBytes.value);
+    }
+    if (durationMs.present) {
+      map['duration_ms'] = Variable<int>(durationMs.value);
+    }
+    if (checksum.present) {
+      map['checksum'] = Variable<String>(checksum.value);
+    }
+    if (downloadedAt.present) {
+      map['downloaded_at'] = Variable<DateTime>(downloadedAt.value);
+    }
+    if (lastPlayedAt.present) {
+      map['last_played_at'] = Variable<DateTime>(lastPlayedAt.value);
+    }
+    if (playCount.present) {
+      map['play_count'] = Variable<int>(playCount.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(
+        $DownloadedAudioTableTable.$converterstatus.toSql(status.value),
+      );
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DownloadedAudioTableCompanion(')
+          ..write('id: $id, ')
+          ..write('poemId: $poemId, ')
+          ..write('poemCategory: $poemCategory, ')
+          ..write('reciterKey: $reciterKey, ')
+          ..write('reciterDisplayName: $reciterDisplayName, ')
+          ..write('sourceRecitationId: $sourceRecitationId, ')
+          ..write('localFilePath: $localFilePath, ')
+          ..write('sourceUrl: $sourceUrl, ')
+          ..write('fileName: $fileName, ')
+          ..write('fileSizeBytes: $fileSizeBytes, ')
+          ..write('durationMs: $durationMs, ')
+          ..write('checksum: $checksum, ')
+          ..write('downloadedAt: $downloadedAt, ')
+          ..write('lastPlayedAt: $lastPlayedAt, ')
+          ..write('playCount: $playCount, ')
+          ..write('status: $status')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DefaultReciterTableTable extends DefaultReciterTable
+    with TableInfo<$DefaultReciterTableTable, DefaultReciterRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DefaultReciterTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _scopeMeta = const VerificationMeta('scope');
+  @override
+  late final GeneratedColumn<String> scope = GeneratedColumn<String>(
+    'scope',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reciterKeyMeta = const VerificationMeta(
+    'reciterKey',
+  );
+  @override
+  late final GeneratedColumn<String> reciterKey = GeneratedColumn<String>(
+    'reciter_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [scope, reciterKey];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'default_reciter_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DefaultReciterRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('scope')) {
+      context.handle(
+        _scopeMeta,
+        scope.isAcceptableOrUnknown(data['scope']!, _scopeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_scopeMeta);
+    }
+    if (data.containsKey('reciter_key')) {
+      context.handle(
+        _reciterKeyMeta,
+        reciterKey.isAcceptableOrUnknown(data['reciter_key']!, _reciterKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reciterKeyMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {scope};
+  @override
+  DefaultReciterRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DefaultReciterRow(
+      scope: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}scope'],
+      )!,
+      reciterKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reciter_key'],
+      )!,
+    );
+  }
+
+  @override
+  $DefaultReciterTableTable createAlias(String alias) {
+    return $DefaultReciterTableTable(attachedDatabase, alias);
+  }
+}
+
+class DefaultReciterRow extends DataClass
+    implements Insertable<DefaultReciterRow> {
+  final String scope;
+  final String reciterKey;
+  const DefaultReciterRow({required this.scope, required this.reciterKey});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['scope'] = Variable<String>(scope);
+    map['reciter_key'] = Variable<String>(reciterKey);
+    return map;
+  }
+
+  DefaultReciterTableCompanion toCompanion(bool nullToAbsent) {
+    return DefaultReciterTableCompanion(
+      scope: Value(scope),
+      reciterKey: Value(reciterKey),
+    );
+  }
+
+  factory DefaultReciterRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DefaultReciterRow(
+      scope: serializer.fromJson<String>(json['scope']),
+      reciterKey: serializer.fromJson<String>(json['reciterKey']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'scope': serializer.toJson<String>(scope),
+      'reciterKey': serializer.toJson<String>(reciterKey),
+    };
+  }
+
+  DefaultReciterRow copyWith({String? scope, String? reciterKey}) =>
+      DefaultReciterRow(
+        scope: scope ?? this.scope,
+        reciterKey: reciterKey ?? this.reciterKey,
+      );
+  DefaultReciterRow copyWithCompanion(DefaultReciterTableCompanion data) {
+    return DefaultReciterRow(
+      scope: data.scope.present ? data.scope.value : this.scope,
+      reciterKey: data.reciterKey.present
+          ? data.reciterKey.value
+          : this.reciterKey,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DefaultReciterRow(')
+          ..write('scope: $scope, ')
+          ..write('reciterKey: $reciterKey')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(scope, reciterKey);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DefaultReciterRow &&
+          other.scope == this.scope &&
+          other.reciterKey == this.reciterKey);
+}
+
+class DefaultReciterTableCompanion extends UpdateCompanion<DefaultReciterRow> {
+  final Value<String> scope;
+  final Value<String> reciterKey;
+  final Value<int> rowid;
+  const DefaultReciterTableCompanion({
+    this.scope = const Value.absent(),
+    this.reciterKey = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DefaultReciterTableCompanion.insert({
+    required String scope,
+    required String reciterKey,
+    this.rowid = const Value.absent(),
+  }) : scope = Value(scope),
+       reciterKey = Value(reciterKey);
+  static Insertable<DefaultReciterRow> custom({
+    Expression<String>? scope,
+    Expression<String>? reciterKey,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (scope != null) 'scope': scope,
+      if (reciterKey != null) 'reciter_key': reciterKey,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DefaultReciterTableCompanion copyWith({
+    Value<String>? scope,
+    Value<String>? reciterKey,
+    Value<int>? rowid,
+  }) {
+    return DefaultReciterTableCompanion(
+      scope: scope ?? this.scope,
+      reciterKey: reciterKey ?? this.reciterKey,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (scope.present) {
+      map['scope'] = Variable<String>(scope.value);
+    }
+    if (reciterKey.present) {
+      map['reciter_key'] = Variable<String>(reciterKey.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DefaultReciterTableCompanion(')
+          ..write('scope: $scope, ')
+          ..write('reciterKey: $reciterKey, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2080,6 +3395,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $HighlightItemsTableTable(this);
   late final $ReadPoemsTableTable readPoemsTable = $ReadPoemsTableTable(this);
   late final $SettingsTableTable settingsTable = $SettingsTableTable(this);
+  late final $DownloadedAudioTableTable downloadedAudioTable =
+      $DownloadedAudioTableTable(this);
+  late final $DefaultReciterTableTable defaultReciterTable =
+      $DefaultReciterTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2091,6 +3410,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     highlightItemsTable,
     readPoemsTable,
     settingsTable,
+    downloadedAudioTable,
+    defaultReciterTable,
   ];
 }
 
@@ -2343,6 +3664,7 @@ typedef $$PoemCacheTableTableProcessedTableManager =
 typedef $$LikedItemsTableTableCreateCompanionBuilder =
     LikedItemsTableCompanion Function({
       required String poemId,
+      required String category,
       required String poemTitle,
       required String poemText,
       Value<String> audioUrl,
@@ -2351,6 +3673,7 @@ typedef $$LikedItemsTableTableCreateCompanionBuilder =
 typedef $$LikedItemsTableTableUpdateCompanionBuilder =
     LikedItemsTableCompanion Function({
       Value<String> poemId,
+      Value<String> category,
       Value<String> poemTitle,
       Value<String> poemText,
       Value<String> audioUrl,
@@ -2368,6 +3691,11 @@ class $$LikedItemsTableTableFilterComposer
   });
   ColumnFilters<String> get poemId => $composableBuilder(
     column: $table.poemId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2401,6 +3729,11 @@ class $$LikedItemsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get poemTitle => $composableBuilder(
     column: $table.poemTitle,
     builder: (column) => ColumnOrderings(column),
@@ -2428,6 +3761,9 @@ class $$LikedItemsTableTableAnnotationComposer
   });
   GeneratedColumn<String> get poemId =>
       $composableBuilder(column: $table.poemId, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
 
   GeneratedColumn<String> get poemTitle =>
       $composableBuilder(column: $table.poemTitle, builder: (column) => column);
@@ -2477,12 +3813,14 @@ class $$LikedItemsTableTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> poemId = const Value.absent(),
+                Value<String> category = const Value.absent(),
                 Value<String> poemTitle = const Value.absent(),
                 Value<String> poemText = const Value.absent(),
                 Value<String> audioUrl = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LikedItemsTableCompanion(
                 poemId: poemId,
+                category: category,
                 poemTitle: poemTitle,
                 poemText: poemText,
                 audioUrl: audioUrl,
@@ -2491,12 +3829,14 @@ class $$LikedItemsTableTableTableManager
           createCompanionCallback:
               ({
                 required String poemId,
+                required String category,
                 required String poemTitle,
                 required String poemText,
                 Value<String> audioUrl = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LikedItemsTableCompanion.insert(
                 poemId: poemId,
+                category: category,
                 poemTitle: poemTitle,
                 poemText: poemText,
                 audioUrl: audioUrl,
@@ -2534,6 +3874,7 @@ typedef $$LikedItemsTableTableProcessedTableManager =
 typedef $$SavedItemsTableTableCreateCompanionBuilder =
     SavedItemsTableCompanion Function({
       required String poemId,
+      required String category,
       required String poemTitle,
       required String poemText,
       Value<String> audioUrl,
@@ -2542,6 +3883,7 @@ typedef $$SavedItemsTableTableCreateCompanionBuilder =
 typedef $$SavedItemsTableTableUpdateCompanionBuilder =
     SavedItemsTableCompanion Function({
       Value<String> poemId,
+      Value<String> category,
       Value<String> poemTitle,
       Value<String> poemText,
       Value<String> audioUrl,
@@ -2559,6 +3901,11 @@ class $$SavedItemsTableTableFilterComposer
   });
   ColumnFilters<String> get poemId => $composableBuilder(
     column: $table.poemId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2592,6 +3939,11 @@ class $$SavedItemsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get poemTitle => $composableBuilder(
     column: $table.poemTitle,
     builder: (column) => ColumnOrderings(column),
@@ -2619,6 +3971,9 @@ class $$SavedItemsTableTableAnnotationComposer
   });
   GeneratedColumn<String> get poemId =>
       $composableBuilder(column: $table.poemId, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
 
   GeneratedColumn<String> get poemTitle =>
       $composableBuilder(column: $table.poemTitle, builder: (column) => column);
@@ -2668,12 +4023,14 @@ class $$SavedItemsTableTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> poemId = const Value.absent(),
+                Value<String> category = const Value.absent(),
                 Value<String> poemTitle = const Value.absent(),
                 Value<String> poemText = const Value.absent(),
                 Value<String> audioUrl = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SavedItemsTableCompanion(
                 poemId: poemId,
+                category: category,
                 poemTitle: poemTitle,
                 poemText: poemText,
                 audioUrl: audioUrl,
@@ -2682,12 +4039,14 @@ class $$SavedItemsTableTableTableManager
           createCompanionCallback:
               ({
                 required String poemId,
+                required String category,
                 required String poemTitle,
                 required String poemText,
                 Value<String> audioUrl = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SavedItemsTableCompanion.insert(
                 poemId: poemId,
+                category: category,
                 poemTitle: poemTitle,
                 poemText: poemText,
                 audioUrl: audioUrl,
@@ -2726,6 +4085,7 @@ typedef $$HighlightItemsTableTableCreateCompanionBuilder =
     HighlightItemsTableCompanion Function({
       required String itemKey,
       required String poemId,
+      required String category,
       required String poemTitle,
       required String poemText,
       Value<String> audioUrl,
@@ -2738,6 +4098,7 @@ typedef $$HighlightItemsTableTableUpdateCompanionBuilder =
     HighlightItemsTableCompanion Function({
       Value<String> itemKey,
       Value<String> poemId,
+      Value<String> category,
       Value<String> poemTitle,
       Value<String> poemText,
       Value<String> audioUrl,
@@ -2763,6 +4124,11 @@ class $$HighlightItemsTableTableFilterComposer
 
   ColumnFilters<String> get poemId => $composableBuilder(
     column: $table.poemId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2816,6 +4182,11 @@ class $$HighlightItemsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get poemTitle => $composableBuilder(
     column: $table.poemTitle,
     builder: (column) => ColumnOrderings(column),
@@ -2861,6 +4232,9 @@ class $$HighlightItemsTableTableAnnotationComposer
 
   GeneratedColumn<String> get poemId =>
       $composableBuilder(column: $table.poemId, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
 
   GeneratedColumn<String> get poemTitle =>
       $composableBuilder(column: $table.poemTitle, builder: (column) => column);
@@ -2930,6 +4304,7 @@ class $$HighlightItemsTableTableTableManager
               ({
                 Value<String> itemKey = const Value.absent(),
                 Value<String> poemId = const Value.absent(),
+                Value<String> category = const Value.absent(),
                 Value<String> poemTitle = const Value.absent(),
                 Value<String> poemText = const Value.absent(),
                 Value<String> audioUrl = const Value.absent(),
@@ -2940,6 +4315,7 @@ class $$HighlightItemsTableTableTableManager
               }) => HighlightItemsTableCompanion(
                 itemKey: itemKey,
                 poemId: poemId,
+                category: category,
                 poemTitle: poemTitle,
                 poemText: poemText,
                 audioUrl: audioUrl,
@@ -2952,6 +4328,7 @@ class $$HighlightItemsTableTableTableManager
               ({
                 required String itemKey,
                 required String poemId,
+                required String category,
                 required String poemTitle,
                 required String poemText,
                 Value<String> audioUrl = const Value.absent(),
@@ -2962,6 +4339,7 @@ class $$HighlightItemsTableTableTableManager
               }) => HighlightItemsTableCompanion.insert(
                 itemKey: itemKey,
                 poemId: poemId,
+                category: category,
                 poemTitle: poemTitle,
                 poemText: poemText,
                 audioUrl: audioUrl,
@@ -3299,6 +4677,605 @@ typedef $$SettingsTableTableProcessedTableManager =
       SettingsTableData,
       PrefetchHooks Function()
     >;
+typedef $$DownloadedAudioTableTableCreateCompanionBuilder =
+    DownloadedAudioTableCompanion Function({
+      Value<int> id,
+      required String poemId,
+      required String poemCategory,
+      required String reciterKey,
+      required String reciterDisplayName,
+      Value<int?> sourceRecitationId,
+      required String localFilePath,
+      required String sourceUrl,
+      required String fileName,
+      Value<int> fileSizeBytes,
+      Value<int?> durationMs,
+      Value<String?> checksum,
+      Value<DateTime?> downloadedAt,
+      Value<DateTime?> lastPlayedAt,
+      Value<int> playCount,
+      Value<DownloadStatus> status,
+    });
+typedef $$DownloadedAudioTableTableUpdateCompanionBuilder =
+    DownloadedAudioTableCompanion Function({
+      Value<int> id,
+      Value<String> poemId,
+      Value<String> poemCategory,
+      Value<String> reciterKey,
+      Value<String> reciterDisplayName,
+      Value<int?> sourceRecitationId,
+      Value<String> localFilePath,
+      Value<String> sourceUrl,
+      Value<String> fileName,
+      Value<int> fileSizeBytes,
+      Value<int?> durationMs,
+      Value<String?> checksum,
+      Value<DateTime?> downloadedAt,
+      Value<DateTime?> lastPlayedAt,
+      Value<int> playCount,
+      Value<DownloadStatus> status,
+    });
+
+class $$DownloadedAudioTableTableFilterComposer
+    extends Composer<_$AppDatabase, $DownloadedAudioTableTable> {
+  $$DownloadedAudioTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get poemId => $composableBuilder(
+    column: $table.poemId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get poemCategory => $composableBuilder(
+    column: $table.poemCategory,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reciterKey => $composableBuilder(
+    column: $table.reciterKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reciterDisplayName => $composableBuilder(
+    column: $table.reciterDisplayName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sourceRecitationId => $composableBuilder(
+    column: $table.sourceRecitationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get localFilePath => $composableBuilder(
+    column: $table.localFilePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceUrl => $composableBuilder(
+    column: $table.sourceUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fileName => $composableBuilder(
+    column: $table.fileName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get fileSizeBytes => $composableBuilder(
+    column: $table.fileSizeBytes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get durationMs => $composableBuilder(
+    column: $table.durationMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get checksum => $composableBuilder(
+    column: $table.checksum,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get downloadedAt => $composableBuilder(
+    column: $table.downloadedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastPlayedAt => $composableBuilder(
+    column: $table.lastPlayedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get playCount => $composableBuilder(
+    column: $table.playCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<DownloadStatus, DownloadStatus, String>
+  get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+}
+
+class $$DownloadedAudioTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $DownloadedAudioTableTable> {
+  $$DownloadedAudioTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get poemId => $composableBuilder(
+    column: $table.poemId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get poemCategory => $composableBuilder(
+    column: $table.poemCategory,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reciterKey => $composableBuilder(
+    column: $table.reciterKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reciterDisplayName => $composableBuilder(
+    column: $table.reciterDisplayName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sourceRecitationId => $composableBuilder(
+    column: $table.sourceRecitationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get localFilePath => $composableBuilder(
+    column: $table.localFilePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceUrl => $composableBuilder(
+    column: $table.sourceUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fileName => $composableBuilder(
+    column: $table.fileName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get fileSizeBytes => $composableBuilder(
+    column: $table.fileSizeBytes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get durationMs => $composableBuilder(
+    column: $table.durationMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get checksum => $composableBuilder(
+    column: $table.checksum,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get downloadedAt => $composableBuilder(
+    column: $table.downloadedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastPlayedAt => $composableBuilder(
+    column: $table.lastPlayedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get playCount => $composableBuilder(
+    column: $table.playCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DownloadedAudioTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DownloadedAudioTableTable> {
+  $$DownloadedAudioTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get poemId =>
+      $composableBuilder(column: $table.poemId, builder: (column) => column);
+
+  GeneratedColumn<String> get poemCategory => $composableBuilder(
+    column: $table.poemCategory,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reciterKey => $composableBuilder(
+    column: $table.reciterKey,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reciterDisplayName => $composableBuilder(
+    column: $table.reciterDisplayName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get sourceRecitationId => $composableBuilder(
+    column: $table.sourceRecitationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get localFilePath => $composableBuilder(
+    column: $table.localFilePath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceUrl =>
+      $composableBuilder(column: $table.sourceUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get fileName =>
+      $composableBuilder(column: $table.fileName, builder: (column) => column);
+
+  GeneratedColumn<int> get fileSizeBytes => $composableBuilder(
+    column: $table.fileSizeBytes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get durationMs => $composableBuilder(
+    column: $table.durationMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get checksum =>
+      $composableBuilder(column: $table.checksum, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get downloadedAt => $composableBuilder(
+    column: $table.downloadedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastPlayedAt => $composableBuilder(
+    column: $table.lastPlayedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get playCount =>
+      $composableBuilder(column: $table.playCount, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<DownloadStatus, String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+}
+
+class $$DownloadedAudioTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DownloadedAudioTableTable,
+          DownloadedAudioRow,
+          $$DownloadedAudioTableTableFilterComposer,
+          $$DownloadedAudioTableTableOrderingComposer,
+          $$DownloadedAudioTableTableAnnotationComposer,
+          $$DownloadedAudioTableTableCreateCompanionBuilder,
+          $$DownloadedAudioTableTableUpdateCompanionBuilder,
+          (
+            DownloadedAudioRow,
+            BaseReferences<
+              _$AppDatabase,
+              $DownloadedAudioTableTable,
+              DownloadedAudioRow
+            >,
+          ),
+          DownloadedAudioRow,
+          PrefetchHooks Function()
+        > {
+  $$DownloadedAudioTableTableTableManager(
+    _$AppDatabase db,
+    $DownloadedAudioTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DownloadedAudioTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DownloadedAudioTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$DownloadedAudioTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> poemId = const Value.absent(),
+                Value<String> poemCategory = const Value.absent(),
+                Value<String> reciterKey = const Value.absent(),
+                Value<String> reciterDisplayName = const Value.absent(),
+                Value<int?> sourceRecitationId = const Value.absent(),
+                Value<String> localFilePath = const Value.absent(),
+                Value<String> sourceUrl = const Value.absent(),
+                Value<String> fileName = const Value.absent(),
+                Value<int> fileSizeBytes = const Value.absent(),
+                Value<int?> durationMs = const Value.absent(),
+                Value<String?> checksum = const Value.absent(),
+                Value<DateTime?> downloadedAt = const Value.absent(),
+                Value<DateTime?> lastPlayedAt = const Value.absent(),
+                Value<int> playCount = const Value.absent(),
+                Value<DownloadStatus> status = const Value.absent(),
+              }) => DownloadedAudioTableCompanion(
+                id: id,
+                poemId: poemId,
+                poemCategory: poemCategory,
+                reciterKey: reciterKey,
+                reciterDisplayName: reciterDisplayName,
+                sourceRecitationId: sourceRecitationId,
+                localFilePath: localFilePath,
+                sourceUrl: sourceUrl,
+                fileName: fileName,
+                fileSizeBytes: fileSizeBytes,
+                durationMs: durationMs,
+                checksum: checksum,
+                downloadedAt: downloadedAt,
+                lastPlayedAt: lastPlayedAt,
+                playCount: playCount,
+                status: status,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String poemId,
+                required String poemCategory,
+                required String reciterKey,
+                required String reciterDisplayName,
+                Value<int?> sourceRecitationId = const Value.absent(),
+                required String localFilePath,
+                required String sourceUrl,
+                required String fileName,
+                Value<int> fileSizeBytes = const Value.absent(),
+                Value<int?> durationMs = const Value.absent(),
+                Value<String?> checksum = const Value.absent(),
+                Value<DateTime?> downloadedAt = const Value.absent(),
+                Value<DateTime?> lastPlayedAt = const Value.absent(),
+                Value<int> playCount = const Value.absent(),
+                Value<DownloadStatus> status = const Value.absent(),
+              }) => DownloadedAudioTableCompanion.insert(
+                id: id,
+                poemId: poemId,
+                poemCategory: poemCategory,
+                reciterKey: reciterKey,
+                reciterDisplayName: reciterDisplayName,
+                sourceRecitationId: sourceRecitationId,
+                localFilePath: localFilePath,
+                sourceUrl: sourceUrl,
+                fileName: fileName,
+                fileSizeBytes: fileSizeBytes,
+                durationMs: durationMs,
+                checksum: checksum,
+                downloadedAt: downloadedAt,
+                lastPlayedAt: lastPlayedAt,
+                playCount: playCount,
+                status: status,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$DownloadedAudioTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DownloadedAudioTableTable,
+      DownloadedAudioRow,
+      $$DownloadedAudioTableTableFilterComposer,
+      $$DownloadedAudioTableTableOrderingComposer,
+      $$DownloadedAudioTableTableAnnotationComposer,
+      $$DownloadedAudioTableTableCreateCompanionBuilder,
+      $$DownloadedAudioTableTableUpdateCompanionBuilder,
+      (
+        DownloadedAudioRow,
+        BaseReferences<
+          _$AppDatabase,
+          $DownloadedAudioTableTable,
+          DownloadedAudioRow
+        >,
+      ),
+      DownloadedAudioRow,
+      PrefetchHooks Function()
+    >;
+typedef $$DefaultReciterTableTableCreateCompanionBuilder =
+    DefaultReciterTableCompanion Function({
+      required String scope,
+      required String reciterKey,
+      Value<int> rowid,
+    });
+typedef $$DefaultReciterTableTableUpdateCompanionBuilder =
+    DefaultReciterTableCompanion Function({
+      Value<String> scope,
+      Value<String> reciterKey,
+      Value<int> rowid,
+    });
+
+class $$DefaultReciterTableTableFilterComposer
+    extends Composer<_$AppDatabase, $DefaultReciterTableTable> {
+  $$DefaultReciterTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get scope => $composableBuilder(
+    column: $table.scope,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reciterKey => $composableBuilder(
+    column: $table.reciterKey,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$DefaultReciterTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $DefaultReciterTableTable> {
+  $$DefaultReciterTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get scope => $composableBuilder(
+    column: $table.scope,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reciterKey => $composableBuilder(
+    column: $table.reciterKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DefaultReciterTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DefaultReciterTableTable> {
+  $$DefaultReciterTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get scope =>
+      $composableBuilder(column: $table.scope, builder: (column) => column);
+
+  GeneratedColumn<String> get reciterKey => $composableBuilder(
+    column: $table.reciterKey,
+    builder: (column) => column,
+  );
+}
+
+class $$DefaultReciterTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DefaultReciterTableTable,
+          DefaultReciterRow,
+          $$DefaultReciterTableTableFilterComposer,
+          $$DefaultReciterTableTableOrderingComposer,
+          $$DefaultReciterTableTableAnnotationComposer,
+          $$DefaultReciterTableTableCreateCompanionBuilder,
+          $$DefaultReciterTableTableUpdateCompanionBuilder,
+          (
+            DefaultReciterRow,
+            BaseReferences<
+              _$AppDatabase,
+              $DefaultReciterTableTable,
+              DefaultReciterRow
+            >,
+          ),
+          DefaultReciterRow,
+          PrefetchHooks Function()
+        > {
+  $$DefaultReciterTableTableTableManager(
+    _$AppDatabase db,
+    $DefaultReciterTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DefaultReciterTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DefaultReciterTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$DefaultReciterTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> scope = const Value.absent(),
+                Value<String> reciterKey = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DefaultReciterTableCompanion(
+                scope: scope,
+                reciterKey: reciterKey,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String scope,
+                required String reciterKey,
+                Value<int> rowid = const Value.absent(),
+              }) => DefaultReciterTableCompanion.insert(
+                scope: scope,
+                reciterKey: reciterKey,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$DefaultReciterTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DefaultReciterTableTable,
+      DefaultReciterRow,
+      $$DefaultReciterTableTableFilterComposer,
+      $$DefaultReciterTableTableOrderingComposer,
+      $$DefaultReciterTableTableAnnotationComposer,
+      $$DefaultReciterTableTableCreateCompanionBuilder,
+      $$DefaultReciterTableTableUpdateCompanionBuilder,
+      (
+        DefaultReciterRow,
+        BaseReferences<
+          _$AppDatabase,
+          $DefaultReciterTableTable,
+          DefaultReciterRow
+        >,
+      ),
+      DefaultReciterRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3315,4 +5292,8 @@ class $AppDatabaseManager {
       $$ReadPoemsTableTableTableManager(_db, _db.readPoemsTable);
   $$SettingsTableTableTableManager get settingsTable =>
       $$SettingsTableTableTableManager(_db, _db.settingsTable);
+  $$DownloadedAudioTableTableTableManager get downloadedAudioTable =>
+      $$DownloadedAudioTableTableTableManager(_db, _db.downloadedAudioTable);
+  $$DefaultReciterTableTableTableManager get defaultReciterTable =>
+      $$DefaultReciterTableTableTableManager(_db, _db.defaultReciterTable);
 }

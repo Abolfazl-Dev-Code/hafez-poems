@@ -24,27 +24,30 @@ class PoemCacheTable extends Table {
 
 class LikedItemsTable extends Table {
   TextColumn get poemId => text()();
+  TextColumn get category => text()();
   TextColumn get poemTitle => text()();
   TextColumn get poemText => text()();
   TextColumn get audioUrl => text().withDefault(const Constant(''))();
 
   @override
-  Set<Column> get primaryKey => {poemId};
+  Set<Column> get primaryKey => {poemId, category};
 }
 
 class SavedItemsTable extends Table {
   TextColumn get poemId => text()();
+  TextColumn get category => text()();
   TextColumn get poemTitle => text()();
   TextColumn get poemText => text()();
   TextColumn get audioUrl => text().withDefault(const Constant(''))();
 
   @override
-  Set<Column> get primaryKey => {poemId};
+  Set<Column> get primaryKey => {poemId, category};
 }
 
 class HighlightItemsTable extends Table {
   TextColumn get itemKey => text()();
   TextColumn get poemId => text()();
+  TextColumn get category => text()();
   TextColumn get poemTitle => text()();
   TextColumn get poemText => text()();
   TextColumn get audioUrl => text().withDefault(const Constant(''))();
@@ -77,4 +80,44 @@ class SettingsTable extends Table {
 
   @override
   Set<Column> get primaryKey => {settingKey};
+}
+
+// ══════════════════════════════════════════════════════════
+//  دامنه‌ی 5: Audio Reciter Downloader
+// ══════════════════════════════════════════════════════════
+enum DownloadStatus { notDownloaded, downloading, downloaded, error }
+
+@DataClassName('DownloadedAudioRow')
+class DownloadedAudioTable extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get poemId => text()();
+  TextColumn get poemCategory => text()();
+  TextColumn get reciterKey => text()();
+  TextColumn get reciterDisplayName => text()();
+  IntColumn get sourceRecitationId => integer().nullable()();
+  TextColumn get localFilePath => text()();
+  TextColumn get sourceUrl => text()();
+  TextColumn get fileName => text()();
+  IntColumn get fileSizeBytes => integer().withDefault(const Constant(0))();
+  IntColumn get durationMs => integer().nullable()();
+  TextColumn get checksum => text().nullable()();
+  DateTimeColumn get downloadedAt => dateTime().nullable()();
+  DateTimeColumn get lastPlayedAt => dateTime().nullable()();
+  IntColumn get playCount => integer().withDefault(const Constant(0))();
+  TextColumn get status =>
+      textEnum<DownloadStatus>().withDefault(const Constant('notDownloaded'))();
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+    {poemId, poemCategory, reciterKey},
+  ];
+}
+
+@DataClassName('DefaultReciterRow')
+class DefaultReciterTable extends Table {
+  TextColumn get scope => text()();
+  TextColumn get reciterKey => text()();
+
+  @override
+  Set<Column> get primaryKey => {scope};
 }

@@ -7,8 +7,7 @@ import 'package:hafez_poems/collectionUnit/selection_mixin.dart';
 import 'package:hafez_poems/core/data/contracts/i_keyed_item_storage.dart';
 import 'package:hafez_poems/models/highlight_item.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/bottomNavBar/user_actions_saver.dart';
-import 'package:hafez_poems/poemsUnit/poems/poem_cache_services.dart';
-import 'package:hafez_poems/poemsUnit/poems/poem_local_services.dart';
+import 'package:hafez_poems/poemsUnit/poems/poem_category_resolver.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_screen.dart';
 
 class HighlightsTab extends StatefulWidget {
@@ -23,7 +22,7 @@ class _HighlightsTabState extends State<HighlightsTab> with SelectionMixin {
       Get.find<IKeyedItemStorage<HighlightItem>>();
 
   String _keyOf(HighlightItem item) =>
-      UserActionsSaver.highlightKey(item.poemId, item.lineIndex);
+      UserActionsSaver.highlightKey(item.poemId, item.category, item.lineIndex);
 
   @override
   Widget build(BuildContext context) {
@@ -81,15 +80,17 @@ class _HighlightsTabState extends State<HighlightsTab> with SelectionMixin {
                       () => PoemScreen(
                         args: PoemScreenArgs(
                           id: item.poemId,
+                          category: item.category,
                           title: item.poemTitle,
                           text: item.poemText,
                           audioUrl: item.audioUrl,
                           highlightLineIndex: item.lineIndex,
-                          fetchText: (id) => GhazalLocalService.instance
-                              .fetchGhazalById(id)
-                              .then((g) => g.text),
-                          fetchAudioUrl: (id) =>
-                              Get.find<GhazalCacheService>().getAudioUrl(id),
+                          fetchText: PoemCategoryResolver.fetchTextFor(
+                            item.category,
+                          ),
+                          fetchAudioUrl: PoemCategoryResolver.fetchAudioUrlFor(
+                            item.category,
+                          ),
                         ),
                       ),
                     ),

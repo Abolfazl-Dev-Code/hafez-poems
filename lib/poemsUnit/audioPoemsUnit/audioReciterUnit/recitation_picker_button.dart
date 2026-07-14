@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/models/recitation_models.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_player_controller.dart';
-import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_recitation_picker_sheet.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/audio_recitation_picker_sheet.dart';
 
-class OpenAudioPlayer extends StatelessWidget {
+class RecitationPickerButton extends StatelessWidget {
   final AudioPlayerController ctrl;
   final String poemId;
+  final String category;
+  final String poemTitle;
   final ThemeData theme;
   final ColorScheme cs;
   final void Function(RecitationInfo)? onRecitationChanged;
 
-  const OpenAudioPlayer({
+  const RecitationPickerButton({
     super.key,
     required this.ctrl,
     required this.poemId,
+    required this.category,
+    required this.poemTitle,
     required this.theme,
     required this.cs,
     this.onRecitationChanged,
@@ -29,6 +33,9 @@ class OpenAudioPlayer extends StatelessWidget {
         selected: ctrl.selectedRecitation,
         theme: theme,
         cs: cs,
+        poemId: poemId,
+        category: category,
+        poemTitle: poemTitle,
         onSelect: (r) {
           ctrl.selectRecitation(poemId, r);
           onRecitationChanged?.call(r);
@@ -40,7 +47,6 @@ class OpenAudioPlayer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selected = ctrl.selectedRecitation;
-
     return Directionality(
       textDirection: TextDirection.rtl,
       child: InkWell(
@@ -61,9 +67,7 @@ class OpenAudioPlayer extends StatelessWidget {
                 size: 14,
                 color: cs.primary.withValues(alpha: 0.8),
               ),
-
               const SizedBox(width: 6),
-
               Expanded(
                 child: Text(
                   selected?.audioArtist ?? '',
@@ -74,9 +78,7 @@ class OpenAudioPlayer extends StatelessWidget {
                   textAlign: TextAlign.right,
                 ),
               ),
-
               const SizedBox(width: 4),
-
               Icon(
                 Icons.unfold_more_rounded,
                 size: 16,

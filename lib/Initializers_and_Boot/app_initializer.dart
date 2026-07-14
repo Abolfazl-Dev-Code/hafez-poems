@@ -5,8 +5,10 @@ import 'package:hafez_poems/Initializers_and_Boot/audio_boot.dart';
 import 'package:hafez_poems/Initializers_and_Boot/cache_services_boot.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_controller.dart';
 import 'package:hafez_poems/core/data/binding/database_binding.dart';
+import 'package:hafez_poems/core/data/contracts/i_audio_download_storage.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/bottomNavBar/user_actions_saver.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/notification_service.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_download_manager.dart';
 import 'package:hafez_poems/theme/theme_controller.dart';
 
 class AppInitializer {
@@ -21,6 +23,10 @@ class AppInitializer {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     await CacheServicesBoot.init();
     Get.put<UserActionsSaver>(UserActionsSaver(), permanent: true);
+    Get.put<AudioDownloadManager>(
+      AudioDownloadManager(Get.find<IAudioDownloadStorage>()),
+      permanent: true,
+    );
     CacheServicesBoot.preloadAll();
   }
 }

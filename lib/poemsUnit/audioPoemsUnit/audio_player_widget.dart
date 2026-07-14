@@ -3,7 +3,7 @@ import 'package:hafez_poems/models/recitation_models.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_play_pause_button.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_player_controller.dart';
-import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_poem_readers_widget.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/recitation_drop_down.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_speed_widget.dart';
 import 'package:hafez_poems/poemsUnit/verseSyncUnit/verse_sync_controller.dart';
 import 'package:hafez_poems/theme/color_style.dart';
@@ -11,6 +11,7 @@ import 'package:hafez_poems/theme/color_style.dart';
 class AudioPlayerWidget extends StatefulWidget {
   final String id;
   final String audioUrl;
+  final String category;
   final String title;
   final Future<String> Function(String id)? fetchAudioUrl;
   final AudioPlayerController controller;
@@ -22,6 +23,7 @@ class AudioPlayerWidget extends StatefulWidget {
     super.key,
     required this.id,
     required this.audioUrl,
+    required this.category,
     required this.title,
     required this.controller,
     this.fetchAudioUrl,
@@ -251,6 +253,8 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
             RecitationDropdown(
               ctrl: ctrl,
               poemId: widget.id,
+              category: widget.category,
+              poemTitle: widget.title,
               theme: theme,
               cs: cs,
               onRecitationChanged: widget.onRecitationChanged,

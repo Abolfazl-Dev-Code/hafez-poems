@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/models/recitation_models.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_player_controller.dart';
-import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_recitation_name_badge.dart';
-import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_recitation_picker.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/audio_recitation_name_badge.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/recitation_picker_button.dart';
 
 class RecitationDropdown extends StatelessWidget {
   final AudioPlayerController ctrl;
   final String poemId;
+  final String category;
+  final String poemTitle;
   final ThemeData theme;
   final ColorScheme cs;
   final void Function(RecitationInfo)? onRecitationChanged;
@@ -15,6 +17,8 @@ class RecitationDropdown extends StatelessWidget {
     super.key,
     required this.ctrl,
     required this.poemId,
+    required this.category,
+    required this.poemTitle,
     required this.theme,
     required this.cs,
     this.onRecitationChanged,
@@ -48,23 +52,6 @@ class RecitationDropdown extends StatelessWidget {
       );
     }
 
-    if (ctrl.recitations.isEmpty) {
-      return Container(
-        height: 36,
-        alignment: Alignment.center,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.music_off_rounded,
-              size: 16,
-              color: cs.onSurface.withValues(alpha: 0.4),
-            ),
-          ],
-        ),
-      );
-    }
-
     if (ctrl.recitations.length == 1) {
       return ArtistChip(
         artist: ctrl.recitations.first.audioArtist,
@@ -76,6 +63,8 @@ class RecitationDropdown extends StatelessWidget {
     return RecitationPickerButton(
       ctrl: ctrl,
       poemId: poemId,
+      category: category,
+      poemTitle: poemTitle,
       theme: theme,
       cs: cs,
       onRecitationChanged: onRecitationChanged,

@@ -6,8 +6,7 @@ import 'package:hafez_poems/collectionUnit/favorites_list.dart';
 import 'package:hafez_poems/collectionUnit/selection_mixin.dart';
 import 'package:hafez_poems/core/data/contracts/i_keyed_item_storage.dart';
 import 'package:hafez_poems/models/liked_item.dart';
-import 'package:hafez_poems/poemsUnit/poems/poem_cache_services.dart';
-import 'package:hafez_poems/poemsUnit/poems/poem_local_services.dart';
+import 'package:hafez_poems/poemsUnit/poems/poem_category_resolver.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_screen.dart';
 
 class LikedTab extends StatefulWidget {
@@ -20,6 +19,8 @@ class LikedTab extends StatefulWidget {
 class _LikedTabState extends State<LikedTab> with SelectionMixin {
   IKeyedItemStorage<LikedItem> get _storage =>
       Get.find<IKeyedItemStorage<LikedItem>>();
+
+  String _keyOf(LikedItem item) => '${item.poemId}|${item.category}';
 
   @override
   Widget build(BuildContext context) {
@@ -50,9 +51,8 @@ class _LikedTabState extends State<LikedTab> with SelectionMixin {
             );
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) pruneDeletedKeys(items.map((e) => e.poemId));
+            if (mounted) pruneDeletedKeys(items.map(_keyOf));
           });
-
           if (items.isEmpty) {
             return const Center(
               child: Text('هنوز هیچ اشعاری را علاقه‌مندی‌ نکرده‌اید.'),
@@ -72,7 +72,7 @@ class _LikedTabState extends State<LikedTab> with SelectionMixin {
                     orElse: () => ghazal.poemText,
                   );
               return FavoriteItem(
-                itemKey: ghazal.poemId,
+                itemKey: _keyOf(ghazal),
                 id: ghazal.poemId,
                 title: ghazal.poemTitle,
                 subtitle: firstLine,
@@ -82,14 +82,16 @@ class _LikedTabState extends State<LikedTab> with SelectionMixin {
                   () => PoemScreen(
                     args: PoemScreenArgs(
                       id: ghazal.poemId,
+                      category: ghazal.category,
                       title: ghazal.poemTitle,
                       text: ghazal.poemText,
                       audioUrl: ghazal.audioUrl,
-                      fetchText: (id) => GhazalLocalService.instance
-                          .fetchGhazalById(id)
-                          .then((g) => g.text),
-                      fetchAudioUrl: (id) =>
-                          Get.find<GhazalCacheService>().getAudioUrl(id),
+                      fetchText: PoemCategoryResolver.fetchTextFor(
+                        ghazal.category,
+                      ),
+                      fetchAudioUrl: PoemCategoryResolver.fetchAudioUrlFor(
+                        ghazal.category,
+                      ),
                     ),
                   ),
                 ),
@@ -105,7 +107,7 @@ class _LikedTabState extends State<LikedTab> with SelectionMixin {
     return StreamBuilder<void>(
       stream: _storage.watch(),
       builder: (context, _) {
-        final allKeys = _storage.values().map((e) => e.poemId);
+        final allKeys = _storage.values().map(_keyOf);
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [

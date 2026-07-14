@@ -85,6 +85,7 @@ class _PoemListSheetState extends State<PoemListSheet> {
     final args = _cfg.tilePrefix != null
         ? PoemScreenArgs(
             id: baseArgs.id,
+            category: baseArgs.category,
             title: displayTitle.toPersianNumbers(),
             text: baseArgs.text.toPersianNumbers(),
             audioUrl: baseArgs.audioUrl,

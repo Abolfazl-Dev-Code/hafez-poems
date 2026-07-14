@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hafez_poems/appbarHomeScreenUnit/searchUnit/search_result_category_mapper.dart';
 import 'package:hafez_poems/models/search_result.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_cache_services.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_screen.dart';
@@ -98,6 +99,7 @@ class SearchResultTitle extends StatelessWidget {
             () => PoemScreen(
               args: PoemScreenArgs(
                 id: item.id,
+                category: poemCategoryFor(item.type),
                 title: item.title,
                 text: item.text,
                 audioUrl: item.audioUrl,
