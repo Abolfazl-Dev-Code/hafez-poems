@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_player_controller.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioWidgetUnit/audio_player_controller.dart';
 
 class SpeedButtons extends StatelessWidget {
   final AudioPlayerController ctrl;

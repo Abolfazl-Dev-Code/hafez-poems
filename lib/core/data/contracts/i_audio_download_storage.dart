@@ -11,6 +11,10 @@ abstract class IAudioDownloadStorage {
     String poemCategory,
     String reciterKey,
   );
+  Stream<List<DownloadedAudioRow>> watchDownloadsForPoem(
+    String poemId,
+    String poemCategory,
+  );
   Future<List<DownloadedAudioRow>> getAllDownloaded();
 
   Future<void> upsertDownloading({
@@ -31,6 +35,7 @@ abstract class IAudioDownloadStorage {
     required int fileSizeBytes,
     int? durationMs,
     String? checksum,
+    String? syncXml,
   });
 
   Future<void> markError(String poemId, String poemCategory, String reciterKey);

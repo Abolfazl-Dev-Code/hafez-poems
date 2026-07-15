@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/models/recitation_models.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
-import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_play_pause_button.dart';
-import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_player_controller.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioWidgetUnit/audio_play_pause_button.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioWidgetUnit/audio_player_controller.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/recitation_drop_down.dart';
-import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_speed_widget.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioWidgetUnit/audio_speed_widget.dart';
 import 'package:hafez_poems/poemsUnit/verseSyncUnit/verse_sync_controller.dart';
 import 'package:hafez_poems/theme/color_style.dart';
 

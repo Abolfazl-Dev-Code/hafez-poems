@@ -11,8 +11,9 @@ String romanizedNameFor(String audioArtist) {
 }
 
 String _fallbackSlug(String audioArtist) {
-  return audioArtist
-      .trim()
-      .replaceAll(RegExp(r'[\s\u200c]+'), '')
-      .replaceAll(RegExp(r'[^\w]'), '');
+  final withUnderscores = audioArtist.trim().replaceAll(
+    RegExp(r'[\s\u200c]+'),
+    '_',
+  );
+  return withUnderscores.replaceAll(RegExp(r'[\\/:*?"<>|]'), '');
 }

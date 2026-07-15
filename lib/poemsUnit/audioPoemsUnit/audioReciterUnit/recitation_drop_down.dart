@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/models/recitation_models.dart';
-import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_player_controller.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioWidgetUnit/audio_player_controller.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/audio_recitation_name_badge.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/recitation_picker_button.dart';
 

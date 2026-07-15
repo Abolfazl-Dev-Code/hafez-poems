@@ -6,7 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:hafez_poems/Initializers_and_Boot/globals.dart';
+import 'package:hafez_poems/core/utils/connectivity_checker.dart';
 import 'package:hafez_poems/models/recitation_models.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioDownloadUnit/audio_messages.dart';
 import 'package:hafez_poems/poemsUnit/verseSyncUnit/recitation_service.dart';
 
 enum HafezPlayerState { stopped, loading, paused, playing }
@@ -182,26 +184,6 @@ class AudioPlayerController extends ChangeNotifier {
     } catch (e) {}
   }
 
-  Future<bool> _hasInternetConnection() async {
-    const probes = ['1.1.1.1', '8.8.8.8'];
-    for (final ip in probes) {
-      Socket? socket;
-      try {
-        socket = await Socket.connect(
-          ip,
-          443,
-          timeout: const Duration(seconds: 3),
-        );
-        return true;
-      } catch (_) {
-        continue;
-      } finally {
-        socket?.destroy();
-      }
-    }
-    return false;
-  }
-
   Future<_AudioAvailability> _checkAudioAvailability(String url) async {
     HttpClient? client;
     try {
@@ -262,6 +244,7 @@ class AudioPlayerController extends ChangeNotifier {
     required String audioUrl,
     String title = 'شعر حافظ',
     Future<String> Function(String id)? fetchAudioUrl,
+    bool isLocalFile = false,
   }) async {
     _lastId = id;
     _lastAudioUrl = audioUrl;
@@ -277,7 +260,31 @@ class AudioPlayerController extends ChangeNotifier {
     _stopTicker();
     _notify();
 
-    final bool hasInternet = await _hasInternetConnection();
+    if (isLocalFile) {
+      try {
+        await audioHandler
+            .customAction('load', {
+              'url': audioUrl,
+              'title': title,
+              'isLocalFile': true,
+            })
+            .timeout(const Duration(seconds: 15));
+
+        if (_disposed || myGeneration != _loadGeneration) return;
+
+        final session = await AudioSession.instance;
+        await session.setActive(true);
+        await _setSpeaker(true);
+      } catch (e) {
+        if (_disposed || myGeneration != _loadGeneration) return;
+        _state = HafezPlayerState.stopped;
+        _notify();
+        _reportIssue(_AudioIssue.noAudioFile);
+      }
+      return;
+    }
+
+    final bool hasInternet = await ConnectivityChecker.hasInternet();
     if (_disposed || myGeneration != _loadGeneration) return;
 
     if (!hasInternet) {
@@ -376,6 +383,55 @@ class AudioPlayerController extends ChangeNotifier {
         _reportIssue(_AudioIssue.ganjoorServerError);
       }
     }
+  }
+
+  Future<void> loadWithSourceResolution({
+    required String id,
+    required String poemCategory,
+    required String reciterKey,
+    required String onlineUrl,
+    required AudioSourceResolver resolver,
+    String title = 'شعر حافظ',
+    void Function(String xml)? onSyncXmlResolved,
+  }) async {
+    if (_disposed) return;
+    final int myGeneration = ++_loadGeneration;
+
+    _state = HafezPlayerState.loading;
+    duration = Duration.zero;
+    position = Duration.zero;
+    _stopTicker();
+    _notify();
+
+    final resolution = await resolver.resolve(
+      poemId: id,
+      poemCategory: poemCategory,
+      reciterKey: reciterKey,
+      onlineUrl: onlineUrl,
+    );
+
+    if (_disposed || myGeneration != _loadGeneration) return;
+
+    if (resolution.userMessage != null) {
+      onUserMessage?.call(resolution.userMessage!);
+    }
+
+    if (resolution.kind == AudioSourceKind.unavailable) {
+      _state = HafezPlayerState.stopped;
+      _notify();
+      return;
+    }
+
+    if (resolution.syncXml != null && onSyncXmlResolved != null) {
+      onSyncXmlResolved(resolution.syncXml!);
+    }
+
+    await load(
+      id: id,
+      audioUrl: resolution.path,
+      title: title,
+      isLocalFile: resolution.kind == AudioSourceKind.local,
+    );
   }
 
   Future<void> reload() async {

@@ -5,8 +5,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hafez_poems/core/data/contracts/i_audio_download_storage.dart';
 import 'package:hafez_poems/core/data/drift/tables.dart';
-import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_file_naming.dart';
-import 'package:hafez_poems/poemsUnit/audioPoemsUnit/download_progress_info.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioDownloadUnit/audio_file_naming.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioDownloadUnit/download_progress_info.dart';
 
 class AudioDownloadManager extends ChangeNotifier {
   final IAudioDownloadStorage _repository;
@@ -42,6 +42,7 @@ class AudioDownloadManager extends ChangeNotifier {
     required int fileNamePoemNumber,
     required String poetName,
     int? sourceRecitationId,
+    String? syncXml,
   }) async {
     final key = _keyOf(poemId, poemCategory, reciterKey);
     if (_activeTokens.containsKey(key)) return;
@@ -116,6 +117,7 @@ class AudioDownloadManager extends ChangeNotifier {
         localFilePath: finalPath,
         fileSizeBytes: fileSize,
         checksum: checksum,
+        syncXml: syncXml,
       );
 
       _progress[key] = DownloadProgressInfo(
@@ -165,6 +167,7 @@ class AudioDownloadManager extends ChangeNotifier {
     required int fileNamePoemNumber,
     required String poetName,
     int? sourceRecitationId,
+    String? syncXml,
   }) async {
     await startDownload(
       poemId: poemId,
@@ -176,6 +179,7 @@ class AudioDownloadManager extends ChangeNotifier {
       fileNamePoemNumber: fileNamePoemNumber,
       poetName: poetName,
       sourceRecitationId: sourceRecitationId,
+      syncXml: syncXml,
     );
   }
 

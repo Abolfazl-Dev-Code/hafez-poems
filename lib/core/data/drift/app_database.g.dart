@@ -2324,6 +2324,17 @@ class $DownloadedAudioTableTable extends DownloadedAudioTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _syncXmlMeta = const VerificationMeta(
+    'syncXml',
+  );
+  @override
+  late final GeneratedColumn<String> syncXml = GeneratedColumn<String>(
+    'sync_xml',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _fileSizeBytesMeta = const VerificationMeta(
     'fileSizeBytes',
   );
@@ -2415,6 +2426,7 @@ class $DownloadedAudioTableTable extends DownloadedAudioTable
     localFilePath,
     sourceUrl,
     fileName,
+    syncXml,
     fileSizeBytes,
     durationMs,
     checksum,
@@ -2512,6 +2524,12 @@ class $DownloadedAudioTableTable extends DownloadedAudioTable
     } else if (isInserting) {
       context.missing(_fileNameMeta);
     }
+    if (data.containsKey('sync_xml')) {
+      context.handle(
+        _syncXmlMeta,
+        syncXml.isAcceptableOrUnknown(data['sync_xml']!, _syncXmlMeta),
+      );
+    }
     if (data.containsKey('file_size_bytes')) {
       context.handle(
         _fileSizeBytesMeta,
@@ -2606,6 +2624,10 @@ class $DownloadedAudioTableTable extends DownloadedAudioTable
         DriftSqlType.string,
         data['${effectivePrefix}file_name'],
       )!,
+      syncXml: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_xml'],
+      ),
       fileSizeBytes: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}file_size_bytes'],
@@ -2659,6 +2681,7 @@ class DownloadedAudioRow extends DataClass
   final String localFilePath;
   final String sourceUrl;
   final String fileName;
+  final String? syncXml;
   final int fileSizeBytes;
   final int? durationMs;
   final String? checksum;
@@ -2676,6 +2699,7 @@ class DownloadedAudioRow extends DataClass
     required this.localFilePath,
     required this.sourceUrl,
     required this.fileName,
+    this.syncXml,
     required this.fileSizeBytes,
     this.durationMs,
     this.checksum,
@@ -2698,6 +2722,9 @@ class DownloadedAudioRow extends DataClass
     map['local_file_path'] = Variable<String>(localFilePath);
     map['source_url'] = Variable<String>(sourceUrl);
     map['file_name'] = Variable<String>(fileName);
+    if (!nullToAbsent || syncXml != null) {
+      map['sync_xml'] = Variable<String>(syncXml);
+    }
     map['file_size_bytes'] = Variable<int>(fileSizeBytes);
     if (!nullToAbsent || durationMs != null) {
       map['duration_ms'] = Variable<int>(durationMs);
@@ -2733,6 +2760,9 @@ class DownloadedAudioRow extends DataClass
       localFilePath: Value(localFilePath),
       sourceUrl: Value(sourceUrl),
       fileName: Value(fileName),
+      syncXml: syncXml == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncXml),
       fileSizeBytes: Value(fileSizeBytes),
       durationMs: durationMs == null && nullToAbsent
           ? const Value.absent()
@@ -2768,6 +2798,7 @@ class DownloadedAudioRow extends DataClass
       localFilePath: serializer.fromJson<String>(json['localFilePath']),
       sourceUrl: serializer.fromJson<String>(json['sourceUrl']),
       fileName: serializer.fromJson<String>(json['fileName']),
+      syncXml: serializer.fromJson<String?>(json['syncXml']),
       fileSizeBytes: serializer.fromJson<int>(json['fileSizeBytes']),
       durationMs: serializer.fromJson<int?>(json['durationMs']),
       checksum: serializer.fromJson<String?>(json['checksum']),
@@ -2792,6 +2823,7 @@ class DownloadedAudioRow extends DataClass
       'localFilePath': serializer.toJson<String>(localFilePath),
       'sourceUrl': serializer.toJson<String>(sourceUrl),
       'fileName': serializer.toJson<String>(fileName),
+      'syncXml': serializer.toJson<String?>(syncXml),
       'fileSizeBytes': serializer.toJson<int>(fileSizeBytes),
       'durationMs': serializer.toJson<int?>(durationMs),
       'checksum': serializer.toJson<String?>(checksum),
@@ -2814,6 +2846,7 @@ class DownloadedAudioRow extends DataClass
     String? localFilePath,
     String? sourceUrl,
     String? fileName,
+    Value<String?> syncXml = const Value.absent(),
     int? fileSizeBytes,
     Value<int?> durationMs = const Value.absent(),
     Value<String?> checksum = const Value.absent(),
@@ -2833,6 +2866,7 @@ class DownloadedAudioRow extends DataClass
     localFilePath: localFilePath ?? this.localFilePath,
     sourceUrl: sourceUrl ?? this.sourceUrl,
     fileName: fileName ?? this.fileName,
+    syncXml: syncXml.present ? syncXml.value : this.syncXml,
     fileSizeBytes: fileSizeBytes ?? this.fileSizeBytes,
     durationMs: durationMs.present ? durationMs.value : this.durationMs,
     checksum: checksum.present ? checksum.value : this.checksum,
@@ -2862,6 +2896,7 @@ class DownloadedAudioRow extends DataClass
           : this.localFilePath,
       sourceUrl: data.sourceUrl.present ? data.sourceUrl.value : this.sourceUrl,
       fileName: data.fileName.present ? data.fileName.value : this.fileName,
+      syncXml: data.syncXml.present ? data.syncXml.value : this.syncXml,
       fileSizeBytes: data.fileSizeBytes.present
           ? data.fileSizeBytes.value
           : this.fileSizeBytes,
@@ -2892,6 +2927,7 @@ class DownloadedAudioRow extends DataClass
           ..write('localFilePath: $localFilePath, ')
           ..write('sourceUrl: $sourceUrl, ')
           ..write('fileName: $fileName, ')
+          ..write('syncXml: $syncXml, ')
           ..write('fileSizeBytes: $fileSizeBytes, ')
           ..write('durationMs: $durationMs, ')
           ..write('checksum: $checksum, ')
@@ -2914,6 +2950,7 @@ class DownloadedAudioRow extends DataClass
     localFilePath,
     sourceUrl,
     fileName,
+    syncXml,
     fileSizeBytes,
     durationMs,
     checksum,
@@ -2935,6 +2972,7 @@ class DownloadedAudioRow extends DataClass
           other.localFilePath == this.localFilePath &&
           other.sourceUrl == this.sourceUrl &&
           other.fileName == this.fileName &&
+          other.syncXml == this.syncXml &&
           other.fileSizeBytes == this.fileSizeBytes &&
           other.durationMs == this.durationMs &&
           other.checksum == this.checksum &&
@@ -2955,6 +2993,7 @@ class DownloadedAudioTableCompanion
   final Value<String> localFilePath;
   final Value<String> sourceUrl;
   final Value<String> fileName;
+  final Value<String?> syncXml;
   final Value<int> fileSizeBytes;
   final Value<int?> durationMs;
   final Value<String?> checksum;
@@ -2972,6 +3011,7 @@ class DownloadedAudioTableCompanion
     this.localFilePath = const Value.absent(),
     this.sourceUrl = const Value.absent(),
     this.fileName = const Value.absent(),
+    this.syncXml = const Value.absent(),
     this.fileSizeBytes = const Value.absent(),
     this.durationMs = const Value.absent(),
     this.checksum = const Value.absent(),
@@ -2990,6 +3030,7 @@ class DownloadedAudioTableCompanion
     required String localFilePath,
     required String sourceUrl,
     required String fileName,
+    this.syncXml = const Value.absent(),
     this.fileSizeBytes = const Value.absent(),
     this.durationMs = const Value.absent(),
     this.checksum = const Value.absent(),
@@ -3014,6 +3055,7 @@ class DownloadedAudioTableCompanion
     Expression<String>? localFilePath,
     Expression<String>? sourceUrl,
     Expression<String>? fileName,
+    Expression<String>? syncXml,
     Expression<int>? fileSizeBytes,
     Expression<int>? durationMs,
     Expression<String>? checksum,
@@ -3034,6 +3076,7 @@ class DownloadedAudioTableCompanion
       if (localFilePath != null) 'local_file_path': localFilePath,
       if (sourceUrl != null) 'source_url': sourceUrl,
       if (fileName != null) 'file_name': fileName,
+      if (syncXml != null) 'sync_xml': syncXml,
       if (fileSizeBytes != null) 'file_size_bytes': fileSizeBytes,
       if (durationMs != null) 'duration_ms': durationMs,
       if (checksum != null) 'checksum': checksum,
@@ -3054,6 +3097,7 @@ class DownloadedAudioTableCompanion
     Value<String>? localFilePath,
     Value<String>? sourceUrl,
     Value<String>? fileName,
+    Value<String?>? syncXml,
     Value<int>? fileSizeBytes,
     Value<int?>? durationMs,
     Value<String?>? checksum,
@@ -3072,6 +3116,7 @@ class DownloadedAudioTableCompanion
       localFilePath: localFilePath ?? this.localFilePath,
       sourceUrl: sourceUrl ?? this.sourceUrl,
       fileName: fileName ?? this.fileName,
+      syncXml: syncXml ?? this.syncXml,
       fileSizeBytes: fileSizeBytes ?? this.fileSizeBytes,
       durationMs: durationMs ?? this.durationMs,
       checksum: checksum ?? this.checksum,
@@ -3112,6 +3157,9 @@ class DownloadedAudioTableCompanion
     if (fileName.present) {
       map['file_name'] = Variable<String>(fileName.value);
     }
+    if (syncXml.present) {
+      map['sync_xml'] = Variable<String>(syncXml.value);
+    }
     if (fileSizeBytes.present) {
       map['file_size_bytes'] = Variable<int>(fileSizeBytes.value);
     }
@@ -3150,6 +3198,7 @@ class DownloadedAudioTableCompanion
           ..write('localFilePath: $localFilePath, ')
           ..write('sourceUrl: $sourceUrl, ')
           ..write('fileName: $fileName, ')
+          ..write('syncXml: $syncXml, ')
           ..write('fileSizeBytes: $fileSizeBytes, ')
           ..write('durationMs: $durationMs, ')
           ..write('checksum: $checksum, ')
@@ -4688,6 +4737,7 @@ typedef $$DownloadedAudioTableTableCreateCompanionBuilder =
       required String localFilePath,
       required String sourceUrl,
       required String fileName,
+      Value<String?> syncXml,
       Value<int> fileSizeBytes,
       Value<int?> durationMs,
       Value<String?> checksum,
@@ -4707,6 +4757,7 @@ typedef $$DownloadedAudioTableTableUpdateCompanionBuilder =
       Value<String> localFilePath,
       Value<String> sourceUrl,
       Value<String> fileName,
+      Value<String?> syncXml,
       Value<int> fileSizeBytes,
       Value<int?> durationMs,
       Value<String?> checksum,
@@ -4767,6 +4818,11 @@ class $$DownloadedAudioTableTableFilterComposer
 
   ColumnFilters<String> get fileName => $composableBuilder(
     column: $table.fileName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncXml => $composableBuilder(
+    column: $table.syncXml,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4861,6 +4917,11 @@ class $$DownloadedAudioTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get syncXml => $composableBuilder(
+    column: $table.syncXml,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get fileSizeBytes => $composableBuilder(
     column: $table.fileSizeBytes,
     builder: (column) => ColumnOrderings(column),
@@ -4942,6 +5003,9 @@ class $$DownloadedAudioTableTableAnnotationComposer
 
   GeneratedColumn<String> get fileName =>
       $composableBuilder(column: $table.fileName, builder: (column) => column);
+
+  GeneratedColumn<String> get syncXml =>
+      $composableBuilder(column: $table.syncXml, builder: (column) => column);
 
   GeneratedColumn<int> get fileSizeBytes => $composableBuilder(
     column: $table.fileSizeBytes,
@@ -5025,6 +5089,7 @@ class $$DownloadedAudioTableTableTableManager
                 Value<String> localFilePath = const Value.absent(),
                 Value<String> sourceUrl = const Value.absent(),
                 Value<String> fileName = const Value.absent(),
+                Value<String?> syncXml = const Value.absent(),
                 Value<int> fileSizeBytes = const Value.absent(),
                 Value<int?> durationMs = const Value.absent(),
                 Value<String?> checksum = const Value.absent(),
@@ -5042,6 +5107,7 @@ class $$DownloadedAudioTableTableTableManager
                 localFilePath: localFilePath,
                 sourceUrl: sourceUrl,
                 fileName: fileName,
+                syncXml: syncXml,
                 fileSizeBytes: fileSizeBytes,
                 durationMs: durationMs,
                 checksum: checksum,
@@ -5061,6 +5127,7 @@ class $$DownloadedAudioTableTableTableManager
                 required String localFilePath,
                 required String sourceUrl,
                 required String fileName,
+                Value<String?> syncXml = const Value.absent(),
                 Value<int> fileSizeBytes = const Value.absent(),
                 Value<int?> durationMs = const Value.absent(),
                 Value<String?> checksum = const Value.absent(),
@@ -5078,6 +5145,7 @@ class $$DownloadedAudioTableTableTableManager
                 localFilePath: localFilePath,
                 sourceUrl: sourceUrl,
                 fileName: fileName,
+                syncXml: syncXml,
                 fileSizeBytes: fileSizeBytes,
                 durationMs: durationMs,
                 checksum: checksum,

@@ -8,7 +8,8 @@ import 'package:hafez_poems/core/data/binding/database_binding.dart';
 import 'package:hafez_poems/core/data/contracts/i_audio_download_storage.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/bottomNavBar/user_actions_saver.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/notification_service.dart';
-import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_download_manager.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioDownloadUnit/audio_download_manager.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioDownloadUnit/audio_messages.dart';
 import 'package:hafez_poems/theme/theme_controller.dart';
 
 class AppInitializer {
@@ -25,6 +26,10 @@ class AppInitializer {
     Get.put<UserActionsSaver>(UserActionsSaver(), permanent: true);
     Get.put<AudioDownloadManager>(
       AudioDownloadManager(Get.find<IAudioDownloadStorage>()),
+      permanent: true,
+    );
+    Get.put<AudioSourceResolver>(
+      AudioSourceResolver(Get.find<IAudioDownloadStorage>()),
       permanent: true,
     );
     CacheServicesBoot.preloadAll();

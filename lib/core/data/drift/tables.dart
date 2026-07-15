@@ -98,6 +98,7 @@ class DownloadedAudioTable extends Table {
   TextColumn get localFilePath => text()();
   TextColumn get sourceUrl => text()();
   TextColumn get fileName => text()();
+  TextColumn get syncXml => text().nullable()();
   IntColumn get fileSizeBytes => integer().withDefault(const Constant(0))();
   IntColumn get durationMs => integer().nullable()();
   TextColumn get checksum => text().nullable()();

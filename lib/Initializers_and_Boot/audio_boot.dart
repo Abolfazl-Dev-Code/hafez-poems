@@ -1,6 +1,6 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:hafez_poems/Initializers_and_Boot/globals.dart';
-import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_handler_service.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioWidgetUnit/audio_handler_service.dart';
 
 class AudioBoot {
   static Future<void> init() async {

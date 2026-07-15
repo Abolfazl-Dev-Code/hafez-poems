@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/models/recitation_models.dart';
-import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_player_controller.dart';
-import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/audio_recitation_picker_sheet.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioWidgetUnit/audio_player_controller.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/audio_tabs_sheet.dart';
+import 'package:hafez_poems/poemsUnit/verseSyncUnit/verse_sync_controller.dart';
 
 class RecitationPickerButton extends StatelessWidget {
   final AudioPlayerController ctrl;
   final String poemId;
   final String category;
   final String poemTitle;
+  final VerseSyncController? verseSyncController;
   final ThemeData theme;
   final ColorScheme cs;
   final void Function(RecitationInfo)? onRecitationChanged;
@@ -18,6 +20,7 @@ class RecitationPickerButton extends StatelessWidget {
     required this.poemId,
     required this.category,
     required this.poemTitle,
+    this.verseSyncController,
     required this.theme,
     required this.cs,
     this.onRecitationChanged,
@@ -28,7 +31,7 @@ class RecitationPickerButton extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => RecitationPickerSheet(
+      builder: (_) => AudioTabsSheet(
         recitations: ctrl.recitations,
         selected: ctrl.selectedRecitation,
         theme: theme,
@@ -36,6 +39,8 @@ class RecitationPickerButton extends StatelessWidget {
         poemId: poemId,
         category: category,
         poemTitle: poemTitle,
+        ctrl: ctrl,
+        verseSyncController: verseSyncController,
         onSelect: (r) {
           ctrl.selectRecitation(poemId, r);
           onRecitationChanged?.call(r);

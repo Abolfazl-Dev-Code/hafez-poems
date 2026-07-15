@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'package:hafez_poems/core/data/contracts/i_audio_download_storage.dart';
 import 'package:hafez_poems/core/data/drift/app_database.dart';
 import 'package:hafez_poems/core/data/drift/tables.dart';
-import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audio_download_manager.dart';
-import 'package:hafez_poems/poemsUnit/audioPoemsUnit/download_progress_info.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioDownloadUnit/audio_download_manager.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioDownloadUnit/download_progress_info.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_category_labels.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_number_extractor.dart';
 import 'package:hafez_poems/poemsUnit/poems/poet_info.dart';
@@ -17,6 +17,7 @@ class ReciterDownloadControl extends StatelessWidget {
   final String reciterDisplayName;
   final String sourceUrl;
   final int? sourceRecitationId;
+  final String? syncXml;
   final ColorScheme cs;
 
   const ReciterDownloadControl({
@@ -28,6 +29,7 @@ class ReciterDownloadControl extends StatelessWidget {
     required this.reciterDisplayName,
     required this.sourceUrl,
     this.sourceRecitationId,
+    this.syncXml,
     required this.cs,
   });
 
@@ -137,6 +139,7 @@ class ReciterDownloadControl extends StatelessWidget {
       fileNamePoemNumber: poemNumber,
       poetName: PoetInfo.defaultPoetName,
       sourceRecitationId: sourceRecitationId,
+      syncXml: syncXml,
     );
   }
 }

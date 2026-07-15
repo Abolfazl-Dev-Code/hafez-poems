@@ -39,6 +39,20 @@ class AudioDownloadRepository implements IAudioDownloadStorage {
   }
 
   @override
+  Stream<List<DownloadedAudioRow>> watchDownloadsForPoem(
+    String poemId,
+    String poemCategory,
+  ) {
+    return (_db.select(_db.downloadedAudioTable)..where(
+          (t) =>
+              t.poemId.equals(poemId) &
+              t.poemCategory.equals(poemCategory) &
+              t.status.equals(DownloadStatus.downloaded.name),
+        ))
+        .watch();
+  }
+
+  @override
   Future<List<DownloadedAudioRow>> getAllDownloaded() {
     return (_db.select(
       _db.downloadedAudioTable,
@@ -55,19 +69,29 @@ class AudioDownloadRepository implements IAudioDownloadStorage {
     required String sourceUrl,
     int? sourceRecitationId,
   }) {
+    final companion = DownloadedAudioTableCompanion.insert(
+      poemId: poemId,
+      poemCategory: poemCategory,
+      reciterKey: reciterKey,
+      reciterDisplayName: reciterDisplayName,
+      fileName: fileName,
+      sourceUrl: sourceUrl,
+      localFilePath: '',
+      sourceRecitationId: Value(sourceRecitationId),
+      status: const Value(DownloadStatus.downloading),
+    );
+
     return _db
         .into(_db.downloadedAudioTable)
-        .insertOnConflictUpdate(
-          DownloadedAudioTableCompanion.insert(
-            poemId: poemId,
-            poemCategory: poemCategory,
-            reciterKey: reciterKey,
-            reciterDisplayName: reciterDisplayName,
-            fileName: fileName,
-            sourceUrl: sourceUrl,
-            localFilePath: '',
-            sourceRecitationId: Value(sourceRecitationId),
-            status: const Value(DownloadStatus.downloading),
+        .insert(
+          companion,
+          onConflict: DoUpdate(
+            (old) => companion,
+            target: [
+              _db.downloadedAudioTable.poemId,
+              _db.downloadedAudioTable.poemCategory,
+              _db.downloadedAudioTable.reciterKey,
+            ],
           ),
         );
   }
@@ -81,6 +105,7 @@ class AudioDownloadRepository implements IAudioDownloadStorage {
     required int fileSizeBytes,
     int? durationMs,
     String? checksum,
+    String? syncXml,
   }) {
     return (_db.update(_db.downloadedAudioTable)..where(
           (t) =>
@@ -94,6 +119,7 @@ class AudioDownloadRepository implements IAudioDownloadStorage {
             fileSizeBytes: Value(fileSizeBytes),
             durationMs: Value(durationMs),
             checksum: Value(checksum),
+            syncXml: Value(syncXml),
             status: const Value(DownloadStatus.downloaded),
             downloadedAt: Value(DateTime.now()),
           ),

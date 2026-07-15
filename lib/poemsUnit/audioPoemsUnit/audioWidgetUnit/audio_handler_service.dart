@@ -117,8 +117,9 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
       case 'load':
         final url = extras?['url'] as String?;
         final title = extras?['title'] as String?;
-        debugPrint('🎵 Loading URL: $url');
-        await load(url!, title: title);
+        final isLocalFile = extras?['isLocalFile'] as bool? ?? false;
+        debugPrint('🎵 Loading URL: $url (local: $isLocalFile)');
+        await load(url!, title: title, isLocalFile: isLocalFile);
         return null;
       case 'setSpeed':
         final speed = (extras?['speed'] as num?)?.toDouble() ?? 1.0;
@@ -159,7 +160,11 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   // ───────────────── public API ─────────────────
-  Future<void> load(String url, {String? title}) async {
+  Future<void> load(
+    String url, {
+    String? title,
+    bool isLocalFile = false,
+  }) async {
     mediaItem.add(
       MediaItem(id: url, title: title ?? 'Hafez Poems', artist: 'اشعار حافظ'),
     );
@@ -175,7 +180,11 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
 
     try {
       await _player.stop();
-      await _player.setUrl(url);
+      if (isLocalFile) {
+        await _player.setFilePath(url);
+      } else {
+        await _player.setUrl(url);
+      }
       await _player.seek(Duration.zero);
 
       playbackState.add(
