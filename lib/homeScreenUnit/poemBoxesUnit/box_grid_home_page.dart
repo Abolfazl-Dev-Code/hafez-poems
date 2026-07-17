@@ -33,7 +33,7 @@ class PoemBoxGridsHomePage extends StatelessWidget {
           context,
           PoemListSheet(
             config: PoemListConfig(
-              headerTitle: 'لیست غزل‌ها',
+              headerTitle: 'غزلیات حافظ',
               loadingText: 'در حال دریافت غزل‌ها...',
               emptyText: 'هیچ غزلی یافت نشد',
               items: Get.find<GhazalCacheService>().cachedGhazalsRx,
