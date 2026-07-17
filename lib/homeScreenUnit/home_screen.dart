@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/custom_appbar.dart';
 import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_banner_home_page.dart';
 import 'package:hafez_poems/homeScreenUnit/carouselUnit/carousel_screen.dart';
@@ -29,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen>
   List<GhazalExcerpt> _allTexts = [];
   List<GhazalExcerpt> _carouselTexts = [];
   late final AnimationController _shimmerController;
+
   @override
   bool get wantKeepAlive => true;
 
@@ -80,12 +80,6 @@ class _HomeScreenState extends State<HomeScreen>
     setState(() => _carouselTexts[index] = newItem);
   }
 
-  Future<void> _onRefresh() async {
-    HapticFeedback.lightImpact();
-    _trySetCarouselTexts();
-    await Future.delayed(const Duration(milliseconds: 600));
-  }
-
   @override
   void dispose() {
     _shimmerController.dispose();
@@ -105,55 +99,47 @@ class _HomeScreenState extends State<HomeScreen>
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         body: SafeArea(
-          child: RefreshIndicator(
-            onRefresh: _onRefresh,
-            color: theme.colorScheme.primary,
-            displacement: 20,
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(
-                parent: AlwaysScrollableScrollPhysics(),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 16),
-                  const CustomAppBar(title: "اشعار حافظ"),
-                  const SizedBox(height: 8),
-                  GreetingCard(theme),
-                  const SizedBox(height: 15),
-                  CarouselSlider.builder(
-                    carouselController: _carouselController,
-                    options: CarouselOptions(
-                      height: 200,
-                      viewportFraction: 0.9,
-                      enableInfiniteScroll: false,
-                    ),
-                    itemCount: 1,
-                    itemBuilder: (context, index, _) => CarouselScreenWidget(
-                      key: ValueKey('carousel_slide_$index'),
-                      initialGhazal: _carouselTexts[index].excerpt,
-                      ghazalNumber: _carouselTexts[index].number,
-                      imagePath: 'assets/icons/hafez-light.png',
-                      darkImagePath: 'assets/icons/hafez-dark.png',
-                      lightColor: const Color.fromARGB(255, 255, 255, 255),
-                      darkColor: const Color.fromARGB(255, 41, 28, 14),
-                      changeButtonIcon: 'rotate',
-                      onChangeGhazal: () => _refreshSlide(index),
-                    ),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 16),
+                const CustomAppBar(title: "اشعار حافظ"),
+                const SizedBox(height: 8),
+                GreetingCard(theme),
+                const SizedBox(height: 15),
+                CarouselSlider.builder(
+                  carouselController: _carouselController,
+                  options: CarouselOptions(
+                    height: 200,
+                    viewportFraction: 0.9,
+                    enableInfiniteScroll: false,
                   ),
-                  const SizedBox(height: 26),
-                  SectionHeader(title: 'دیوان حافظ'),
-                  const SizedBox(height: 16),
-                  PoemBoxGridsHomePage(theme),
-                  const SizedBox(height: 8),
-                  SectionHeader(title: 'ویژه‌ها'),
-                  const SizedBox(height: 16),
-                  FalBanner(theme),
-                  const SizedBox(height: 14),
-                  BiographyBanner(theme),
-                  const SizedBox(height: 70),
-                ],
-              ),
+                  itemCount: 1,
+                  itemBuilder: (context, index, _) => CarouselScreenWidget(
+                    key: ValueKey('carousel_slide_$index'),
+                    initialGhazal: _carouselTexts[index].excerpt,
+                    ghazalNumber: _carouselTexts[index].number,
+                    imagePath: 'assets/icons/hafez-light.png',
+                    darkImagePath: 'assets/icons/hafez-dark.png',
+                    lightColor: const Color.fromARGB(255, 255, 255, 255),
+                    darkColor: const Color.fromARGB(255, 41, 28, 14),
+                    changeButtonIcon: 'rotate',
+                    onChangeGhazal: () => _refreshSlide(index),
+                  ),
+                ),
+                const SizedBox(height: 26),
+                SectionHeader(title: 'دیوان حافظ'),
+                const SizedBox(height: 16),
+                PoemBoxGridsHomePage(theme),
+                const SizedBox(height: 8),
+                SectionHeader(title: 'ویژه‌ها'),
+                const SizedBox(height: 16),
+                FalBanner(theme),
+                const SizedBox(height: 14),
+                BiographyBanner(theme),
+                const SizedBox(height: 70),
+              ],
             ),
           ),
         ),

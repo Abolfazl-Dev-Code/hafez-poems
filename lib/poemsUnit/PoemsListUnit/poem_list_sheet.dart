@@ -43,8 +43,35 @@ class PoemListSheet extends StatefulWidget {
 
 class _PoemListSheetState extends State<PoemListSheet> {
   final Set<String> _prefetching = {};
+  final Set<String> _animatedIds = {};
+  final ScrollController _scrollController = ScrollController();
   _ReadFilter _filter = _ReadFilter.all;
+  int _visibleCount = 30;
   late final IReadStatusStorage _readStatus = Get.find<IReadStatusStorage>();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_handleScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _handleScroll() {
+    if (_scrollController.position.pixels <
+        _scrollController.position.maxScrollExtent - 400) {
+      return;
+    }
+    final entries = _visibleEntries;
+    if (_visibleCount >= entries.length) return;
+    setState(() {
+      _visibleCount = (_visibleCount + 30).clamp(0, entries.length);
+    });
+  }
 
   PoemListConfig get _cfg => widget.config;
   List<BasePoem> get _items => _cfg.items.cast<BasePoem>();
@@ -171,7 +198,10 @@ class _PoemListSheetState extends State<PoemListSheet> {
       }).toList(),
     ).then((selected) {
       if (selected != null && selected != _filter) {
-        setState(() => _filter = selected);
+        setState(() {
+          _filter = selected;
+          _visibleCount = 30;
+        });
       }
     });
   }
@@ -388,9 +418,12 @@ class _PoemListSheetState extends State<PoemListSheet> {
                       );
                     }
 
+                    final visibleCount = _visibleCount.clamp(0, entries.length);
+
                     return ListView.builder(
+                      controller: _scrollController,
                       scrollCacheExtent: ScrollCacheExtent.pixels(69 * 5),
-                      itemCount: entries.length,
+                      itemCount: visibleCount,
                       itemBuilder: (context, index) {
                         final entry = entries[index];
                         final item = entry.value;
@@ -402,11 +435,31 @@ class _PoemListSheetState extends State<PoemListSheet> {
                             ? '${_cfg.tilePrefix} ${entry.key + 1}'
                             : item.title;
 
-                        return PoemListTitle(
+                        final tile = PoemListTitle(
                           title: tileTitle.toPersianNumbers(),
                           hasFullText: item.hasFullText,
                           isRead: read,
                           onTap: () => _navigate(item, tileTitle),
+                        );
+
+                        if (_animatedIds.contains(item.id)) return tile;
+                        _animatedIds.add(item.id);
+
+                        return TweenAnimationBuilder<double>(
+                          key: ValueKey(item.id),
+                          tween: Tween(begin: 0, end: 1),
+                          duration: const Duration(milliseconds: 320),
+                          curve: Curves.easeOutCubic,
+                          builder: (context, value, child) {
+                            return Opacity(
+                              opacity: value,
+                              child: Transform.translate(
+                                offset: Offset(0, (1 - value) * 16),
+                                child: child,
+                              ),
+                            );
+                          },
+                          child: tile,
                         );
                       },
                     );

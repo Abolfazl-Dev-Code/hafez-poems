@@ -63,7 +63,6 @@ class FalBiography extends StatelessWidget {
             GestureDetector(
               onTap: () {
                 HapticFeedback.mediumImpact();
-
                 Navigator.of(
                   context,
                 ).push(MaterialPageRoute(builder: (_) => const FalScreen()));
