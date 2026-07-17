@@ -496,14 +496,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  funky_icons:
-    dependency: "direct main"
-    description:
-      name: funky_icons
-      sha256: a4167ed966d2300e7828b97f9383d72a4eea58c7836cb662922de3dc11834e91
-      url: "https://dart.devneeds.ir"
-    source: hosted
-    version: "1.0.2"
   get:
     dependency: "direct main"
     description:
@@ -776,6 +768,14 @@ packages:
       url: "https://dart.devneeds.ir"
     source: hosted
     version: "1.3.0"
+  lottie:
+    dependency: "direct main"
+    description:
+      name: lottie
+      sha256: "58dda9eee3f1b1fb9d490b0161635cffe93022b3b8ca0687e3df33a53620ead2"
+      url: "https://dart.devneeds.ir"
+    source: hosted
+    version: "3.5.1"
   matcher:
     dependency: transitive
     description:

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/homeScreenUnit/biographyUnit/route_observer_screen.dart';
+import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_scaffold_messenger.dart';
+import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/snackbar_route_observer.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/theme_reveal_service.dart';
 import 'package:hafez_poems/onboardingSplashUnit/splash_screen.dart';
 import 'package:hafez_poems/theme/app_theme.dart';
@@ -16,7 +18,8 @@ class MainApp extends StatelessWidget {
       () => RepaintBoundary(
         key: ThemeRevealService.instance.repaintKey,
         child: GetMaterialApp(
-          navigatorObservers: [routeObserver],
+          scaffoldMessengerKey: appScaffoldMessengerKey,
+          navigatorObservers: [routeObserver, appRouteObserver],
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,

@@ -81,6 +81,26 @@ class PoemSearchIndex<T> {
 
     if (title == normalizedQuery) return 100;
     if (title.startsWith(normalizedQuery)) return 95;
+    // اگر کوئری شامل عدد بود، تطابق دقیق‌تر عددی را اولویت بده
+    final numberMatch = RegExp(r'\d+').firstMatch(normalizedQuery);
+    if (numberMatch != null) {
+      final queryNumber = numberMatch.group(0)!;
+
+      final titleNumberMatch = RegExp(r'\d+').firstMatch(title);
+
+      if (titleNumberMatch != null) {
+        final titleNumber = titleNumberMatch.group(0)!;
+
+        if (titleNumber == queryNumber) {
+          return 99; // غزل 1
+        }
+
+        if (titleNumber.startsWith(queryNumber)) {
+          // غزل 11 بهتر از غزل 111
+          return 98 - (titleNumber.length - queryNumber.length);
+        }
+      }
+    }
     if (title.contains(normalizedQuery)) return 90;
 
     if (tokens.length > 1 && text.contains(normalizedQuery)) {

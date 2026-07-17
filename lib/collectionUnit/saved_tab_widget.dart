@@ -35,16 +35,10 @@ class _SavedTabState extends State<SavedTab> with SelectionMixin {
       appBar: AppBar(
         title: Text(
           selectionMode
-              ? '${selectedKeys.length} مورد انتخاب شده'
+              ? '${selectedKeys.length} مورد انتخاب شده'.toPersianNumbers()
               : 'اشعار ذخیره‌شده',
         ),
         centerTitle: !selectionMode,
-        leading: selectionMode
-            ? IconButton(
-                onPressed: clearSelection,
-                icon: const Icon(Icons.close),
-              )
-            : null,
         actions: selectionMode ? [_buildActions(context)] : null,
       ),
       body: StreamBuilder<void>(
@@ -153,13 +147,23 @@ class _SavedTabState extends State<SavedTab> with SelectionMixin {
     return StreamBuilder<void>(
       stream: _storage.watch(),
       builder: (context, _) {
-        final allKeys = _storage.values().map(_keyOf);
+        final allKeys = _storage.values().map(_keyOf).toList();
+
+        final allSelected =
+            allKeys.isNotEmpty && selectedKeys.length == allKeys.length;
+
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextButton(
-              onPressed: () => selectAll(allKeys),
-              child: const Text('انتخاب همه'),
+              onPressed: () {
+                if (allSelected) {
+                  clearSelection();
+                } else {
+                  selectAll(allKeys);
+                }
+              },
+              child: Text(allSelected ? 'لغو همه' : 'انتخاب همه'),
             ),
             IconButton(
               onPressed: selectedKeys.isEmpty

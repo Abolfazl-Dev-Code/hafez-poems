@@ -252,6 +252,27 @@ class HafezAudioHandler extends BaseAudioHandler with SeekHandler {
     );
   }
 
+  Future<void> release() async {
+    try {
+      await _player.stop();
+
+      mediaItem.add(null);
+      queue.add(const []);
+
+      playbackState.add(
+        playbackState.value.copyWith(
+          controls: const [],
+          processingState: AudioProcessingState.idle,
+          playing: false,
+          updatePosition: Duration.zero,
+        ),
+      );
+
+      final session = await AudioSession.instance;
+      await session.setActive(false);
+    } catch (_) {}
+  }
+
   @override
   Future<void> seek(Duration position) async {
     await _player.seek(position);

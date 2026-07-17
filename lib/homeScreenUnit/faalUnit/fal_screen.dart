@@ -4,6 +4,7 @@ import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:hafez_poems/core/data/contracts/i_keyed_item_storage.dart';
 import 'package:hafez_poems/homeScreenUnit/faalUnit/fal_local_service.dart';
+import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_cache_services.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_local_services.dart';
@@ -25,23 +26,6 @@ class _FalScreenState extends State<FalScreen>
   bool _isLoading = false;
   bool _isSaved = false;
 
-  late final AnimationController _snackProgressController;
-
-  @override
-  void initState() {
-    super.initState();
-    _snackProgressController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1800),
-    );
-  }
-
-  @override
-  void dispose() {
-    _snackProgressController.dispose();
-    super.dispose();
-  }
-
   Future<void> _getNewFal() async {
     setState(() {
       _isLoading = true;
@@ -60,100 +44,6 @@ class _FalScreenState extends State<FalScreen>
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  void _showSavedSnackBar() {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    _snackProgressController
-      ..reset()
-      ..forward();
-
-    final snackBar = SnackBar(
-      behavior: SnackBarBehavior.floating,
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      duration: const Duration(milliseconds: 1800),
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 30),
-      content: AnimatedBuilder(
-        animation: _snackProgressController,
-        builder: (context, child) {
-          return Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF1FA855),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.95),
-                width: 1.2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.18),
-                  blurRadius: 14,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 14,
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.18),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.check_rounded,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      const Expanded(
-                        child: Text(
-                          'فال ذخیره شد',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15.5,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 4,
-                  child: Stack(
-                    children: [
-                      Container(color: Colors.white.withValues(alpha: 0.22)),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: FractionallySizedBox(
-                          widthFactor: 1 - _snackProgressController.value,
-                          child: Container(color: Colors.white),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   Future<void> _saveFal() async {
@@ -177,7 +67,10 @@ class _FalScreenState extends State<FalScreen>
 
     if (!mounted) return;
     setState(() => _isSaved = true);
-    _showSavedSnackBar();
+    AppSnackBarService.success(
+      'فال ذخیره شد',
+      duration: const Duration(milliseconds: 1800),
+    );
   }
 
   @override

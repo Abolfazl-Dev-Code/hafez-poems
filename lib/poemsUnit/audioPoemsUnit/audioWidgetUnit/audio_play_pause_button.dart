@@ -15,7 +15,7 @@ class PlayPauseButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enabled = ctrl.isAudioLoaded && !ctrl.isLoadingAudio;
+    final enabled = !ctrl.isLoadingAudio;
 
     return Container(
       height: 38,
@@ -48,7 +48,7 @@ class PlayPauseButton extends StatelessWidget {
                 size: 32,
               ),
         color: cs.onPrimary,
-        onPressed: enabled ? ctrl.togglePlayPause : null,
+        onPressed: enabled ? ctrl.playOrPause : null,
       ),
     );
   }

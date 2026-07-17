@@ -63,7 +63,6 @@ class PoemActionBar extends StatelessWidget {
             onTap: () {
               if (!canHighlight) {
                 AppSnackBarService.warning(
-                  scaffoldContext,
                   'لطفاً ابتدا یک مصرع را انتخاب کنید',
                 );
                 return;

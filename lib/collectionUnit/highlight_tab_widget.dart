@@ -7,6 +7,7 @@ import 'package:hafez_poems/collectionUnit/selection_mixin.dart';
 import 'package:hafez_poems/core/data/contracts/i_keyed_item_storage.dart';
 import 'package:hafez_poems/models/highlight_item.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/bottomNavBar/user_actions_saver.dart';
+import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_category_resolver.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_screen.dart';
 
@@ -30,16 +31,10 @@ class _HighlightsTabState extends State<HighlightsTab> with SelectionMixin {
       appBar: AppBar(
         title: Text(
           selectionMode
-              ? '${selectedKeys.length} مورد انتخاب شده'
+              ? '${selectedKeys.length} مورد انتخاب شده'.toPersianNumbers()
               : 'برگزیده‌‌ها',
         ),
         centerTitle: !selectionMode,
-        leading: selectionMode
-            ? IconButton(
-                onPressed: clearSelection,
-                icon: const Icon(Icons.close),
-              )
-            : null,
         actions: selectionMode ? [_buildActions(context)] : null,
       ),
       body: StreamBuilder<void>(
@@ -107,13 +102,23 @@ class _HighlightsTabState extends State<HighlightsTab> with SelectionMixin {
     return StreamBuilder<void>(
       stream: _storage.watch(),
       builder: (context, _) {
-        final allKeys = _storage.values().map(_keyOf);
+        final allKeys = _storage.values().map(_keyOf).toList();
+
+        final allSelected =
+            allKeys.isNotEmpty && selectedKeys.length == allKeys.length;
+
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextButton(
-              onPressed: () => selectAll(allKeys),
-              child: const Text('انتخاب همه'),
+              onPressed: () {
+                if (allSelected) {
+                  clearSelection();
+                } else {
+                  selectAll(allKeys);
+                }
+              },
+              child: Text(allSelected ? 'لغو همه' : 'انتخاب همه'),
             ),
             IconButton(
               onPressed: selectedKeys.isEmpty

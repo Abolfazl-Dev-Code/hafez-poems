@@ -53,6 +53,20 @@ class AudioDownloadRepository implements IAudioDownloadStorage {
   }
 
   @override
+  Future<List<DownloadedAudioRow>> getDownloadsForPoem(
+    String poemId,
+    String poemCategory,
+  ) {
+    return (_db.select(_db.downloadedAudioTable)..where(
+          (t) =>
+              t.poemId.equals(poemId) &
+              t.poemCategory.equals(poemCategory) &
+              t.status.equals(DownloadStatus.downloaded.name),
+        ))
+        .get();
+  }
+
+  @override
   Future<List<DownloadedAudioRow>> getAllDownloaded() {
     return (_db.select(
       _db.downloadedAudioTable,
@@ -180,21 +194,25 @@ class AudioDownloadRepository implements IAudioDownloadStorage {
   }
 
   @override
-  Future<String?> getDefaultReciter(String scope) async {
-    final row = await (_db.select(
+  Future<DefaultReciterRow?> getDefaultReciter(String scope) {
+    return (_db.select(
       _db.defaultReciterTable,
     )..where((t) => t.scope.equals(scope))).getSingleOrNull();
-    return row?.reciterKey;
   }
 
   @override
-  Future<void> setDefaultReciter(String scope, String reciterKey) {
+  Future<void> setDefaultReciter({
+    required String scope,
+    required String reciterKey,
+    required String reciterDisplayName,
+  }) {
     return _db
         .into(_db.defaultReciterTable)
         .insertOnConflictUpdate(
           DefaultReciterTableCompanion.insert(
             scope: scope,
             reciterKey: reciterKey,
+            reciterDisplayName: reciterDisplayName,
           ),
         );
   }

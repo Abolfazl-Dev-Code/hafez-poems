@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:hafez_poems/core/data/contracts/i_audio_download_storage.dart';
 import 'package:hafez_poems/core/data/drift/app_database.dart';
 import 'package:hafez_poems/core/utils/audio_file_size_formatter.dart';
+import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioDownloadUnit/audio_download_manager.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioDownloadUnit/audio_messages.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioWidgetUnit/audio_player_controller.dart';
@@ -41,7 +42,17 @@ class DownloadsListTab extends StatelessWidget {
       onSyncXmlResolved: (xml) {
         verseSyncController?.loadSyncPoints(xml);
       },
+      onSyncUnavailable: () {
+        verseSyncController?.clearSyncPoints();
+      },
     );
+
+    if (ctrl.hasPreparedAudio && ctrl.isUsingOfflineAudio) {
+      AppSnackBarService.success(
+        'نسخه آفلاین «${row.reciterDisplayName}» برای پخش انتخاب شد.',
+        duration: const Duration(seconds: 3),
+      );
+    }
 
     if (context.mounted) Navigator.pop(context);
   }
@@ -77,15 +88,23 @@ class DownloadsListTab extends StatelessWidget {
       ),
     );
 
-    if (confirmed == true) {
-      final manager = Get.find<AudioDownloadManager>();
-      await manager.deleteDownload(poemId, category, row.reciterKey);
+    if (confirmed != true) return;
 
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('فایل با موفقیت حذف شد')));
-      }
+    final manager = Get.find<AudioDownloadManager>();
+
+    final wasCurrentOffline =
+        ctrl.isUsingOfflineAudio && ctrl.selectedReciterKey == row.reciterKey;
+
+    await manager.deleteDownload(poemId, category, row.reciterKey);
+
+    if (wasCurrentOffline) {
+      await ctrl.switchToOnlineVersion();
+    }
+
+    if (!context.mounted) return;
+
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
     }
   }
 
@@ -134,23 +153,48 @@ class DownloadsListTab extends StatelessWidget {
           itemCount: items.length,
           itemBuilder: (context, index) {
             final row = items[index];
+            final isSelected =
+                ctrl.isUsingOfflineAudio &&
+                ctrl.selectedReciterKey == row.reciterKey;
             return InkWell(
               onTap: () => _play(context, row),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
               child: Container(
-                margin: const EdgeInsets.symmetric(vertical: 2),
+                margin: const EdgeInsets.symmetric(vertical: 3),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
-                  vertical: 10,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? Colors.green.withValues(alpha: 0.08)
+                      : cs.primary.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: isSelected
+                        ? Colors.green.withValues(alpha: 0.35)
+                        : cs.primary.withValues(alpha: 0.15),
+                    width: isSelected ? 1.4 : 1,
+                  ),
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.play_circle_outline_rounded,
-                      size: 22,
-                      color: cs.primary,
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: isSelected ? Colors.green : cs.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        isSelected
+                            ? Icons.check_rounded
+                            : Icons.play_arrow_rounded,
+                        color: Colors.white,
+                        size: 22,
+                      ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,11 +209,32 @@ class DownloadsListTab extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 2),
+                          if (isSelected) ...[
+                            const SizedBox(height: 3),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.check_circle,
+                                  size: 12,
+                                  color: Colors.green.shade700,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'در حال استفاده',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: Colors.green.shade700,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                           Text(
-                            '${row.fileName} · ${FileSizeFormatter.format(row.fileSizeBytes)}',
+                            '${FileSizeFormatter.format(row.fileSizeBytes)} · برای پخش لمس کنید',
                             textAlign: TextAlign.right,
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: cs.onSurface.withValues(alpha: 0.45),
+                              color: cs.primary.withValues(alpha: 0.7),
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),

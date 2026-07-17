@@ -173,7 +173,6 @@ class _SettingPageState extends State<SettingPage>
       );
       if (!mounted) return;
       AppSnackBarService.success(
-        context,
         'زمان یادآوری به $_reminderTimeText تغییر کرد',
       );
     }
@@ -193,7 +192,7 @@ class _SettingPageState extends State<SettingPage>
         if (!granted) {
           if (!mounted) return;
           setState(() => _dailyReminderEnabled = false);
-          AppSnackBarService.error(context, 'اجازه ارسال اعلان‌ها داده نشد');
+          AppSnackBarService.error('اجازه ارسال اعلان‌ها داده نشد');
           return;
         }
 
@@ -205,7 +204,7 @@ class _SettingPageState extends State<SettingPage>
         if (!mounted) return;
         setState(() => _dailyReminderEnabled = isScheduled);
         if (isScheduled) {
-          AppSnackBarService.success(context, 'یادآوری روزانه فعال شد');
+          AppSnackBarService.success('یادآوری روزانه فعال شد');
         }
       } else {
         await NotificationService.instance.cancelDailyReminder();
@@ -217,12 +216,9 @@ class _SettingPageState extends State<SettingPage>
         setState(() => _dailyReminderEnabled = isStillScheduled);
 
         if (!isStillScheduled) {
-          AppSnackBarService.success(context, 'یادآوری روزانه غیرفعال شد');
+          AppSnackBarService.success('یادآوری روزانه غیرفعال شد');
         } else {
-          AppSnackBarService.error(
-            context,
-            'غیرفعال‌سازی یادآوری روزانه انجام نشد',
-          );
+          AppSnackBarService.error('غیرفعال‌سازی یادآوری روزانه انجام نشد');
         }
       }
     } finally {
@@ -247,10 +243,10 @@ class _SettingPageState extends State<SettingPage>
       await _loadSettings();
 
       if (!mounted) return;
-      AppSnackBarService.success(context, 'تمام داده‌های محلی حذف شد');
+      AppSnackBarService.success('تمام داده‌های محلی حذف شد');
     } catch (e) {
       if (!mounted) return;
-      AppSnackBarService.error(context, 'خطا در حذف داده‌ها: $e');
+      AppSnackBarService.error('خطا در حذف داده‌ها: $e');
     }
   }
 
@@ -269,10 +265,10 @@ class _SettingPageState extends State<SettingPage>
         ),
       );
       if (!mounted) return;
-      AppSnackBarService.success(context, 'پنجره اشتراک‌گذاری باز شد');
+      AppSnackBarService.success('پنجره اشتراک‌گذاری باز شد');
     } catch (e) {
       if (!mounted) return;
-      AppSnackBarService.error(context, 'اشتراک‌گذاری انجام نشد');
+      AppSnackBarService.error('اشتراک‌گذاری انجام نشد');
     }
   }
 
@@ -280,7 +276,7 @@ class _SettingPageState extends State<SettingPage>
     final uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       if (!mounted) return;
-      AppSnackBarService.error(context, 'امکان باز کردن لینک وجود ندارد');
+      AppSnackBarService.error('امکان باز کردن لینک وجود ندارد');
     }
   }
 

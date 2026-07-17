@@ -16,7 +16,7 @@ class SpeedButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<double>(
-      enabled: ctrl.isAudioLoaded,
+      enabled: ctrl.hasPreparedAudio,
       onSelected: (speed) => ctrl.setPlaybackSpeed(speed),
       offset: const Offset(-20, -180),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -48,7 +48,7 @@ class SpeedButtons extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 6),
         decoration: BoxDecoration(
-          color: ctrl.isAudioLoaded
+          color: ctrl.hasPreparedAudio
               ? cs.surfaceContainerHighest.withValues(alpha: 0.6)
               : cs.surfaceContainerHighest.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(10),
@@ -57,7 +57,7 @@ class SpeedButtons extends StatelessWidget {
         child: Text(
           '${ctrl.playbackSpeed}x',
           style: theme.textTheme.labelMedium?.copyWith(
-            color: ctrl.isAudioLoaded
+            color: ctrl.hasPreparedAudio
                 ? cs.onSurface.withValues(alpha: 0.75)
                 : cs.onSurface.withValues(alpha: 0.35),
             fontWeight: FontWeight.bold,

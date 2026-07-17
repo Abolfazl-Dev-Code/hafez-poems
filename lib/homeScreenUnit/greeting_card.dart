@@ -1,9 +1,71 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_controller.dart';
+import 'package:hafez_poems/theme/animated_app_icons.dart';
+import 'package:hafez_poems/theme/app_icons.dart';
 
-class GreetingCard extends StatelessWidget {
-  const GreetingCard(ThemeData theme, {super.key});
+class GreetingCard extends StatefulWidget {
+  const GreetingCard(
+    ThemeData theme, {
+    super.key,
+    this.iconScale = 1.5,
+    this.iconSpeed = 1.5,
+  });
+
+  final double iconScale;
+  final double iconSpeed;
+
+  @override
+  State<GreetingCard> createState() => _GreetingCardState();
+}
+
+class _GreetingCardState extends State<GreetingCard> {
+  Timer? _timer;
+
+  DateTime _nextGreetingTime() {
+    final now = DateTime.now();
+
+    final points = [
+      DateTime(now.year, now.month, now.day, 6),
+      DateTime(now.year, now.month, now.day, 12),
+      DateTime(now.year, now.month, now.day, 17),
+      DateTime(now.year, now.month, now.day, 21),
+    ];
+
+    for (final point in points) {
+      if (point.isAfter(now)) return point;
+    }
+
+    return DateTime(now.year, now.month, now.day + 1, 6);
+  }
+
+  void _scheduleUpdate() {
+    _timer?.cancel();
+
+    final next = _nextGreetingTime();
+
+    _timer = Timer(next.difference(DateTime.now()), () {
+      if (!mounted) return;
+
+      setState(() {});
+
+      _scheduleUpdate();
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleUpdate();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   String _greetingText({String name = ''}) {
     final hour = DateTime.now().hour;
@@ -38,14 +100,14 @@ class GreetingCard extends StatelessWidget {
     return 'شبت رو با حافظ آروم کن 🌙';
   }
 
-  IconData get _greetingIcon {
+  String get _greetingAsset {
     final hour = DateTime.now().hour;
 
-    if (hour < 12) return Icons.wb_sunny_rounded;
-    if (hour < 17) return Icons.wb_cloudy_rounded;
-    if (hour < 21) return Icons.wb_twilight_rounded;
+    if (hour >= 6 && hour < 12) return AppIcons.morning;
+    if (hour >= 12 && hour < 17) return AppIcons.noon;
+    if (hour >= 17 && hour < 21) return AppIcons.evening;
 
-    return Icons.nightlight_round;
+    return AppIcons.night;
   }
 
   List<Color> _greetingGradientForTheme(bool isLight) {
@@ -127,11 +189,23 @@ class GreetingCard extends StatelessWidget {
               Container(
                 width: 44,
                 height: 44,
+                alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: iconColor.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(_greetingIcon, color: iconColor, size: 22),
+                child: AnimatedAppIcon(
+                  key: ValueKey(_greetingAsset),
+                  asset: _greetingAsset,
+                  size: 22,
+                  scale: widget.iconScale,
+                  color: iconColor,
+                  repeat: true,
+                  autoplay: true,
+                  speed: widget.iconSpeed,
+                  animateOnTap: false,
+                  animateOnSelected: false,
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(

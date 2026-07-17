@@ -10,6 +10,7 @@ import 'package:hafez_poems/navbarHomeScreenUnit/bottomNavBar/user_actions_saver
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/notification_service.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioDownloadUnit/audio_download_manager.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioDownloadUnit/audio_messages.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/default_reciter_controller.dart';
 import 'package:hafez_poems/theme/theme_controller.dart';
 
 class AppInitializer {
@@ -32,6 +33,7 @@ class AppInitializer {
       AudioSourceResolver(Get.find<IAudioDownloadStorage>()),
       permanent: true,
     );
+    Get.put(DefaultReciterController(Get.find<IAudioDownloadStorage>()));
     CacheServicesBoot.preloadAll();
   }
 }

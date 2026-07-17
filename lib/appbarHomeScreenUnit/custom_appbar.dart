@@ -1,14 +1,15 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:funky_icons/funky_icons.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_screen.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/searchUnit/search_screen.dart';
+import 'package:hafez_poems/theme/animated_app_icons.dart';
+import 'package:hafez_poems/theme/app_icons.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
 
   const CustomAppBar({super.key, this.title = "اشعار حافظ"});
+  static const Duration _navTapDelay = Duration(milliseconds: 150);
 
   @override
   Widget build(BuildContext context) {
@@ -35,47 +36,57 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
           ],
         ),
-        child: Row(
+        child: Stack(
+          alignment: Alignment.center,
           children: [
-            SizedBox(
-              width: 48,
-              height: 48,
-              child: IconButton(
-                splashRadius: 24,
-                icon: _ThemedFunkyIcon(
-                  icon: FunkyIcons.search03,
-                  color: colorScheme.onSurface,
-                  height: 22,
-                ),
-                onPressed: () => Get.to(
-                  () => SearchScreen(),
-                  transition: Transition.downToUp,
-                ),
-              ),
-            ),
-            Expanded(
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: textTheme.titleMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w700,
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 70),
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.titleMedium?.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
-            SizedBox(
-              width: 48,
-              height: 48,
-              child: IconButton(
-                splashRadius: 24,
-                icon: Icon(
-                  CupertinoIcons.person,
-                  color: colorScheme.onSurface,
-                  size: 25,
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 11),
+                child: AnimatedAppIcon(
+                  asset: AppIcons.search,
+                  size: 27,
+                  tapDelay: _navTapDelay,
+                  onTap: () {
+                    Get.to(
+                      () => SearchScreen(),
+                      transition: Transition.downToUp,
+                    );
+                  },
                 ),
-                onPressed: () => Get.to(() => const ProfileScreen()),
+              ),
+            ),
+
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: EdgeInsetsGeometry.only(left: 9),
+                child: AnimatedAppIcon(
+                  asset: AppIcons.person,
+                  size: 28,
+                  tapDelay: _navTapDelay,
+                  onTap: () {
+                    Get.to(
+                      () => ProfileScreen(),
+                      transition: Transition.downToUp,
+                    );
+                  },
+                ),
               ),
             ),
           ],
@@ -86,24 +97,4 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => const Size.fromHeight(80.0);
-}
-
-class _ThemedFunkyIcon extends StatelessWidget {
-  final FunkyIcons icon;
-  final Color color;
-  final double height;
-
-  const _ThemedFunkyIcon({
-    required this.icon,
-    required this.color,
-    this.height = 22,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ColorFiltered(
-      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-      child: FunkyIcon(icon, height: height),
-    );
-  }
 }

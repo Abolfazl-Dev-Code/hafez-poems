@@ -3,7 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:hafez_poems/collectionUnit/collection_screen.dart';
 import 'package:hafez_poems/homeScreenUnit/home_screen.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/bottomNavBar/bottom_nav_bar_animation.dart';
+import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/settings_screen.dart';
+import 'package:hafez_poems/theme/animated_app_icons.dart';
+import 'package:hafez_poems/theme/app_icons.dart';
 import 'package:hafez_poems/theme/color_style.dart';
 
 class BottomNavBar extends StatefulWidget {
@@ -33,12 +36,20 @@ class _BottomNavBarState extends State<BottomNavBar> {
     'برگزیده',
   ];
 
-  static const List<IconData> _icons = [
-    Icons.settings,
-    Icons.favorite,
-    Icons.home,
-    Icons.bookmark,
-    Icons.highlight,
+  static const List<String> _icons = [
+    AppIcons.settings,
+    AppIcons.like,
+    AppIcons.home,
+    AppIcons.saved,
+    AppIcons.highlight,
+  ];
+
+  static const List<double> _iconScales = [
+    1.3, // settings
+    1.4, // like
+    1.3, // home
+    1.3, // saved
+    3.1, // highlight
   ];
 
   @override
@@ -49,7 +60,11 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
   void _onNavTap(int index) {
     if (index == _currentIndex) return;
+
+    AppSnackBarService.dismiss();
+
     setState(() => _currentIndex = index);
+
     _pageController.animateToPage(
       index,
       duration: const Duration(milliseconds: 250),
@@ -58,6 +73,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
   }
 
   void _onPageChanged(int index) {
+    AppSnackBarService.dismiss();
     setState(() => _currentIndex = index);
   }
 
@@ -82,6 +98,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
             child: _CurvedNavBar(
               currentIndex: _currentIndex,
               icons: _icons,
+              iconScales: _iconScales,
               labels: _titles,
               barColor: AppColors.icon,
               restingIconColor: isDark ? AppColors.darkIcon : Colors.white,
@@ -94,9 +111,10 @@ class _BottomNavBarState extends State<BottomNavBar> {
   }
 }
 
-class _CurvedNavBar extends StatelessWidget {
+class _CurvedNavBar extends StatefulWidget {
   final int currentIndex;
-  final List<IconData> icons;
+  final List<String> icons;
+  final List<double>? iconScales;
   final List<String> labels;
   final Color barColor;
   final Color restingIconColor;
@@ -104,11 +122,11 @@ class _CurvedNavBar extends StatelessWidget {
 
   static const double barHeight = 60;
   static const double circleSize = 52;
-  static const double extraLift = 0;
 
   const _CurvedNavBar({
     required this.currentIndex,
     required this.icons,
+    this.iconScales,
     required this.labels,
     required this.barColor,
     required this.restingIconColor,
@@ -116,25 +134,48 @@ class _CurvedNavBar extends StatelessWidget {
   });
 
   @override
+  State<_CurvedNavBar> createState() => _CurvedNavBarState();
+}
+
+class _CurvedNavBarState extends State<_CurvedNavBar> {
+  late double _loc;
+  double? _previousLoc;
+
+  double _locFor(int index) => index / widget.icons.length;
+
+  @override
+  void initState() {
+    super.initState();
+    _loc = _locFor(widget.currentIndex);
+  }
+
+  @override
+  void didUpdateWidget(covariant _CurvedNavBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentIndex != widget.currentIndex) {
+      _previousLoc = _loc;
+      _loc = _locFor(widget.currentIndex);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final double s = 1 / icons.length;
+    final double s = 1 / widget.icons.length;
+    final double beginLoc = _previousLoc ?? _loc;
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final double width = constraints.maxWidth;
-        final double loc = currentIndex / icons.length;
-        final double itemSpan = width / icons.length;
+        final double itemSpan = width / widget.icons.length;
 
         return SizedBox(
-          height: barHeight + extraLift,
+          height: _CurvedNavBar.barHeight,
           width: width,
           child: TweenAnimationBuilder<double>(
-            tween: Tween<double>(begin: loc, end: loc),
+            tween: Tween<double>(begin: beginLoc, end: _loc),
             duration: const Duration(milliseconds: 380),
             curve: Curves.easeOutCubic,
             builder: (context, animatedLoc, _) {
-              final double circleCenterX = (animatedLoc + s / 2) * width;
-
               return Stack(
                 clipBehavior: Clip.none,
                 alignment: Alignment.bottomCenter,
@@ -144,17 +185,22 @@ class _CurvedNavBar extends StatelessWidget {
                     left: 0,
                     right: 0,
                     child: CustomPaint(
-                      size: Size(width, barHeight),
+                      size: Size(width, _CurvedNavBar.barHeight),
                       painter: BottomNavBarAnimation(
                         loc: animatedLoc,
                         s: s,
-                        color: barColor,
+                        color: widget.barColor,
                       ),
                     ),
                   ),
+                  ...List.generate(widget.icons.length, (index) {
+                    final bool isSelected = index == widget.currentIndex;
+                    final double scale =
+                        widget.iconScales != null &&
+                            index < widget.iconScales!.length
+                        ? widget.iconScales![index]
+                        : 1.0;
 
-                  ...List.generate(icons.length, (index) {
-                    if (index == currentIndex) return const SizedBox.shrink();
                     return Positioned(
                       bottom: 10,
                       left: itemSpan * index,
@@ -163,23 +209,60 @@ class _CurvedNavBar extends StatelessWidget {
                         behavior: HitTestBehavior.opaque,
                         onTap: () {
                           HapticFeedback.lightImpact();
-                          onTap(index);
+                          widget.onTap(index);
                         },
                         child: Column(
+                          key: ValueKey(widget.icons[index]),
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
-                              icons[index],
-                              size: 23,
-                              color: restingIconColor,
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 280),
+                              curve: Curves.easeOutCubic,
+                              width: isSelected ? _CurvedNavBar.circleSize : 26,
+                              height: isSelected
+                                  ? _CurvedNavBar.circleSize
+                                  : 26,
+                              alignment: Alignment.center,
+                              transform: Matrix4.translationValues(
+                                0,
+                                isSelected
+                                    ? -(_CurvedNavBar.circleSize / 2 - 10)
+                                    : 0,
+                                0,
+                              ),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: isSelected
+                                    ? widget.barColor
+                                    : Colors.transparent,
+                              ),
+                              child: AnimatedAppIcon(
+                                asset: widget.icons[index],
+                                size: isSelected ? 22 : 20,
+                                scale: scale,
+                                color: widget.restingIconColor,
+                                selected: isSelected,
+                                onTap: () {
+                                  HapticFeedback.lightImpact();
+                                  widget.onTap(index);
+                                },
+                              ),
                             ),
-                            const SizedBox(height: 3),
-                            Text(
-                              labels[index],
-                              style: TextStyle(
-                                fontFamily: 'vazir',
-                                fontSize: 11,
-                                color: restingIconColor,
+                            AnimatedOpacity(
+                              duration: const Duration(milliseconds: 200),
+                              opacity: isSelected ? 0 : 1,
+                              child: Column(
+                                children: [
+                                  const SizedBox(height: 1),
+                                  Text(
+                                    widget.labels[index],
+                                    style: TextStyle(
+                                      fontFamily: 'vazir',
+                                      fontSize: 11,
+                                      color: widget.restingIconColor,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -187,26 +270,6 @@ class _CurvedNavBar extends StatelessWidget {
                       ),
                     );
                   }),
-
-                  Positioned(
-                    bottom: barHeight - circleSize / 2,
-                    left: circleCenterX - circleSize / 2,
-                    child: Container(
-                      width: circleSize,
-                      height: circleSize,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: barColor,
-                      ),
-                      child: Center(
-                        child: Icon(
-                          icons[currentIndex],
-                          size: 26,
-                          color: restingIconColor,
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               );
             },

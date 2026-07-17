@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:hafez_poems/core/data/contracts/i_audio_download_storage.dart';
 import 'package:hafez_poems/models/recitation_models.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioDownloadUnit/audio_messages.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/reciter_key.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioWidgetUnit/audio_play_pause_button.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioWidgetUnit/audio_player_controller.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/recitation_drop_down.dart';
@@ -47,11 +51,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
     widget.controller.onUserMessage = (message) {
       if (mounted) {
-        AppSnackBarService.error(
-          context,
-          message,
-          duration: Duration(milliseconds: 1000),
-        );
+        AppSnackBarService.error(message, duration: const Duration(seconds: 3));
       }
     };
   }
@@ -75,47 +75,65 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   }
 
   Future<void> _loadIfNeeded() async {
-    debugPrint('🚀 _loadIfNeeded called — id: ${widget.id}');
     final ctrl = widget.controller;
     if (_initialized &&
         ctrl.lastId == widget.id &&
         ctrl.lastAudioUrl == widget.audioUrl) {
-      debugPrint('⏭️ skipped — already initialized');
       return;
     }
 
     _initialized = true;
 
-    await ctrl.loadRecitations(widget.id);
+    await ctrl.loadRecitations(widget.id, widget.category);
 
-    debugPrint('✅ recitations count: ${ctrl.recitations.length}');
-    debugPrint('✅ selectedRecitation: ${ctrl.selectedRecitation?.audioArtist}');
+    final storage = Get.find<IAudioDownloadStorage>();
+    final resolver = Get.find<AudioSourceResolver>();
 
-    debugPrint('SYNC_CHECK_1');
-    debugPrint(
-      'SYNC_CHECK_2 verseSyncCtrl=${widget.verseSyncController != null}',
-    );
-    debugPrint('SYNC_CHECK_3 recitation=${ctrl.selectedRecitation?.id}');
+    String? reciterKey;
+    String onlineUrl = '';
 
-    if (widget.verseSyncController != null &&
-        ctrl.selectedRecitation != null &&
-        ctrl.selectedRecitation!.xmlText.isNotEmpty) {
-      widget.verseSyncController!.loadSyncPoints(
-        ctrl.selectedRecitation!.xmlText,
-      );
+    if (ctrl.selectedRecitation != null) {
+      reciterKey = ReciterKey.from(ctrl.selectedRecitation!.audioArtist);
+      onlineUrl = ctrl.selectedRecitation!.mp3Url;
     } else {
-      debugPrint('SYNC_CHECK_5 SKIPPED');
+      final downloaded = await storage.getDownloadsForPoem(
+        widget.id,
+        widget.category,
+      );
+      if (downloaded.isNotEmpty) {
+        final defaultReciter = await storage.getDefaultReciter(widget.category);
+        final match = downloaded.firstWhere(
+          (d) => d.reciterKey == defaultReciter?.reciterKey,
+          orElse: () => downloaded.first,
+        );
+        reciterKey = match.reciterKey;
+        onlineUrl = match.sourceUrl;
+      }
     }
 
-    final selectedUrl = ctrl.selectedRecitation?.mp3Url ?? widget.audioUrl;
+    if (reciterKey == null) {
+      await ctrl.load(
+        id: widget.id,
+        audioUrl: widget.audioUrl,
+        title: widget.title,
+        fetchAudioUrl: widget.fetchAudioUrl,
+      );
+      return;
+    }
 
-    await ctrl.load(
+    await ctrl.loadWithSourceResolution(
       id: widget.id,
-      audioUrl: selectedUrl,
+      poemCategory: widget.category,
+      reciterKey: reciterKey,
+      onlineUrl: onlineUrl,
+      resolver: resolver,
       title: widget.title,
-      fetchAudioUrl: ctrl.selectedRecitation != null
-          ? null
-          : widget.fetchAudioUrl,
+      onSyncXmlResolved: (xml) {
+        widget.verseSyncController?.loadSyncPoints(xml);
+      },
+      onSyncUnavailable: () {
+        widget.verseSyncController?.clearSyncPoints();
+      },
     );
   }
 
@@ -136,15 +154,18 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
     if (!mounted) return;
 
-    if (!ctrl.isAudioLoaded) {
-      AppSnackBarService.error(context, 'بارگیری فایل صوتی انجام نشد');
+    if (!ctrl.hasPreparedAudio) {
+      AppSnackBarService.error(
+        'بارگیری فایل صوتی انجام نشد',
+        duration: const Duration(seconds: 3),
+      );
       return;
     }
 
     await ctrl.seek(position);
 
     if (!ctrl.isPlaying) {
-      await ctrl.togglePlayPause();
+      await ctrl.playOrPause();
     }
   }
 
@@ -278,7 +299,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                 min: 0.0,
                 max: maxMs,
                 value: currentMs,
-                onChanged: ctrl.isAudioLoaded
+                onChanged: ctrl.hasPreparedAudio
                     ? (v) => ctrl.seek(Duration(milliseconds: v.toInt()))
                     : null,
               ),
@@ -315,10 +336,11 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                       IconButton(
                         icon: const Icon(Icons.stop_circle_outlined),
                         iconSize: 40,
-                        color: ctrl.isAudioLoaded
+                        color: ctrl.hasPreparedAudio
                             ? cs.error
                             : theme.disabledColor,
-                        onPressed: ctrl.isAudioLoaded ? ctrl.stop : null,
+
+                        onPressed: ctrl.hasPreparedAudio ? ctrl.stop : null,
                         tooltip: 'توقف',
                       ),
                       const SizedBox(width: 22),

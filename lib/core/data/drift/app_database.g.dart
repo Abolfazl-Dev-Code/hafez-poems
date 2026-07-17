@@ -3237,8 +3237,19 @@ class $DefaultReciterTableTable extends DefaultReciterTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _reciterDisplayNameMeta =
+      const VerificationMeta('reciterDisplayName');
   @override
-  List<GeneratedColumn> get $columns => [scope, reciterKey];
+  late final GeneratedColumn<String> reciterDisplayName =
+      GeneratedColumn<String>(
+        'reciter_display_name',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [scope, reciterKey, reciterDisplayName];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -3267,6 +3278,17 @@ class $DefaultReciterTableTable extends DefaultReciterTable
     } else if (isInserting) {
       context.missing(_reciterKeyMeta);
     }
+    if (data.containsKey('reciter_display_name')) {
+      context.handle(
+        _reciterDisplayNameMeta,
+        reciterDisplayName.isAcceptableOrUnknown(
+          data['reciter_display_name']!,
+          _reciterDisplayNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_reciterDisplayNameMeta);
+    }
     return context;
   }
 
@@ -3284,6 +3306,10 @@ class $DefaultReciterTableTable extends DefaultReciterTable
         DriftSqlType.string,
         data['${effectivePrefix}reciter_key'],
       )!,
+      reciterDisplayName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reciter_display_name'],
+      )!,
     );
   }
 
@@ -3297,12 +3323,18 @@ class DefaultReciterRow extends DataClass
     implements Insertable<DefaultReciterRow> {
   final String scope;
   final String reciterKey;
-  const DefaultReciterRow({required this.scope, required this.reciterKey});
+  final String reciterDisplayName;
+  const DefaultReciterRow({
+    required this.scope,
+    required this.reciterKey,
+    required this.reciterDisplayName,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['scope'] = Variable<String>(scope);
     map['reciter_key'] = Variable<String>(reciterKey);
+    map['reciter_display_name'] = Variable<String>(reciterDisplayName);
     return map;
   }
 
@@ -3310,6 +3342,7 @@ class DefaultReciterRow extends DataClass
     return DefaultReciterTableCompanion(
       scope: Value(scope),
       reciterKey: Value(reciterKey),
+      reciterDisplayName: Value(reciterDisplayName),
     );
   }
 
@@ -3321,6 +3354,9 @@ class DefaultReciterRow extends DataClass
     return DefaultReciterRow(
       scope: serializer.fromJson<String>(json['scope']),
       reciterKey: serializer.fromJson<String>(json['reciterKey']),
+      reciterDisplayName: serializer.fromJson<String>(
+        json['reciterDisplayName'],
+      ),
     );
   }
   @override
@@ -3329,20 +3365,28 @@ class DefaultReciterRow extends DataClass
     return <String, dynamic>{
       'scope': serializer.toJson<String>(scope),
       'reciterKey': serializer.toJson<String>(reciterKey),
+      'reciterDisplayName': serializer.toJson<String>(reciterDisplayName),
     };
   }
 
-  DefaultReciterRow copyWith({String? scope, String? reciterKey}) =>
-      DefaultReciterRow(
-        scope: scope ?? this.scope,
-        reciterKey: reciterKey ?? this.reciterKey,
-      );
+  DefaultReciterRow copyWith({
+    String? scope,
+    String? reciterKey,
+    String? reciterDisplayName,
+  }) => DefaultReciterRow(
+    scope: scope ?? this.scope,
+    reciterKey: reciterKey ?? this.reciterKey,
+    reciterDisplayName: reciterDisplayName ?? this.reciterDisplayName,
+  );
   DefaultReciterRow copyWithCompanion(DefaultReciterTableCompanion data) {
     return DefaultReciterRow(
       scope: data.scope.present ? data.scope.value : this.scope,
       reciterKey: data.reciterKey.present
           ? data.reciterKey.value
           : this.reciterKey,
+      reciterDisplayName: data.reciterDisplayName.present
+          ? data.reciterDisplayName.value
+          : this.reciterDisplayName,
     );
   }
 
@@ -3350,44 +3394,53 @@ class DefaultReciterRow extends DataClass
   String toString() {
     return (StringBuffer('DefaultReciterRow(')
           ..write('scope: $scope, ')
-          ..write('reciterKey: $reciterKey')
+          ..write('reciterKey: $reciterKey, ')
+          ..write('reciterDisplayName: $reciterDisplayName')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(scope, reciterKey);
+  int get hashCode => Object.hash(scope, reciterKey, reciterDisplayName);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is DefaultReciterRow &&
           other.scope == this.scope &&
-          other.reciterKey == this.reciterKey);
+          other.reciterKey == this.reciterKey &&
+          other.reciterDisplayName == this.reciterDisplayName);
 }
 
 class DefaultReciterTableCompanion extends UpdateCompanion<DefaultReciterRow> {
   final Value<String> scope;
   final Value<String> reciterKey;
+  final Value<String> reciterDisplayName;
   final Value<int> rowid;
   const DefaultReciterTableCompanion({
     this.scope = const Value.absent(),
     this.reciterKey = const Value.absent(),
+    this.reciterDisplayName = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   DefaultReciterTableCompanion.insert({
     required String scope,
     required String reciterKey,
+    required String reciterDisplayName,
     this.rowid = const Value.absent(),
   }) : scope = Value(scope),
-       reciterKey = Value(reciterKey);
+       reciterKey = Value(reciterKey),
+       reciterDisplayName = Value(reciterDisplayName);
   static Insertable<DefaultReciterRow> custom({
     Expression<String>? scope,
     Expression<String>? reciterKey,
+    Expression<String>? reciterDisplayName,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (scope != null) 'scope': scope,
       if (reciterKey != null) 'reciter_key': reciterKey,
+      if (reciterDisplayName != null)
+        'reciter_display_name': reciterDisplayName,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3395,11 +3448,13 @@ class DefaultReciterTableCompanion extends UpdateCompanion<DefaultReciterRow> {
   DefaultReciterTableCompanion copyWith({
     Value<String>? scope,
     Value<String>? reciterKey,
+    Value<String>? reciterDisplayName,
     Value<int>? rowid,
   }) {
     return DefaultReciterTableCompanion(
       scope: scope ?? this.scope,
       reciterKey: reciterKey ?? this.reciterKey,
+      reciterDisplayName: reciterDisplayName ?? this.reciterDisplayName,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3413,6 +3468,9 @@ class DefaultReciterTableCompanion extends UpdateCompanion<DefaultReciterRow> {
     if (reciterKey.present) {
       map['reciter_key'] = Variable<String>(reciterKey.value);
     }
+    if (reciterDisplayName.present) {
+      map['reciter_display_name'] = Variable<String>(reciterDisplayName.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3424,6 +3482,7 @@ class DefaultReciterTableCompanion extends UpdateCompanion<DefaultReciterRow> {
     return (StringBuffer('DefaultReciterTableCompanion(')
           ..write('scope: $scope, ')
           ..write('reciterKey: $reciterKey, ')
+          ..write('reciterDisplayName: $reciterDisplayName, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -5187,12 +5246,14 @@ typedef $$DefaultReciterTableTableCreateCompanionBuilder =
     DefaultReciterTableCompanion Function({
       required String scope,
       required String reciterKey,
+      required String reciterDisplayName,
       Value<int> rowid,
     });
 typedef $$DefaultReciterTableTableUpdateCompanionBuilder =
     DefaultReciterTableCompanion Function({
       Value<String> scope,
       Value<String> reciterKey,
+      Value<String> reciterDisplayName,
       Value<int> rowid,
     });
 
@@ -5212,6 +5273,11 @@ class $$DefaultReciterTableTableFilterComposer
 
   ColumnFilters<String> get reciterKey => $composableBuilder(
     column: $table.reciterKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reciterDisplayName => $composableBuilder(
+    column: $table.reciterDisplayName,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -5234,6 +5300,11 @@ class $$DefaultReciterTableTableOrderingComposer
     column: $table.reciterKey,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get reciterDisplayName => $composableBuilder(
+    column: $table.reciterDisplayName,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$DefaultReciterTableTableAnnotationComposer
@@ -5250,6 +5321,11 @@ class $$DefaultReciterTableTableAnnotationComposer
 
   GeneratedColumn<String> get reciterKey => $composableBuilder(
     column: $table.reciterKey,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reciterDisplayName => $composableBuilder(
+    column: $table.reciterDisplayName,
     builder: (column) => column,
   );
 }
@@ -5299,20 +5375,24 @@ class $$DefaultReciterTableTableTableManager
               ({
                 Value<String> scope = const Value.absent(),
                 Value<String> reciterKey = const Value.absent(),
+                Value<String> reciterDisplayName = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DefaultReciterTableCompanion(
                 scope: scope,
                 reciterKey: reciterKey,
+                reciterDisplayName: reciterDisplayName,
                 rowid: rowid,
               ),
           createCompanionCallback:
               ({
                 required String scope,
                 required String reciterKey,
+                required String reciterDisplayName,
                 Value<int> rowid = const Value.absent(),
               }) => DefaultReciterTableCompanion.insert(
                 scope: scope,
                 reciterKey: reciterKey,
+                reciterDisplayName: reciterDisplayName,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

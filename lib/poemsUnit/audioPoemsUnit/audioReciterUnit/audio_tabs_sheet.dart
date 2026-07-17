@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hafez_poems/models/recitation_models.dart';
+import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioDownloadUnit/audio_download_manager.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioDownloadUnit/downloads_list_tab.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/reciter_download_control.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/reciter_key.dart';
@@ -49,6 +52,11 @@ class _AudioTabsSheetState extends State<AudioTabsSheet>
     _tabController = TabController(length: 2, vsync: this);
     _searchCtrl = TextEditingController();
     _filtered = _sortedList(widget.recitations);
+    Get.find<AudioDownloadManager>().onError = (msg) {
+      if (mounted) {
+        AppSnackBarService.error(msg, duration: const Duration(seconds: 3));
+      }
+    };
   }
 
   List<RecitationInfo> _sortedList(List<RecitationInfo> list) {
@@ -72,6 +80,7 @@ class _AudioTabsSheetState extends State<AudioTabsSheet>
 
   @override
   void dispose() {
+    Get.find<AudioDownloadManager>().onError = null;
     _tabController.dispose();
     _searchCtrl.dispose();
     super.dispose();
@@ -281,14 +290,6 @@ class _AudioTabsSheetState extends State<AudioTabsSheet>
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            if (isSelected) ...[
-                              const SizedBox(width: 8),
-                              Icon(
-                                Icons.check_rounded,
-                                size: 16,
-                                color: cs.primary,
-                              ),
-                            ],
                             const SizedBox(width: 4),
                             ReciterDownloadControl(
                               poemId: widget.poemId,
@@ -302,9 +303,14 @@ class _AudioTabsSheetState extends State<AudioTabsSheet>
                               cs: cs,
                             ),
                             DefaultReciterStar(
-                              poemId: widget.poemId,
+                              category: widget.category,
                               reciterKey: reciterKey,
+                              reciterDisplayName: r.audioArtist,
                               cs: cs,
+                              onSetDefault: () {
+                                widget.ctrl.selectRecitation(widget.poemId, r);
+                                widget.onSelect(r);
+                              },
                             ),
                           ],
                         ),

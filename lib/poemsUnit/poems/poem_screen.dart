@@ -317,10 +317,7 @@ class _PoemScreenState extends State<PoemScreen> {
 
     final loadingTimer = Timer(const Duration(seconds: 4), () {
       if (!mounted) return;
-      AppSnackBarService.info(
-        context,
-        'درحال بارگیری صدا، لطفاً منتظر بمانید.',
-      );
+      AppSnackBarService.info('درحال بارگیری صدا، لطفاً منتظر بمانید.');
     });
 
     try {
@@ -336,7 +333,7 @@ class _PoemScreenState extends State<PoemScreen> {
     final position = _verseSyncCtrl.positionForVerse(verseOrder);
 
     if (position == null) {
-      AppSnackBarService.error(context, 'موقعیت این مصرع پیدا نشد.');
+      AppSnackBarService.error('موقعیت این مصرع پیدا نشد.');
       return;
     }
 
@@ -630,7 +627,7 @@ class _PoemScreenState extends State<PoemScreen> {
   Future<void> _copyLine(String text) async {
     await Clipboard.setData(ClipboardData(text: text));
     if (!mounted) return;
-    AppSnackBarService.success(context, 'مصرع کپی شد');
+    AppSnackBarService.success('مصرع کپی شد');
   }
 
   Future<void> _toggleHighlight() async {

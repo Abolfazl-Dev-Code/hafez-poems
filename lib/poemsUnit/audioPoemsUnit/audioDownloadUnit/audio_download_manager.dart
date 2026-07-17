@@ -15,6 +15,8 @@ class AudioDownloadManager extends ChangeNotifier {
   final Map<String, CancelToken> _activeTokens = {};
   final Map<String, DownloadProgressInfo> _progress = {};
 
+  void Function(String message)? onError;
+
   AudioDownloadManager(this._repository);
 
   String _keyOf(String poemId, String poemCategory, String reciterKey) =>
@@ -137,6 +139,7 @@ class AudioDownloadManager extends ChangeNotifier {
           status: DownloadStatus.error,
         );
         await _repository.markError(poemId, poemCategory, reciterKey);
+        onError?.call('دانلود با خطا مواجه شد. لطفاً دوباره تلاش کنید.');
       }
     } catch (e) {
       await _cleanupTemp(tempPath);
@@ -146,6 +149,7 @@ class AudioDownloadManager extends ChangeNotifier {
         status: DownloadStatus.error,
       );
       await _repository.markError(poemId, poemCategory, reciterKey);
+      onError?.call('دانلود با خطا مواجه شد. لطفاً دوباره تلاش کنید.');
     } finally {
       _activeTokens.remove(key);
       notifyListeners();

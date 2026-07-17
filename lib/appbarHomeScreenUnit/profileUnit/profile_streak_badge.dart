@@ -59,13 +59,12 @@ void showStreakInfo(BuildContext context, int streak, int bestStreak) {
         '${streak.toString().toPersianNumbers()} روز پشت‌سرهم اپ رو باز کرده‌ای، ${remaining.toString().toPersianNumbers()} روز تا شکستن رکوردت';
   }
 
-  AppSnackBarService.info(context, message);
+  AppSnackBarService.info(message);
 }
 
 void showStreakGuide(BuildContext context) {
   AppSnackBarService.info(
     duration: const Duration(seconds: 7),
-    context,
     '🔥 روز شمار یعنی چند روز پشت‌سرهم برنامه رو باز کرده‌ای. '
     'هر روز که وارد بشی یه روز بهش اضافه می‌شه. '
     'اگه یه روز رو جا بندازی، از صفر شروع می‌شه!',

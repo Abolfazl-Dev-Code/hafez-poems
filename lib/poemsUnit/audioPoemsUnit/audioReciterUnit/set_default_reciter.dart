@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hafez_poems/core/data/contracts/i_audio_download_storage.dart';
+import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/default_reciter_controller.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioWidgetUnit/poem_category_plural_labels.dart';
 
 class DefaultReciterStar extends StatefulWidget {
-  final String poemId;
+  final String category;
   final String reciterKey;
   final ColorScheme cs;
+  final VoidCallback? onSetDefault;
+  final String reciterDisplayName;
 
   const DefaultReciterStar({
     super.key,
-    required this.poemId,
+    required this.category,
     required this.reciterKey,
     required this.cs,
+    this.onSetDefault,
+    required this.reciterDisplayName,
   });
 
   @override
@@ -19,37 +25,66 @@ class DefaultReciterStar extends StatefulWidget {
 }
 
 class _DefaultReciterStarState extends State<DefaultReciterStar> {
-  bool _isDefault = false;
-  late final IAudioDownloadStorage _storage;
+  late final DefaultReciterController _controller;
 
   @override
   void initState() {
     super.initState();
-    _storage = Get.find<IAudioDownloadStorage>();
-    _load();
+    _controller = Get.find<DefaultReciterController>();
+    _controller.addListener(_onChanged);
+    _controller.ensureLoaded(widget.category);
   }
 
-  Future<void> _load() async {
-    final key = await _storage.getDefaultReciter(widget.poemId);
-    if (mounted) setState(() => _isDefault = key == widget.reciterKey);
+  void _onChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onChanged);
+    super.dispose();
   }
 
   Future<void> _toggle() async {
-    await _storage.setDefaultReciter(widget.poemId, widget.reciterKey);
-    if (mounted) setState(() => _isDefault = true);
+    if (_controller.defaultFor(widget.category)?.reciterKey ==
+        widget.reciterKey) {
+      return;
+    }
+    await _controller.setDefault(
+      widget.category,
+      widget.reciterKey,
+      widget.reciterDisplayName,
+    );
+    if (!mounted) return;
+    widget.onSetDefault?.call();
+    final label = PoemCategoryPluralLabels.labelFor(widget.category);
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppSnackBarService.success(
+        'خواننده پیش‌فرض برای تمامی $label تغییر کرد',
+        duration: const Duration(seconds: 3),
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDefault =
+        _controller.defaultFor(widget.category)?.reciterKey ==
+        widget.reciterKey;
+
     return IconButton(
       icon: Icon(
-        _isDefault ? Icons.star_rounded : Icons.star_border_rounded,
+        isDefault ? Icons.star_rounded : Icons.star_border_rounded,
         size: 20,
-        color: _isDefault
+        color: isDefault
             ? Colors.amber.shade600
             : widget.cs.onSurface.withValues(alpha: 0.4),
       ),
-      onPressed: _isDefault ? null : _toggle,
+      onPressed: isDefault ? null : _toggle,
     );
   }
 }

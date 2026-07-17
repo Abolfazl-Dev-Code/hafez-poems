@@ -5,13 +5,23 @@ import 'package:audio_session/audio_session.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:audio_service/audio_service.dart';
+import 'package:get/get.dart';
 import 'package:hafez_poems/Initializers_and_Boot/globals.dart';
+import 'package:hafez_poems/core/data/contracts/i_audio_download_storage.dart';
 import 'package:hafez_poems/core/utils/connectivity_checker.dart';
 import 'package:hafez_poems/models/recitation_models.dart';
+import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioDownloadUnit/audio_messages.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/reciter_key.dart';
 import 'package:hafez_poems/poemsUnit/verseSyncUnit/recitation_service.dart';
 
-enum HafezPlayerState { stopped, loading, paused, playing }
+enum HafezPlayerState {
+  idle, // هیچ فایل فعالی وجود ندارد
+  loading, // در حال آماده‌سازی فایل
+  ready, // فایل آماده پخش است
+  paused, // پخش متوقف شده (Pause)
+  playing, // در حال پخش
+}
 
 enum _AudioIssue { noInternet, noAudioFile, slowConnection, ganjoorServerError }
 
@@ -42,17 +52,31 @@ class AudioPlayerController extends ChangeNotifier {
   bool get hasMultipleRecitations => _recitations.length > 1;
 
   final _recitationService = RecitationService();
+  final IAudioDownloadStorage _storage = Get.find<IAudioDownloadStorage>();
 
-  HafezPlayerState _state = HafezPlayerState.stopped;
+  HafezPlayerState _state = HafezPlayerState.idle;
   Duration duration = Duration.zero;
   Duration position = Duration.zero;
 
   HafezPlayerState get state => _state;
-  bool get isAudioLoaded =>
-      _state == HafezPlayerState.paused || _state == HafezPlayerState.playing;
+  bool get hasPreparedAudio =>
+      _state == HafezPlayerState.ready ||
+      _state == HafezPlayerState.paused ||
+      _state == HafezPlayerState.playing;
+
   bool get isLoadingAudio => _state == HafezPlayerState.loading;
   bool get isPlaying => _state == HafezPlayerState.playing;
-  bool get isStopped => _state == HafezPlayerState.stopped;
+  bool get isIdle => _state == HafezPlayerState.idle;
+  bool _lastIsLocalFile = false;
+  bool _isUsingOfflineAudio = false;
+  bool get isUsingOfflineAudio => _isUsingOfflineAudio;
+
+  String? get selectedReciterKey {
+    final recitation = _selectedRecitation;
+    if (recitation == null) return null;
+
+    return ReciterKey.from(recitation.audioArtist);
+  }
 
   void Function(String message)? onUserMessage;
 
@@ -76,18 +100,7 @@ class AudioPlayerController extends ChangeNotifier {
   }
 
   Future<void> playFromPrepared() async {
-    if (!isAudioLoaded) {
-      await load(
-        id: _lastId!,
-        audioUrl: _lastAudioUrl ?? '',
-        title: _lastTitle,
-        fetchAudioUrl: _lastFetchAudioUrl,
-      );
-    }
-
-    if (isAudioLoaded) {
-      await togglePlayPause();
-    }
+    await playOrPause();
   }
 
   PlaybackState? _lastPlaybackState;
@@ -114,7 +127,7 @@ class AudioPlayerController extends ChangeNotifier {
       }
 
       if (processingState == AudioProcessingState.idle) {
-        _state = HafezPlayerState.stopped;
+        _state = HafezPlayerState.idle;
         position = Duration.zero;
         duration = Duration.zero;
         _stopTicker();
@@ -123,7 +136,7 @@ class AudioPlayerController extends ChangeNotifier {
       }
 
       if (processingState == AudioProcessingState.error) {
-        _state = HafezPlayerState.stopped;
+        _state = HafezPlayerState.idle;
         _stopTicker();
         _notify();
         return;
@@ -138,9 +151,15 @@ class AudioPlayerController extends ChangeNotifier {
         return;
       }
 
-      _state = state.playing
-          ? HafezPlayerState.playing
-          : HafezPlayerState.paused;
+      if (processingState == AudioProcessingState.ready) {
+        _state = state.playing
+            ? HafezPlayerState.playing
+            : HafezPlayerState.ready;
+      } else {
+        _state = state.playing
+            ? HafezPlayerState.playing
+            : HafezPlayerState.paused;
+      }
 
       position = state.position;
 
@@ -247,9 +266,11 @@ class AudioPlayerController extends ChangeNotifier {
     bool isLocalFile = false,
   }) async {
     _lastId = id;
-    _lastAudioUrl = audioUrl;
+    _lastIsLocalFile = isLocalFile;
+    _isUsingOfflineAudio = isLocalFile;
     _lastTitle = title;
     _lastFetchAudioUrl = fetchAudioUrl;
+    _lastAudioUrl = audioUrl;
 
     if (_disposed) return;
     final int myGeneration = ++_loadGeneration;
@@ -275,9 +296,16 @@ class AudioPlayerController extends ChangeNotifier {
         final session = await AudioSession.instance;
         await session.setActive(true);
         await _setSpeaker(true);
+        _state = HafezPlayerState.ready;
+        position = Duration.zero;
+        _notify();
+        _state = HafezPlayerState.ready;
+        position = Duration.zero;
+        _notify();
       } catch (e) {
         if (_disposed || myGeneration != _loadGeneration) return;
-        _state = HafezPlayerState.stopped;
+        _state = HafezPlayerState.idle;
+        _isUsingOfflineAudio = false;
         _notify();
         _reportIssue(_AudioIssue.noAudioFile);
       }
@@ -288,7 +316,7 @@ class AudioPlayerController extends ChangeNotifier {
     if (_disposed || myGeneration != _loadGeneration) return;
 
     if (!hasInternet) {
-      _state = HafezPlayerState.stopped;
+      _state = HafezPlayerState.idle;
       _notify();
       _reportIssue(_AudioIssue.noInternet);
       return;
@@ -305,7 +333,8 @@ class AudioPlayerController extends ChangeNotifier {
     if (_disposed || myGeneration != _loadGeneration) return;
 
     if (url.isEmpty) {
-      _state = HafezPlayerState.stopped;
+      _state = HafezPlayerState.idle;
+      _isUsingOfflineAudio = false;
       _notify();
       _reportIssue(_AudioIssue.noAudioFile);
       return;
@@ -316,17 +345,20 @@ class AudioPlayerController extends ChangeNotifier {
 
     switch (availability) {
       case _AudioAvailability.notFound:
-        _state = HafezPlayerState.stopped;
+        _state = HafezPlayerState.idle;
+        _isUsingOfflineAudio = false;
         _notify();
         _reportIssue(_AudioIssue.noAudioFile);
         return;
       case _AudioAvailability.noInternet:
-        _state = HafezPlayerState.stopped;
+        _state = HafezPlayerState.idle;
+        _isUsingOfflineAudio = false;
         _notify();
         _reportIssue(_AudioIssue.noInternet);
         return;
       case _AudioAvailability.serverError:
-        _state = HafezPlayerState.stopped;
+        _state = HafezPlayerState.idle;
+        _isUsingOfflineAudio = false;
         _notify();
         _reportIssue(_AudioIssue.ganjoorServerError);
         return;
@@ -359,7 +391,7 @@ class AudioPlayerController extends ChangeNotifier {
       slowTimer.cancel();
       if (_disposed || myGeneration != _loadGeneration) return;
 
-      _state = HafezPlayerState.stopped;
+      _state = HafezPlayerState.idle;
       _notify();
 
       final msg = e.toString();
@@ -385,6 +417,86 @@ class AudioPlayerController extends ChangeNotifier {
     }
   }
 
+  Future<bool> switchToOnlineVersion() async {
+    if (_disposed) return false;
+
+    final recitation = _selectedRecitation;
+    final id = _lastId;
+
+    if (recitation == null || id == null) {
+      await release();
+      return false;
+    }
+
+    final hasInternet = await ConnectivityChecker.hasInternet();
+
+    if (!hasInternet) {
+      await release();
+      _reportIssue(_AudioIssue.noInternet);
+      return false;
+    }
+
+    _lastIsLocalFile = false;
+    _isUsingOfflineAudio = false;
+
+    await load(
+      id: id,
+      audioUrl: recitation.mp3Url,
+      title: _lastTitle,
+      fetchAudioUrl: _lastFetchAudioUrl,
+      isLocalFile: false,
+    );
+
+    if (!hasPreparedAudio) {
+      await release();
+      return false;
+    }
+
+    AppSnackBarService.success(
+      'فایل آفلاین حذف شد؛ نسخه آنلاین فعال شد.',
+      duration: const Duration(seconds: 3),
+    );
+
+    return true;
+  }
+
+  Future<void> playOrPause() async {
+    if (_disposed) return;
+
+    switch (_state) {
+      case HafezPlayerState.idle:
+        if (_lastId == null) return;
+
+        await load(
+          id: _lastId!,
+          audioUrl: _lastAudioUrl ?? '',
+          title: _lastTitle,
+          fetchAudioUrl: _lastFetchAudioUrl,
+          isLocalFile: _lastIsLocalFile,
+        );
+
+        if (_state == HafezPlayerState.ready) {
+          await audioHandler.play();
+        }
+        break;
+
+      case HafezPlayerState.ready:
+        await audioHandler.play();
+        break;
+
+      case HafezPlayerState.paused:
+        await audioHandler.play();
+        break;
+
+      case HafezPlayerState.playing:
+        await audioHandler.pause();
+        break;
+
+      case HafezPlayerState.loading:
+        break;
+    }
+  }
+
   Future<void> loadWithSourceResolution({
     required String id,
     required String poemCategory,
@@ -393,6 +505,7 @@ class AudioPlayerController extends ChangeNotifier {
     required AudioSourceResolver resolver,
     String title = 'شعر حافظ',
     void Function(String xml)? onSyncXmlResolved,
+    VoidCallback? onSyncUnavailable,
   }) async {
     if (_disposed) return;
     final int myGeneration = ++_loadGeneration;
@@ -417,15 +530,17 @@ class AudioPlayerController extends ChangeNotifier {
     }
 
     if (resolution.kind == AudioSourceKind.unavailable) {
-      _state = HafezPlayerState.stopped;
+      _state = HafezPlayerState.idle;
       _notify();
       return;
     }
 
-    if (resolution.syncXml != null && onSyncXmlResolved != null) {
+    if (resolution.kind == AudioSourceKind.local) {
+      onSyncUnavailable?.call();
+    } else if (resolution.syncXml != null && onSyncXmlResolved != null) {
       onSyncXmlResolved(resolution.syncXml!);
     }
-
+    updateSelectedReciterByKey(reciterKey);
     await load(
       id: id,
       audioUrl: resolution.path,
@@ -448,19 +563,12 @@ class AudioPlayerController extends ChangeNotifier {
       audioUrl: url,
       title: _lastTitle.isNotEmpty ? _lastTitle : 'شعر حافظ',
       fetchAudioUrl: _lastFetchAudioUrl,
+      isLocalFile: _lastIsLocalFile,
     );
   }
 
   Future<void> togglePlayPause() async {
-    if (_disposed || !isAudioLoaded) return;
-
-    try {
-      if (isPlaying) {
-        await audioHandler.pause();
-      } else {
-        await audioHandler.play();
-      }
-    } catch (e) {}
+    await playOrPause();
   }
 
   Future<void> stop() async {
@@ -468,16 +576,49 @@ class AudioPlayerController extends ChangeNotifier {
 
     try {
       await audioHandler.stop();
-      await _setSpeaker(false);
+
       _stopTicker();
-      _state = HafezPlayerState.stopped;
+
       position = Duration.zero;
+
+      _state = HafezPlayerState.ready;
+
+      _onPositionChanged?.call();
       _notify();
-    } catch (e) {}
+    } catch (_) {}
+  }
+
+  void updateSelectedReciterByKey(String reciterKey) {
+    final match = _recitations.where(
+      (r) => ReciterKey.from(r.audioArtist) == reciterKey,
+    );
+
+    if (match.isEmpty) return;
+
+    _selectedRecitation = match.first;
+    _notify();
+  }
+
+  Future<void> release() async {
+    try {
+      await audioHandler.release();
+
+      _stopTicker();
+
+      _state = HafezPlayerState.idle;
+      _isUsingOfflineAudio = false;
+
+      duration = Duration.zero;
+      position = Duration.zero;
+
+      await _setSpeaker(false);
+
+      _notify();
+    } catch (_) {}
   }
 
   Future<void> seek(Duration pos) async {
-    if (_disposed || !isAudioLoaded) return;
+    if (_disposed || !hasPreparedAudio) return;
 
     try {
       await audioHandler.seek(pos);
@@ -496,7 +637,7 @@ class AudioPlayerController extends ChangeNotifier {
     _notify();
   }
 
-  Future<void> loadRecitations(String poemId) async {
+  Future<void> loadRecitations(String poemId, String poemCategory) async {
     if (_disposed) return;
 
     _isLoadingRecitations = true;
@@ -514,7 +655,26 @@ class AudioPlayerController extends ChangeNotifier {
         if (saved != null && list.any((r) => r.id == saved.id)) {
           _selectedRecitation = list.firstWhere((r) => r.id == saved.id);
         } else {
-          _selectedRecitation = list.first;
+          final globalDefault = await _storage.getDefaultReciter(poemCategory);
+          RecitationInfo? bestMatch;
+
+          if (globalDefault != null) {
+            int bestScore = 0;
+
+            for (final reciter in list) {
+              final score = ReciterKey.score(
+                reciter.audioArtist,
+                globalDefault.reciterDisplayName,
+              );
+
+              if (score > bestScore) {
+                bestScore = score;
+                bestMatch = reciter;
+              }
+            }
+          }
+
+          _selectedRecitation = bestMatch ?? list.first;
         }
       } else {
         _selectedRecitation = null;
@@ -548,7 +708,6 @@ class AudioPlayerController extends ChangeNotifier {
 
   @override
   void dispose() {
-    _disposed = true;
     _loadGeneration++;
 
     _stopTicker();
@@ -558,8 +717,8 @@ class AudioPlayerController extends ChangeNotifier {
     _playbackSub = null;
     _mediaSub = null;
 
-    _setSpeaker(false);
-    audioHandler.stop();
+    unawaited(release());
+    _disposed = true;
 
     super.dispose();
   }

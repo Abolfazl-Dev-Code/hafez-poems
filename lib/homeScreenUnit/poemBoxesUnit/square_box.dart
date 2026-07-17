@@ -28,11 +28,11 @@ class SquareActionBox extends StatelessWidget {
             margin: EdgeInsets.zero,
             elevation: theme.brightness == Brightness.dark ? 6 : 3,
             shadowColor: theme.shadowColor.withValues(
-              alpha: theme.brightness == Brightness.dark ? 0.35 : 0.10,
+              alpha: theme.brightness == Brightness.dark ? 0.3 : 0.10,
             ),
             surfaceTintColor: Colors.transparent,
             color: theme.brightness == Brightness.light
-                ? colorScheme.outlineVariant.withValues(alpha: 0.3)
+                ? colorScheme.outlineVariant.withValues(alpha: 0.2)
                 : colorScheme.surfaceContainerHigh,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),

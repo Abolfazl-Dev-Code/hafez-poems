@@ -52,6 +52,14 @@ class RecitationPickerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selected = ctrl.selectedRecitation;
+    final isOffline = ctrl.isUsingOfflineAudio;
+
+    final badgeColor = isOffline
+        ? Colors.amber.shade700
+        : Colors.green.shade700;
+
+    final badgeBackground = badgeColor.withValues(alpha: .12);
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: InkWell(
@@ -67,27 +75,57 @@ class RecitationPickerButton extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(
-                Icons.mic_rounded,
-                size: 14,
-                color: cs.primary.withValues(alpha: 0.8),
-              ),
-              const SizedBox(width: 6),
               Expanded(
-                child: Text(
-                  selected?.audioArtist ?? '',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: cs.onSurface.withValues(alpha: 0.85),
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.right,
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: badgeBackground,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.check_circle, size: 12, color: badgeColor),
+                          const SizedBox(width: 4),
+                          Text(
+                            isOffline ? 'آفلاین' : 'آنلاین',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: badgeColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(width: 8),
+
+                    Expanded(
+                      child: Text(
+                        selected?.audioArtist ?? 'انتخاب خواننده | دانلود',
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.right,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: cs.onSurface.withValues(alpha: .85),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
+
               const SizedBox(width: 4),
+
               Icon(
                 Icons.unfold_more_rounded,
                 size: 16,
-                color: cs.primary.withValues(alpha: 0.7),
+                color: cs.primary.withValues(alpha: .7),
               ),
             ],
           ),

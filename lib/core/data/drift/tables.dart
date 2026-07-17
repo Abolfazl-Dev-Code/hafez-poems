@@ -118,6 +118,7 @@ class DownloadedAudioTable extends Table {
 class DefaultReciterTable extends Table {
   TextColumn get scope => text()();
   TextColumn get reciterKey => text()();
+  TextColumn get reciterDisplayName => text()();
 
   @override
   Set<Column> get primaryKey => {scope};

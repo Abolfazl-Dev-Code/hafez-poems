@@ -44,6 +44,9 @@ class _SelectableCardsPageState<T> extends State<SelectableCardsPage<T>> {
 
   bool get _selectionMode => _selectedIds.isNotEmpty;
 
+  bool get _allSelected =>
+      widget.items.isNotEmpty && _selectedIds.length == widget.items.length;
+
   bool _isSelected(T item) {
     return _selectedIds.contains(widget.idGetter(item));
   }
@@ -190,17 +193,13 @@ class _SelectableCardsPageState<T> extends State<SelectableCardsPage<T>> {
         title: _selectionMode
             ? Text('${_selectedIds.length} انتخاب شده')
             : Text(widget.title),
-        leading: _selectionMode
-            ? IconButton(
-                onPressed: _clearSelection,
-                icon: const Icon(Icons.close),
-              )
-            : null,
         actions: [
           if (_selectionMode) ...[
             TextButton(
-              onPressed: items.isEmpty ? null : _selectAll,
-              child: Text(widget.selectAllText),
+              onPressed: items.isEmpty
+                  ? null
+                  : (_allSelected ? _clearSelection : _selectAll),
+              child: Text(_allSelected ? 'لغو همه' : widget.selectAllText),
             ),
             IconButton(
               onPressed: _selectedIds.isEmpty ? null : _confirmAndDelete,

@@ -15,6 +15,10 @@ abstract class IAudioDownloadStorage {
     String poemId,
     String poemCategory,
   );
+  Future<List<DownloadedAudioRow>> getDownloadsForPoem(
+    String poemId,
+    String poemCategory,
+  );
   Future<List<DownloadedAudioRow>> getAllDownloaded();
 
   Future<void> upsertDownloading({
@@ -46,6 +50,11 @@ abstract class IAudioDownloadStorage {
     String reciterKey,
   );
 
-  Future<String?> getDefaultReciter(String scope);
-  Future<void> setDefaultReciter(String scope, String reciterKey);
+  Future<DefaultReciterRow?> getDefaultReciter(String scope);
+
+  Future<void> setDefaultReciter({
+    required String scope,
+    required String reciterKey,
+    required String reciterDisplayName,
+  });
 }
