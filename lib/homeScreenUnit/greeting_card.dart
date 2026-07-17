@@ -11,7 +11,7 @@ class GreetingCard extends StatefulWidget {
     ThemeData theme, {
     super.key,
     this.iconScale = 1.5,
-    this.iconSpeed = 1.5,
+    this.iconSpeed = 1.2,
   });
 
   final double iconScale;

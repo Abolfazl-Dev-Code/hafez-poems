@@ -6,6 +6,8 @@ import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_banner_home_p
 import 'package:hafez_poems/homeScreenUnit/carouselUnit/carousel_screen.dart';
 import 'package:hafez_poems/homeScreenUnit/faalUnit/fal_banner_home_page_screen.dart';
 import 'package:hafez_poems/homeScreenUnit/greeting_card.dart';
+import 'package:hafez_poems/homeScreenUnit/moshaereHelper/moshaere_helper_banner.dart';
+import 'package:hafez_poems/homeScreenUnit/podcastUnit/podcast_banner.dart';
 import 'package:hafez_poems/homeScreenUnit/poemBoxesUnit/box_grid_home_page.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/homeScreenUnit/section_header.dart';
@@ -136,8 +138,12 @@ class _HomeScreenState extends State<HomeScreen>
                 SectionHeader(title: 'ویژه‌ها'),
                 const SizedBox(height: 16),
                 FalBanner(theme),
-                const SizedBox(height: 14),
+                const SizedBox(height: 13),
                 BiographyBanner(theme),
+                const SizedBox(height: 13),
+                PodcastBanner(theme),
+                const SizedBox(height: 13),
+                MoshaereBanner(theme),
                 const SizedBox(height: 70),
               ],
             ),
