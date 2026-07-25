@@ -7,6 +7,8 @@ class AnimatedAppIcon extends StatefulWidget {
     required this.asset,
     this.size = 24,
     this.color,
+    this.secondaryColor,
+    this.strokeWidth,
     this.fit = BoxFit.contain,
     this.scale = 1,
     this.repeat = false,
@@ -23,6 +25,8 @@ class AnimatedAppIcon extends StatefulWidget {
   final double size;
   final double scale;
   final Color? color;
+  final Color? secondaryColor;
+  final double? strokeWidth;
   final BoxFit fit;
   final bool repeat;
   final bool animateOnTap;
@@ -46,7 +50,6 @@ class AnimatedAppIconState extends State<AnimatedAppIcon>
   @override
   void initState() {
     super.initState();
-
     _controller = AnimationController(vsync: this);
   }
 
@@ -65,9 +68,7 @@ class AnimatedAppIconState extends State<AnimatedAppIcon>
 
   Future<void> play() async {
     if (!_loaded) return;
-
     _controller.reset();
-
     if (widget.repeat) {
       _controller.repeat();
     } else {
@@ -77,13 +78,11 @@ class AnimatedAppIconState extends State<AnimatedAppIcon>
 
   Future<void> reverseToStart() async {
     if (!_loaded) return;
-
     if (widget.repeat) {
       _controller.stop();
       _controller.value = 0;
       return;
     }
-
     await _controller.reverse();
   }
 
@@ -101,57 +100,68 @@ class AnimatedAppIconState extends State<AnimatedAppIcon>
     if (widget.animateOnTap) {
       play();
     }
-
     if (widget.tapDelay > Duration.zero) {
       await Future.delayed(widget.tapDelay);
     }
-
     widget.onTap?.call();
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    Widget icon = Transform.scale(
-      scale: widget.scale,
-      child: Lottie.asset(
-        widget.asset,
-        controller: _controller,
-        width: widget.size,
-        height: widget.size,
-        fit: widget.fit,
-        repeat: widget.repeat,
-        animate: false,
-        delegates: widget.color == null
-            ? null
-            : LottieDelegates(
-                values: [
-                  ValueDelegate.color(const ['**'], value: widget.color!),
-                ],
-              ),
-        onLoaded: (composition) {
-          _loaded = true;
-          _controller.duration = Duration(
-            microseconds: (composition.duration.inMicroseconds / widget.speed)
-                .round(),
-          );
+    final delegates = <ValueDelegate>[
+      if (widget.secondaryColor != null) ...[
+        if (widget.color != null)
+          ValueDelegate.color(const [
+            '**',
+            '.primary',
+            'Color',
+          ], value: widget.color!),
+        ValueDelegate.color(const [
+          '**',
+          '.secondary',
+          'Color',
+        ], value: widget.secondaryColor!),
+      ],
+      if (widget.strokeWidth != null)
+        ValueDelegate.strokeWidth(const ['**'], value: widget.strokeWidth!),
+    ];
 
-          final bool shouldAutoPlay =
-              widget.autoplay || (widget.selected && widget.animateOnSelected);
+    Widget lottie = Lottie.asset(
+      widget.asset,
+      controller: _controller,
+      width: widget.size,
+      height: widget.size,
+      fit: widget.fit,
+      repeat: widget.repeat,
+      animate: false,
+      delegates: delegates.isEmpty ? null : LottieDelegates(values: delegates),
+      onLoaded: (composition) {
+        _loaded = true;
+        _controller.duration = Duration(
+          microseconds: (composition.duration.inMicroseconds / widget.speed)
+              .round(),
+        );
 
-          if (shouldAutoPlay) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) play();
-            });
-          }
-        },
-      ),
+        final bool shouldAutoPlay =
+            widget.autoplay || (widget.selected && widget.animateOnSelected);
+
+        if (shouldAutoPlay) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) play();
+          });
+        }
+      },
     );
+
+    if (widget.color != null && widget.secondaryColor == null) {
+      lottie = ColorFiltered(
+        colorFilter: ColorFilter.mode(widget.color!, BlendMode.srcIn),
+        child: lottie,
+      );
+    }
+
+    Widget icon = Transform.scale(scale: widget.scale, child: lottie);
+
     if (widget.onTap == null) {
       return icon;
     }

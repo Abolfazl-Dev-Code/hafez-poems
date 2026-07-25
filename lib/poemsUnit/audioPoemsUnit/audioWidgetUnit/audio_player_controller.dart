@@ -536,7 +536,14 @@ class AudioPlayerController extends ChangeNotifier {
     }
 
     if (resolution.kind == AudioSourceKind.local) {
-      onSyncUnavailable?.call();
+      final storedSync = resolution.syncXml;
+      if (storedSync != null &&
+          storedSync.isNotEmpty &&
+          onSyncXmlResolved != null) {
+        onSyncXmlResolved(storedSync);
+      } else {
+        onSyncUnavailable?.call();
+      }
     } else if (resolution.syncXml != null && onSyncXmlResolved != null) {
       onSyncXmlResolved(resolution.syncXml!);
     }

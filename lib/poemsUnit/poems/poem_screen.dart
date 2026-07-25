@@ -130,6 +130,11 @@ class _PoemScreenState extends State<PoemScreen> {
   }
 
   void _onActiveVerseChanged() {
+    // Re-apply position when sync data finishes loading during playback.
+    if (_audioCtrl.isPlaying && _verseSyncCtrl.hasSyncData) {
+      _verseSyncCtrl.updatePosition(_audioCtrl.position);
+    }
+
     // فقط هنگام پخش
     if (!_audioCtrl.isPlaying) return;
 

@@ -20,6 +20,9 @@ class _BottomNavBarState extends State<BottomNavBar> {
   int _currentIndex = 2;
   final PageController _pageController = PageController(initialPage: 2);
 
+  static const double _navBarSideMargin = 16;
+  static const double _navBarBottomMargin = 12;
+
   final List<Widget> _pages = const [
     SettingPage(title: 'تنظیمات'),
     CollectionScreen(initialTab: 0, showTabs: false),
@@ -44,6 +47,14 @@ class _BottomNavBarState extends State<BottomNavBar> {
     AppIcons.highlight,
   ];
 
+  static const List<double> _iconStrokeWidths = [
+    10, // settings
+    14, // like
+    16, // home
+    8, // saved
+    12, // highlight
+  ];
+
   static const List<double> _iconScales = [
     1.3, // settings
     1.4, // like
@@ -60,11 +71,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
   void _onNavTap(int index) {
     if (index == _currentIndex) return;
-
     AppSnackBarService.dismiss();
-
     setState(() => _currentIndex = index);
-
     _pageController.animateToPage(
       index,
       duration: const Duration(milliseconds: 250),
@@ -92,13 +100,14 @@ class _BottomNavBarState extends State<BottomNavBar> {
             children: _pages,
           ),
           Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
+            bottom: _navBarBottomMargin,
+            left: _navBarSideMargin,
+            right: _navBarSideMargin,
             child: _CurvedNavBar(
               currentIndex: _currentIndex,
               icons: _icons,
               iconScales: _iconScales,
+              iconStrokeWidths: _iconStrokeWidths,
               labels: _titles,
               barColor: AppColors.icon,
               restingIconColor: isDark ? AppColors.darkIcon : Colors.white,
@@ -119,9 +128,10 @@ class _CurvedNavBar extends StatefulWidget {
   final Color barColor;
   final Color restingIconColor;
   final ValueChanged<int> onTap;
-
+  final List<double>? iconStrokeWidths;
   static const double barHeight = 60;
   static const double circleSize = 52;
+  static const double borderRadius = barHeight / 2;
 
   const _CurvedNavBar({
     required this.currentIndex,
@@ -131,6 +141,7 @@ class _CurvedNavBar extends StatefulWidget {
     required this.barColor,
     required this.restingIconColor,
     required this.onTap,
+    this.iconStrokeWidths,
   });
 
   @override
@@ -169,7 +180,7 @@ class _CurvedNavBarState extends State<_CurvedNavBar> {
         final double itemSpan = width / widget.icons.length;
 
         return SizedBox(
-          height: _CurvedNavBar.barHeight,
+          height: _CurvedNavBar.barHeight + _CurvedNavBar.circleSize / 2,
           width: width,
           child: TweenAnimationBuilder<double>(
             tween: Tween<double>(begin: beginLoc, end: _loc),
@@ -184,15 +195,21 @@ class _CurvedNavBarState extends State<_CurvedNavBar> {
                     bottom: 0,
                     left: 0,
                     right: 0,
-                    child: CustomPaint(
-                      size: Size(width, _CurvedNavBar.barHeight),
-                      painter: BottomNavBarAnimation(
-                        loc: animatedLoc,
-                        s: s,
-                        color: widget.barColor,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(
+                        _CurvedNavBar.borderRadius,
+                      ),
+                      child: CustomPaint(
+                        size: Size(width, _CurvedNavBar.barHeight),
+                        painter: BottomNavBarAnimation(
+                          loc: animatedLoc,
+                          s: s,
+                          color: widget.barColor,
+                        ),
                       ),
                     ),
                   ),
+
                   ...List.generate(widget.icons.length, (index) {
                     final bool isSelected = index == widget.currentIndex;
                     final double scale =
@@ -200,9 +217,13 @@ class _CurvedNavBarState extends State<_CurvedNavBar> {
                             index < widget.iconScales!.length
                         ? widget.iconScales![index]
                         : 1.0;
-
+                    final double? strokeWidth =
+                        widget.iconStrokeWidths != null &&
+                            index < widget.iconStrokeWidths!.length
+                        ? widget.iconStrokeWidths![index]
+                        : null;
                     return Positioned(
-                      bottom: 10,
+                      bottom: 8.5,
                       left: itemSpan * index,
                       width: itemSpan,
                       child: GestureDetector(
@@ -226,7 +247,7 @@ class _CurvedNavBarState extends State<_CurvedNavBar> {
                               transform: Matrix4.translationValues(
                                 0,
                                 isSelected
-                                    ? -(_CurvedNavBar.circleSize / 2 - 10)
+                                    ? -(_CurvedNavBar.circleSize / 2 - 17)
                                     : 0,
                                 0,
                               ),
@@ -240,6 +261,7 @@ class _CurvedNavBarState extends State<_CurvedNavBar> {
                                 asset: widget.icons[index],
                                 size: isSelected ? 22 : 20,
                                 scale: scale,
+                                strokeWidth: strokeWidth,
                                 color: widget.restingIconColor,
                                 selected: isSelected,
                                 onTap: () {

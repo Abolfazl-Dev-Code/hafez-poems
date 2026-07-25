@@ -74,6 +74,12 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     }
   }
 
+  Future<void> _loadSyncForSelectedRecitation() async {
+    final recitation = widget.controller.selectedRecitation;
+    if (recitation == null || recitation.xmlText.isEmpty) return;
+    await widget.verseSyncController?.loadSyncPoints(recitation.xmlText);
+  }
+
   Future<void> _loadIfNeeded() async {
     final ctrl = widget.controller;
     if (_initialized &&
@@ -118,6 +124,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
         title: widget.title,
         fetchAudioUrl: widget.fetchAudioUrl,
       );
+      await _loadSyncForSelectedRecitation();
       return;
     }
 
@@ -135,6 +142,9 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
         widget.verseSyncController?.clearSyncPoints();
       },
     );
+
+    // Online streams don't carry sync XML in the resolver; load from recitation metadata.
+    await _loadSyncForSelectedRecitation();
   }
 
   Future<void> prepareForPlay() async {

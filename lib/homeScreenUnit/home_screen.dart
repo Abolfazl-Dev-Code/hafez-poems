@@ -105,7 +105,7 @@ class _HomeScreenState extends State<HomeScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 16),
+                const SizedBox(height: 10),
                 const CustomAppBar(title: "اشعار حافظ"),
                 const SizedBox(height: 8),
                 GreetingCard(theme),
@@ -144,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen>
                 PodcastBanner(theme),
                 const SizedBox(height: 13),
                 MoshaereBanner(theme),
-                const SizedBox(height: 70),
+                const SizedBox(height: 85),
               ],
             ),
           ),

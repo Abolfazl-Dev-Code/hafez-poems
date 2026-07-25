@@ -61,6 +61,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 child: AnimatedAppIcon(
                   asset: AppIcons.search,
                   size: 27,
+                  color: colorScheme.onSurface,
+                  strokeWidth: 15,
                   tapDelay: _navTapDelay,
                   onTap: () {
                     Get.to(
@@ -71,7 +73,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ),
             ),
-
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
@@ -79,6 +80,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 child: AnimatedAppIcon(
                   asset: AppIcons.person,
                   size: 28,
+                  color: colorScheme.onSurface,
+                  strokeWidth: 15,
                   tapDelay: _navTapDelay,
                   onTap: () {
                     Get.to(

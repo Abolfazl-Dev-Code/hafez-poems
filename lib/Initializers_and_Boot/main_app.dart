@@ -21,9 +21,9 @@ class MainApp extends StatelessWidget {
           scaffoldMessengerKey: appScaffoldMessengerKey,
           navigatorObservers: [routeObserver, appRouteObserver],
           debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: themeController.themeMode,
+          theme: themeController.isDarkMode.value
+              ? AppTheme.darkTheme
+              : AppTheme.lightTheme,
           home: SplashScreen(),
         ),
       ),

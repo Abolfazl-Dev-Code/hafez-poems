@@ -44,7 +44,7 @@ class FavoritesList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(12, 2, 12, 65),
+      padding: const EdgeInsets.fromLTRB(12, 2, 12, 80),
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
