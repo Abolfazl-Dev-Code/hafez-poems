@@ -55,11 +55,7 @@ void showAboutDialogCustom({
               style: TextButton.styleFrom(foregroundColor: colorScheme.primary),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
-                children: const [
-                  Text('بستن'),
-                  SizedBox(width: 4),
-                  Icon(Icons.close, size: 18),
-                ],
+                children: const [Text('بستن')],
               ),
             ),
           ],

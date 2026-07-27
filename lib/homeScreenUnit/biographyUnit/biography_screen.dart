@@ -19,7 +19,7 @@ class HafezBiographyScreen extends StatefulWidget {
 }
 
 class _HafezBiographyScreenState extends State<HafezBiographyScreen>
-    with TickerProviderStateMixin, RouteAware {
+    with TickerProviderStateMixin, RouteAware, WidgetsBindingObserver {
   late final AnimationController _ambientCtrl;
   late final ScrollController _scrollCtrl;
 
@@ -37,11 +37,13 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
   );
 
   late final List<Particle> _particles;
+  bool _wasPlayingBeforePause = false;
+  bool _wasPlayingBeforeNavigate = false;
 
   @override
   void initState() {
     super.initState();
-
+    WidgetsBinding.instance.addObserver(this);
     _ambientCtrl = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 12),
@@ -67,6 +69,31 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    switch (state) {
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.hidden:
+        _wasPlayingBeforePause =
+            BiographyAudioController.isPlayingNotifier.value;
+        BiographyAudioController.stop();
+        break;
+
+      case AppLifecycleState.resumed:
+        if (_wasPlayingBeforePause) {
+          BiographyAudioController.play();
+        }
+        break;
+
+      case AppLifecycleState.detached:
+        BiographyAudioController.stop();
+        break;
+    }
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final route = ModalRoute.of(context);
@@ -77,12 +104,16 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
 
   @override
   void didPushNext() {
+    _wasPlayingBeforeNavigate =
+        BiographyAudioController.isPlayingNotifier.value;
     BiographyAudioController.stop();
   }
 
   @override
   void didPopNext() {
-    BiographyAudioController.play();
+    if (_wasPlayingBeforeNavigate) {
+      BiographyAudioController.play();
+    }
   }
 
   void _showControls() {
@@ -204,6 +235,7 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
     _hideControlsTimer?.cancel();
     routeObserver.unsubscribe(this);
     BiographyAudioController.release();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 

@@ -1,8 +1,6 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-
 import 'package:hafez_poems/theme/text_style.dart';
 
 class CarouselScreenWidget extends StatefulWidget {
@@ -194,8 +192,8 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
     return ClipRRect(
       key: const ValueKey('hafez_flip_video'),
       borderRadius: const BorderRadius.only(
-        bottomLeft: Radius.circular(20),
-        topLeft: Radius.circular(20),
+        bottomLeft: Radius.circular(15),
+        topLeft: Radius.circular(15),
       ),
       child: SizedBox.expand(
         child: FittedBox(
@@ -224,7 +222,7 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
     return Container(
       decoration: BoxDecoration(
         color: isDark ? widget.darkColor : widget.lightColor,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(15),
         border: Border.all(
           color: theme.dividerColor.withValues(alpha: isDark ? 0.25 : 0.18),
         ),
@@ -253,8 +251,8 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
                     : ClipRRect(
                         key: const ValueKey('hafez_static_image'),
                         borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(20),
-                          topLeft: Radius.circular(20),
+                          bottomLeft: Radius.circular(15),
+                          topLeft: Radius.circular(15),
                         ),
                         child: SizedBox.expand(
                           child: Image.asset(
@@ -269,7 +267,7 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
           Positioned(
             top: 12,
             right: 12,
-            left: 120,
+            left: 115,
             bottom: 0,
             child: SingleChildScrollView(
               physics: const NeverScrollableScrollPhysics(),
@@ -298,9 +296,9 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
                     overflow: TextOverflow.visible,
                     style: AppTextStyles.bodyMedium.copyWith(
                       color: colorScheme.onSurface,
-                      height: 1.4,
+                      height: 1.5,
                       fontWeight: FontWeight.w500,
-                      fontSize: 13,
+                      fontSize: 14,
                     ),
                   ),
                 ),

@@ -62,16 +62,7 @@ void showStreakInfo(BuildContext context, int streak, int bestStreak) {
   AppSnackBarService.info(message);
 }
 
-void showStreakGuide(BuildContext context) {
-  AppSnackBarService.info(
-    duration: const Duration(seconds: 7),
-    '🔥 روز شمار یعنی چند روز پشت‌سرهم برنامه رو باز کرده‌ای. '
-    'هر روز که وارد بشی یه روز بهش اضافه می‌شه. '
-    'اگه یه روز رو جا بندازی، از صفر شروع می‌شه!',
-  );
-}
-
-class StreakMotivationCard extends StatelessWidget {
+class StreakMotivationCard extends StatefulWidget {
   final int currentStreak;
   final int bestStreak;
 
@@ -82,13 +73,24 @@ class StreakMotivationCard extends StatelessWidget {
   });
 
   @override
+  State<StreakMotivationCard> createState() => _StreakMotivationCardState();
+}
+
+class _StreakMotivationCardState extends State<StreakMotivationCard> {
+  bool _isExpanded = false;
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isLight = theme.brightness == Brightness.light;
     final colorScheme = theme.colorScheme;
 
-    final isNewRecord = bestStreak > 0 && currentStreak >= bestStreak;
-    final remaining = (bestStreak - currentStreak).clamp(0, bestStreak);
+    final isNewRecord =
+        widget.bestStreak > 0 && widget.currentStreak >= widget.bestStreak;
+    final remaining = (widget.bestStreak - widget.currentStreak).clamp(
+      0,
+      widget.bestStreak,
+    );
 
     final String message;
     if (isNewRecord) {
@@ -116,85 +118,146 @@ class StreakMotivationCard extends StatelessWidget {
           end: Alignment.bottomLeft,
         ),
       ),
-      child: Row(
+      child: Column(
         children: [
-          GestureDetector(
-            onTap: () => showStreakGuide(context),
-            child: Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: isNewRecord
-                      ? Colors.white.withValues(alpha: 0.92)
-                      : colorScheme.onSurfaceVariant,
-                  strokeAlign: 1,
-                  width: 2.5,
-                ),
-                shape: BoxShape.circle,
-
-                color: isNewRecord
-                    ? Colors.white.withValues(alpha: 0.25)
-                    : const Color(0xFFFF6B35).withValues(alpha: 0.15),
-              ),
-              child: Icon(
-                Icons.local_fire_department_rounded,
-                color: isNewRecord ? Colors.white : const Color(0xFFFF6B35),
-                size: 28,
-              ),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      '${currentStreak.toString().toPersianNumbers()} روز',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: isNewRecord ? Colors.white : null,
-                      ),
-                    ),
-                    if (bestStreak > 0) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isNewRecord
-                              ? Colors.white.withValues(alpha: 0.25)
-                              : colorScheme.primary.withValues(alpha: 0.10),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          'رکورد: ${bestStreak.toString().toPersianNumbers()}',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: isNewRecord
-                                ? Colors.white
-                                : colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  message,
-                  style: theme.textTheme.bodySmall?.copyWith(
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  border: Border.all(
                     color: isNewRecord
                         ? Colors.white.withValues(alpha: 0.92)
                         : colorScheme.onSurfaceVariant,
+                    strokeAlign: 0.5,
+                    width: 1,
                   ),
+                  shape: BoxShape.circle,
+                  color: isNewRecord
+                      ? Colors.white.withValues(alpha: 0.25)
+                      : const Color(0xFFFF6B35).withValues(alpha: 0.15),
                 ),
-              ],
-            ),
+                child: Icon(
+                  Icons.local_fire_department_rounded,
+                  color: isNewRecord ? Colors.white : const Color(0xFFFF6B35),
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          '${widget.currentStreak.toString().toPersianNumbers()} روز',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: isNewRecord ? Colors.white : null,
+                          ),
+                        ),
+                        if (widget.bestStreak > 0) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isNewRecord
+                                  ? Colors.white.withValues(alpha: 0.25)
+                                  : colorScheme.primary.withValues(alpha: 0.10),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              'رکورد: ${widget.bestStreak.toString().toPersianNumbers()}',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: isNewRecord
+                                    ? Colors.white
+                                    : colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      message,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: isNewRecord
+                            ? Colors.white.withValues(alpha: 0.92)
+                            : colorScheme.onSurfaceVariant,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () {
+                        setState(() {
+                          _isExpanded = !_isExpanded;
+                        });
+                      },
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _isExpanded ? 'نمایش کمتر' : 'نمایش بیشتر',
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: isNewRecord
+                                  ? Colors.white
+                                  : colorScheme.primary,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          AnimatedRotation(
+                            turns: _isExpanded ? 0.5 : 0,
+                            duration: const Duration(milliseconds: 250),
+                            child: Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              size: 18,
+                              color: isNewRecord
+                                  ? Colors.white
+                                  : colorScheme.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            child: _isExpanded
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 14),
+                    child: Text(
+                      textAlign: TextAlign.right,
+                      '🔥 روزشمار نشان می‌دهد چند روز پشت‌سرهم برنامه را باز کرده‌ای.\n'
+                      '• هر روزی که وارد برنامه شوی، یک روز به این عدد اضافه می‌شود.\n'
+                      '• اگر حتی یک روز وارد برنامه نشوی، شمارنده از صفر شروع می‌شود.\n'
+                      '• رکورد، بیشترین تعداد روزهای متوالی است که تاکنون ثبت کرده‌ای.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        height: 1.7,
+                        fontSize: 15,
+                        color: isNewRecord
+                            ? Colors.white.withValues(alpha: 1)
+                            : colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
           ),
         ],
       ),

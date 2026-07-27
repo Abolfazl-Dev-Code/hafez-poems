@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_screen_book_cover.dart';
 import 'package:hafez_poems/homeScreenUnit/faalUnit/fal_screen.dart';
 
-const _kPanel = Color(0xFF141A3A);
+const _kPanelTop = Color(0xFF1B2147);
+const _kPanelBottom = Color(0xFF121735);
+
 const _kGold = Color(0xFFD4AF37);
 const _kCream = Color(0xFFF3ECD9);
 
@@ -12,64 +14,106 @@ class FalBiography extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 0),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(42, 36, 42, 36),
-        decoration: BoxDecoration(
-          color: _kPanel,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: _kGold.withValues(alpha: 0.22)),
-          boxShadow: [
-            BoxShadow(
-              color: _kGold.withValues(alpha: 0.06),
-              blurRadius: 30,
-              spreadRadius: 2,
-            ),
-          ],
+    return Container(
+      margin: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [_kPanelTop, _kPanelBottom],
         ),
-        child: Column(
-          children: [
-            Text(
-              'یک رسمِ هزارساله',
-              style: TextStyle(
-                fontFamily: 'vazir',
-                fontSize: 14,
-                letterSpacing: 3.5,
-                color: _kGold.withValues(alpha: 0.88),
+        border: Border.all(color: _kGold.withValues(alpha: 0.22)),
+        boxShadow: [
+          BoxShadow(
+            color: _kGold.withValues(alpha: 0.05),
+            blurRadius: 35,
+            spreadRadius: 1,
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 25,
+            offset: const Offset(0, 14),
+          ),
+        ],
+      ),
+      child: Container(
+        margin: const EdgeInsets.all(2),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(26),
+          border: Border.all(color: Colors.white.withValues(alpha: .035)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(42, 38, 42, 42),
+          child: Column(
+            children: [
+              Text(
+                'رسمی از هزار سال عشق',
+                style: TextStyle(
+                  fontFamily: 'vazir',
+                  fontSize: 16,
+                  letterSpacing: 4,
+                  color: _kGold.withValues(alpha: .9),
+                ),
               ),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'فالی از حافظ',
-              style: TextStyle(
-                fontFamily: 'vazir',
-                fontSize: 23,
-                color: _kCream,
-                fontWeight: FontWeight.bold,
+              const SizedBox(height: 18),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 1,
+                      color: _kGold.withValues(alpha: .25),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    child: Icon(
+                      Icons.auto_awesome,
+                      size: 18,
+                      color: _kGold.withValues(alpha: .85),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      height: 1,
+                      color: _kGold.withValues(alpha: .25),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'برای گرفتن فال، روی کتاب بزن',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'vazir',
-                fontSize: 13,
-                color: _kCream.withValues(alpha: 0.52),
+              const SizedBox(height: 18),
+              Text(
+                'دل به حافظ بسپار و برای\nدیدن راهت روی کتاب بزن',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'vazir',
+                  fontSize: 14,
+                  height: 1.8,
+                  color: _kCream.withValues(alpha: .68),
+                ),
               ),
-            ),
-            const SizedBox(height: 32),
-            GestureDetector(
-              onTap: () {
-                HapticFeedback.mediumImpact();
-                Navigator.of(
-                  context,
-                ).push(MaterialPageRoute(builder: (_) => const FalScreen()));
-              },
-              child: const BookCover(),
-            ),
-          ],
+              const SizedBox(height: 36),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(10),
+                  splashColor: _kGold.withValues(alpha: .10),
+                  highlightColor: Colors.transparent,
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const FalScreen()),
+                    );
+                  },
+                  child: const Padding(
+                    padding: EdgeInsets.all(4),
+                    child: BookCover(),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

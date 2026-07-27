@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_icons_auto_play.dart';
 import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_screen_chapter_data.dart';
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
 
@@ -46,6 +47,7 @@ class ChapterCard extends StatelessWidget {
     return Container(
       width: 62,
       height: 62,
+      alignment: Alignment.center,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(color: _kGold.withValues(alpha: 0.30)),
@@ -53,7 +55,13 @@ class ChapterCard extends StatelessWidget {
           colors: [_kGold.withValues(alpha: 0.13), Colors.transparent],
         ),
       ),
-      child: Icon(data.icon, color: _kGold, size: 26),
+      child: AutoPlayLucideIcon(
+        icon: data.iconData,
+        size: 28,
+        color: Colors.white,
+        duration: const Duration(seconds: 2),
+        shouldPlay: visible,
+      ),
     );
   }
 

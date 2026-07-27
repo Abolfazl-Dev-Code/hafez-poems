@@ -46,11 +46,7 @@ void showPrivacyDialog(BuildContext context) {
               style: TextButton.styleFrom(foregroundColor: colorScheme.primary),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
-                children: const [
-                  Text('متوجه شدم'),
-                  SizedBox(width: 4),
-                  Icon(Icons.check, size: 18),
-                ],
+                children: const [Text('متوجه شدم')],
               ),
             ),
           ],
