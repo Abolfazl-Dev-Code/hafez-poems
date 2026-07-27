@@ -1,7 +1,7 @@
 name: hafez_poems
 description: "Poems of Hafez"
 publish_to: "none"
-version: 2.2.3+9
+version: 2.3.5+10
 
 environment:
   sdk: ^3.12.2
@@ -11,7 +11,6 @@ dependencies:
   flutter:
     sdk: flutter
   get: ^4.7.3
-  iconify_flutter: ^0.0.7
   shared_preferences: ^2.5.5
   image_picker: ^1.1.2
   image_cropper: ^12.2.1
@@ -39,8 +38,6 @@ dependencies:
   dio: ^5.10.0
   crypto: ^3.0.7
   lottie: ^3.5.1
-  rive_animated_icon: ^2.1.1
-  not_static_icons: ^0.47.0
   flutter_lucide_animated: ^0.0.4
 
 dev_dependencies:
