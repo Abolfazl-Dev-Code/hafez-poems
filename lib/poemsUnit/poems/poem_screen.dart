@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_lucide_animated/flutter_lucide_animated.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/bottomNavBar/user_actions_saver.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioWidgetUnit/audio_player_controller.dart';
@@ -12,6 +13,8 @@ import 'package:hafez_poems/poemsUnit/poemContextMenuUnit/poem_selected_text.dar
 import 'package:hafez_poems/poemsUnit/verseShareUnit/verse_share_sheet.dart';
 import 'package:hafez_poems/poemsUnit/verseSyncUnit/active_verse_indicator_widget.dart';
 import 'package:hafez_poems/poemsUnit/verseSyncUnit/verse_sync_controller.dart';
+import 'package:hafez_poems/theme/app_icons.dart';
+import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/core/data/contracts/i_read_status_storage.dart';
@@ -49,7 +52,8 @@ class PoemScreen extends StatefulWidget {
   State<PoemScreen> createState() => _PoemScreenState();
 }
 
-class _PoemScreenState extends State<PoemScreen> {
+class _PoemScreenState extends State<PoemScreen>
+    with SingleTickerProviderStateMixin {
   late final AudioPlayerController _audioCtrl = AudioPlayerController();
   late final VerseSyncController _verseSyncCtrl = VerseSyncController();
   final GlobalKey<AudioPlayerWidgetState> _audioWidgetKey =
@@ -81,6 +85,8 @@ class _PoemScreenState extends State<PoemScreen> {
   Timer? _markAsReadTimer;
 
   static const double indicatorSlotSize = 18.0;
+
+  late final AnimationController _shareController;
 
   double _fontSize = 20;
   double _lineHeight = 1.9;
@@ -121,6 +127,7 @@ class _PoemScreenState extends State<PoemScreen> {
     _scheduleMarkAsRead();
     _initText();
     _scheduleMeasureBottomOverlay();
+    _shareController = AnimationController(vsync: this);
   }
 
   void _syncPosition() {
@@ -130,7 +137,6 @@ class _PoemScreenState extends State<PoemScreen> {
   }
 
   void _onActiveVerseChanged() {
-    // Re-apply position when sync data finishes loading during playback.
     if (_audioCtrl.isPlaying && _verseSyncCtrl.hasSyncData) {
       _verseSyncCtrl.updatePosition(_audioCtrl.position);
     }
@@ -681,6 +687,7 @@ class _PoemScreenState extends State<PoemScreen> {
     _audioCtrl.removeListener(_syncPosition);
     _audioCtrl.dispose();
     _verseSyncCtrl.dispose();
+    _shareController.dispose();
     super.dispose();
   }
 
@@ -707,16 +714,21 @@ class _PoemScreenState extends State<PoemScreen> {
         appBar: AppBar(
           toolbarHeight: 50,
           automaticallyImplyLeading: false,
-          leadingWidth: 65,
+          leadingWidth: 70,
           leading: _isMultiLineSelecting
               ? null
-              : IconButton(
-                  iconSize: 25,
-                  icon: const Icon(Icons.arrow_back_rounded),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    if (_args.hasAudio) _audioCtrl.stop();
-                  },
+              : Center(
+                  child: LucideAnimatedIcon(
+                    icon: arrow_right,
+                    size: 25,
+                    trigger: AnimationTrigger.onTap,
+                    duration: const Duration(milliseconds: 300),
+                    color: colorScheme.onSurface,
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      if (_args.hasAudio) _audioCtrl.stop();
+                    },
+                  ),
                 ),
           titleSpacing: 35,
           title: _isMultiLineSelecting
@@ -780,9 +792,30 @@ class _PoemScreenState extends State<PoemScreen> {
                   Padding(
                     padding: const EdgeInsets.only(left: 12),
                     child: IconButton(
-                      icon: const Icon(Icons.share_rounded),
-                      iconSize: 21,
-                      onPressed: _isTextLoading ? null : _sharePoem,
+                      icon: ColorFiltered(
+                        colorFilter: ColorFilter.mode(
+                          colorScheme.onSurface,
+                          BlendMode.srcIn,
+                        ),
+                        child: Lottie.asset(
+                          AppIcons.share,
+                          height: 20,
+                          controller: _shareController,
+                          repeat: false,
+                          onLoaded: (composition) {
+                            _shareController.duration = composition.duration;
+                          },
+                        ),
+                      ),
+                      onPressed: _isTextLoading
+                          ? null
+                          : () {
+                              _shareController
+                                ..reset()
+                                ..forward();
+
+                              _sharePoem();
+                            },
                     ),
                   ),
                 ],

@@ -17,4 +17,7 @@ class AppIcons {
   static const like = 'assets/icons/animatedIcons/white-heart-select.json';
   static const settings = 'assets/icons/animatedIcons/white-setting.json';
   static const saved = 'assets/icons/animatedIcons/white-saved.json';
+
+  //PoemScreen
+  static const share = 'assets/icons/animatedIcons/black-shared.json';
 }

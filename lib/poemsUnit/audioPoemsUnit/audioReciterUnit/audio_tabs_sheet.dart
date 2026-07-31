@@ -49,9 +49,15 @@ class _AudioTabsSheetState extends State<AudioTabsSheet>
   @override
   void initState() {
     super.initState();
+
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      setState(() {});
+    });
+
     _searchCtrl = TextEditingController();
     _filtered = _sortedList(widget.recitations);
+
     Get.find<AudioDownloadManager>().onError = (msg) {
       if (mounted) {
         AppSnackBarService.error(msg, duration: const Duration(seconds: 3));
@@ -114,17 +120,80 @@ class _AudioTabsSheetState extends State<AudioTabsSheet>
                 ),
               ),
             ),
-            TabBar(
-              controller: _tabController,
-              labelColor: cs.primary,
-              unselectedLabelColor: cs.onSurface.withValues(alpha: 0.5),
-              indicatorColor: cs.primary,
-              tabs: const [
-                Tab(text: 'خوانندگان'),
-                Tab(text: 'دانلودها'),
-              ],
+            AnimatedBuilder(
+              animation: _tabController.animation!,
+              builder: (context, child) {
+                final animationValue = _tabController.animation!.value;
+
+                return Container(
+                  height: 45,
+                  margin: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Stack(
+                    children: [
+                      Align(
+                        alignment: Alignment(1 - (animationValue * 2), 0),
+                        child: Container(
+                          width: MediaQuery.of(context).size.width / 2 - 24,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: cs.primary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                      ),
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () {
+                                _tabController.animateTo(0);
+                              },
+                              child: Center(
+                                child: Text(
+                                  'خوانندگان',
+                                  style: TextStyle(
+                                    color: animationValue < 0.5
+                                        ? cs.primary
+                                        : cs.onSurface.withValues(alpha: 0.5),
+                                    fontWeight: animationValue < 0.5
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          Expanded(
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () {
+                                _tabController.animateTo(1);
+                              },
+                              child: Center(
+                                child: Text(
+                                  'دانلودها',
+                                  style: TextStyle(
+                                    color: animationValue > 0.5
+                                        ? cs.primary
+                                        : cs.onSurface.withValues(alpha: 0.5),
+                                    fontWeight: animationValue > 0.5
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-            const Divider(height: 1),
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.5,
               child: TabBarView(
@@ -290,7 +359,7 @@ class _AudioTabsSheetState extends State<AudioTabsSheet>
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: 14),
                             ReciterDownloadControl(
                               poemId: widget.poemId,
                               category: widget.category,

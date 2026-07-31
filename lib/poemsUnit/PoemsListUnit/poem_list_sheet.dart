@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_lucide_animated/flutter_lucide_animated.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
 import 'package:hafez_poems/poemsUnit/PoemsListUnit/poem_list_empty.dart';
@@ -294,15 +295,14 @@ class _PoemListSheetState extends State<PoemListSheet> {
                 // ── هدر ──
                 Row(
                   children: [
-                    IconButton(
-                      onPressed: Get.back,
-                      icon: Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        color: cs.onSurface,
-                        size: 20,
-                      ),
+                    SizedBox(width: 10),
+                    LucideAnimatedIcon(
+                      icon: arrow_right,
+                      color: cs.onSurface,
+                      size: 20,
+                      onTap: Get.back,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 14),
                     Expanded(
                       child: Text(
                         _cfg.headerTitle,
