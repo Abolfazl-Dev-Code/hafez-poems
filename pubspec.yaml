@@ -22,7 +22,6 @@ dependencies:
   crop_your_image: ^2.0.0
   share_plus: ^13.1.0
   url_launcher: ^6.3.2
-  flutter_local_notifications: ^22.0.0
   http: ^1.6.0
   cupertino_icons: ^1.0.9
   collection: ^1.19.1
@@ -39,6 +38,7 @@ dependencies:
   crypto: ^3.0.7
   lottie: ^3.5.1
   flutter_lucide_animated: ^0.0.4
+  awesome_notifications: ^0.12.1
 
 dev_dependencies:
   flutter_test:

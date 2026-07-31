@@ -6,6 +6,7 @@ import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/avatar_crop_screen.
 import 'package:hafez_poems/core/data/contracts/i_keyed_item_storage.dart';
 import 'package:hafez_poems/core/data/contracts/i_read_status_storage.dart';
 import 'package:hafez_poems/core/data/contracts/i_settings_storage.dart';
+import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/notification_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
@@ -113,6 +114,7 @@ class ProfileController extends GetxController {
     if (name.isEmpty) return;
     userName.value = name;
     await _settings.put(_kName, name);
+    await NotificationService.instance.scheduleDailyReminder();
   }
 
   Future<void> updateBio(String newBio) async {

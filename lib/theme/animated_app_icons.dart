@@ -170,6 +170,11 @@ class AnimatedAppIconState extends State<AnimatedAppIcon>
       child: InkWell(
         borderRadius: BorderRadius.circular(widget.size),
         onTap: _handleTap,
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        hoverColor: Colors.transparent,
+        focusColor: Colors.transparent,
+        overlayColor: const WidgetStatePropertyAll(Colors.transparent),
         child: SizedBox(
           width: widget.size + 12,
           height: widget.size + 12,

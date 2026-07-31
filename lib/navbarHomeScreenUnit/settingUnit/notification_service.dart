@@ -1,60 +1,64 @@
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter/services.dart';
+import 'package:hafez_poems/homeScreenUnit/greetingUnit/greeting_schedule.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:timezone/data/latest_all.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:get/get.dart';
+import 'package:hafez_poems/core/data/contracts/i_settings_storage.dart';
 
 class NotificationService {
   NotificationService._();
 
   static final NotificationService instance = NotificationService._();
 
-  final FlutterLocalNotificationsPlugin _plugin =
-      FlutterLocalNotificationsPlugin();
-
-  late tz.Location _local;
-
   static const int dailyReminderId = 1001;
-  static const String channelId = 'daily_hafez_reminder';
-  static const String channelName = 'یادآوری روزانه حافظ';
-  static const String channelDescription =
-      'اعلان یادآوری روزانه برای خواندن دیوان حافظ';
+  static const MethodChannel _channel = MethodChannel('hafez/notifications');
+  late final ISettingsStorage _settings = Get.find<ISettingsStorage>();
 
   Future<void> init() async {
-    tz.initializeTimeZones();
-    _local = tz.getLocation('Asia/Tehran');
-    tz.setLocalLocation(_local);
-
-    const androidSettings = AndroidInitializationSettings(
-      '@mipmap/ic_launcher',
-    );
-    const initSettings = InitializationSettings(android: androidSettings);
-    await _plugin.initialize(settings: initSettings);
+    await AwesomeNotifications().initialize(null, [
+      NotificationChannel(
+        channelKey: 'daily_hafez_reminder',
+        channelName: 'یادآوری روزانه حافظ',
+        channelDescription: 'اعلان یادآوری روزانه برای خواندن دیوان حافظ',
+        importance: NotificationImportance.High,
+        channelShowBadge: true,
+        playSound: true,
+        enableVibration: true,
+      ),
+    ], debug: false);
   }
 
   Future<bool> requestNotificationPermission() async {
-    final androidImpl = _plugin
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >();
-    if (androidImpl == null) return true;
-    final granted = await androidImpl.requestNotificationsPermission();
-    return granted ?? false;
+    final isAllowed = await AwesomeNotifications().isNotificationAllowed();
+    if (isAllowed) return true;
+    return await AwesomeNotifications().requestPermissionToSendNotifications();
   }
 
   Future<bool> requestExactAlarmPermission() async {
-    final androidImpl = _plugin
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >();
-    if (androidImpl == null) return true;
-    final granted = await androidImpl.requestExactAlarmsPermission();
-    return granted ?? false;
+    return await AwesomeNotifications().requestPermissionToSendNotifications(
+      permissions: [NotificationPermission.PreciseAlarms],
+    );
   }
 
   Future<bool> requestReminderPermissions() async {
     final notifGranted = await requestNotificationPermission();
     if (!notifGranted) return false;
     return await requestExactAlarmPermission();
+  }
+
+  Future<void> showRtlNotification({
+    required String title,
+    required String body,
+    int id = dailyReminderId,
+  }) async {
+    try {
+      await _channel.invokeMethod('showRtlNotification', {
+        'title': title,
+        'body': body,
+        'id': id,
+      });
+      // ignore: empty_catches
+    } catch (e) {}
   }
 
   Future<void> scheduleDailyReminder() async {
@@ -70,45 +74,43 @@ class NotificationService {
   }) async {
     await cancelDailyReminder();
 
-    const androidDetails = AndroidNotificationDetails(
-      channelId,
-      channelName,
-      channelDescription: channelDescription,
-      importance: Importance.high,
-      priority: Priority.high,
-    );
+    final userName = (_settings.get<String>('name') ?? '').trim();
 
-    final now = tz.TZDateTime.now(_local);
-    var scheduled = tz.TZDateTime(
-      _local,
-      now.year,
-      now.month,
-      now.day,
-      hour,
-      minute,
-    );
-    if (!scheduled.isAfter(now)) {
-      scheduled = scheduled.add(const Duration(days: 1));
-    }
+    final baseTitle = GreetingNotificationContent.titleForHour(hour);
 
-    await _plugin.zonedSchedule(
-      id: dailyReminderId,
-      title: '\u202Bحافظ\u202C',
-      body: '\u202Bیه لیوان چایی و یه غزل حافظ\u202C',
-      scheduledDate: scheduled,
-      notificationDetails: const NotificationDetails(android: androidDetails),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time,
-      payload: 'daily_reminder',
-    );
+    final title = userName.isEmpty ? baseTitle : '$baseTitle $userName';
+    final body = GreetingNotificationContent.bodyForHour(hour);
+
+    try {
+      await _channel.invokeMethod('scheduleDailyRtlNotification', {
+        'title': title,
+        'body': body,
+        'hour': hour,
+        'minute': minute,
+        'id': dailyReminderId,
+      });
+      // ignore: empty_catches
+    } catch (e) {}
   }
 
   Future<void> cancelDailyReminder() async {
-    await _plugin.cancel(id: dailyReminderId);
+    try {
+      await _channel.invokeMethod('cancelDailyRtlNotification', {
+        'id': dailyReminderId,
+      });
+      // ignore: empty_catches
+    } catch (e) {}
   }
 
   Future<bool> isDailyReminderScheduled() async {
-    final pending = await _plugin.pendingNotificationRequests();
-    return pending.any((n) => n.id == dailyReminderId);
+    try {
+      final result = await _channel.invokeMethod<bool>(
+        'isDailyReminderScheduled',
+        {'id': dailyReminderId},
+      );
+      return result ?? false;
+    } catch (e) {
+      return false;
+    }
   }
 }

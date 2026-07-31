@@ -218,7 +218,9 @@ class _SettingPageState extends State<SettingPage>
         if (!isStillScheduled) {
           AppSnackBarService.success('یادآوری روزانه غیرفعال شد');
         } else {
-          AppSnackBarService.error('غیرفعال‌سازی یادآوری روزانه انجام نشد');
+          AppSnackBarService.error(
+            'غیرفعال‌سازی یادآوری روزانه انجام نشد\nاز تنظیمات تلفن اقدام کنید',
+          );
         }
       }
     } finally {
@@ -389,9 +391,7 @@ class _SettingPageState extends State<SettingPage>
                   );
                 }),
               ),
-
               const SizedBox(height: 16),
-
               // ── تنظیمات مطالعه ────────────────────────────────────────
               SectionCard(
                 title: 'تنظیمات مطالعه',
@@ -671,7 +671,6 @@ class _SettingPageState extends State<SettingPage>
                   ],
                 ],
               ),
-
               // ── مدیریت داده‌ها ─────────────────────────────────────────
               SectionCard(
                 title: 'مدیریت داده‌ها',
@@ -680,7 +679,7 @@ class _SettingPageState extends State<SettingPage>
                   SettingTile(
                     title: 'حذف تمامی داده‌های محلی',
                     subtitle:
-                        'علاقه‌مندی‌‌ها، ذخیره‌ها، برگزیده‌‌ها و تنظیمات ذخیره‌شده پاک می‌شوند.',
+                        'علاقه‌مندی‌‌ها، ذخیره‌ها، برگزیده‌‌ها و تمامی گزینه‌های درون بخش تنظیمات پاک می‌شوند.',
                     titleColor: colorScheme.error,
                     trailing: Icon(
                       Icons.delete_forever_rounded,

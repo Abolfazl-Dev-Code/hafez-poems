@@ -2,10 +2,11 @@ import 'dart:math';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/custom_appbar.dart';
+import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_controller.dart';
 import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_banner_home_page.dart';
 import 'package:hafez_poems/homeScreenUnit/carouselUnit/carousel_screen.dart';
 import 'package:hafez_poems/homeScreenUnit/faalUnit/fal_banner_home_page_screen.dart';
-import 'package:hafez_poems/homeScreenUnit/greeting_card.dart';
+import 'package:hafez_poems/homeScreenUnit/greetingUnit/greeting_card.dart';
 import 'package:hafez_poems/homeScreenUnit/poemBoxesUnit/box_grid_home_page.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/homeScreenUnit/section_header.dart';
@@ -23,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen>
   final CarouselSliderController _carouselController =
       CarouselSliderController();
   final GhazalCacheService _cache = Get.find<GhazalCacheService>();
+  final ProfileController profileController = Get.put(ProfileController());
   Worker? _textsReadyWorker;
   Worker? _indexingWorker;
   List<GhazalExcerpt> _allTexts = [];
@@ -106,7 +108,12 @@ class _HomeScreenState extends State<HomeScreen>
                 const SizedBox(height: 10),
                 const CustomAppBar(title: "اشعار حافظ"),
                 const SizedBox(height: 8),
-                GreetingCard(theme),
+                Obx(
+                  () => GreetingCard(
+                    theme,
+                    streakDays: profileController.streakCount.value,
+                  ),
+                ),
                 const SizedBox(height: 15),
                 CarouselSlider.builder(
                   carouselController: _carouselController,
