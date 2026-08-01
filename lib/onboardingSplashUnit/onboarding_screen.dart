@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_theme.dart';
+import 'package:hafez_poems/onboardingSplashUnit/onboarding_colors.dart';
 import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -44,36 +45,36 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       icon: Icons.menu_book_rounded,
       title: "دیوان کامل حافظ",
       subtitle: "تمام غزلیات، رباعیات و قصاید حافظ\nدر یک مجموعه زیبا و خوانا",
-      lightBgTop: Color(0xFFF8F5F0),
-      lightBgBottom: Color(0xFFEFE7DA),
-      darkBgTop: Color(0xFF0F172A),
-      darkBgBottom: Color(0xFF020617),
-      lightAccent: Color(0xFF8B5E3C),
-      darkAccent: BiographyColors.gold,
+      lightBgTop: OnboardingColors.slide1LightBgTop,
+      lightBgBottom: OnboardingColors.slide1LightBgBottom,
+      darkBgTop: OnboardingColors.slide1DarkBgTop,
+      darkBgBottom: OnboardingColors.slide1DarkBgBottom,
+      lightAccent: OnboardingColors.slide1LightAccent,
+      darkAccent: OnboardingColors.slide1DarkAccent,
     ),
 
     SlideData(
       icon: Icons.auto_awesome_rounded,
       title: "فال حافظ",
       subtitle: "با نیتی از دل فال بگیر\nو پیام حافظ را بخوان",
-      lightBgTop: Color(0xFFFDF6EC),
-      lightBgBottom: Color(0xFFF5E8D8),
-      darkBgTop: Color(0xFF020617),
-      darkBgBottom: Color(0xFF0F172A),
-      lightAccent: Color(0xFFB45309),
-      darkAccent: Color(0xFFFACC15),
+      lightBgTop: OnboardingColors.slide2LightBgTop,
+      lightBgBottom: OnboardingColors.slide2LightBgBottom,
+      darkBgTop: OnboardingColors.slide2DarkBgTop,
+      darkBgBottom: OnboardingColors.slide2DarkBgBottom,
+      lightAccent: OnboardingColors.slide2LightAccent,
+      darkAccent: OnboardingColors.slide2DarkAccent,
     ),
 
     SlideData(
       icon: Icons.headphones_rounded,
       title: "پخش صوتی اشعار",
       subtitle: "به غزل‌های حافظ با صدای دلنشین گوش بده\nو در شعرها غرق شو",
-      lightBgTop: Color(0xFFF8F5F0),
-      lightBgBottom: Color(0xFFEFE7DA),
-      darkBgTop: Color(0xFF0F172A),
-      darkBgBottom: Color(0xFF020617),
-      lightAccent: Color(0xFF92400E),
-      darkAccent: Color(0xFFFBBF24),
+      lightBgTop: OnboardingColors.slide3LightBgTop,
+      lightBgBottom: OnboardingColors.slide3LightBgBottom,
+      darkBgTop: OnboardingColors.slide3DarkBgTop,
+      darkBgBottom: OnboardingColors.slide3DarkBgBottom,
+      lightAccent: OnboardingColors.slide3LightAccent,
+      darkAccent: OnboardingColors.slide3DarkAccent,
     ),
   ];
 

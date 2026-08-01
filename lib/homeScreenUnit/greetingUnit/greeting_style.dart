@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/homeScreenUnit/greetingUnit/greeting_colors.dart';
 import 'package:hafez_poems/homeScreenUnit/greetingUnit/greeting_schedule.dart';
 import 'package:hafez_poems/theme/app_icons.dart';
 
@@ -18,39 +19,39 @@ class GreetingStyle {
     if (isLight) {
       return switch (period) {
         GreetingPeriod.morning => [
-          const Color(0xFFFFF8EE),
-          const Color(0xFFFFEDD5),
+          GreetingColors.morningLightGradientStart,
+          GreetingColors.morningLightGradientEnd,
         ],
         GreetingPeriod.noon => [
-          const Color(0xFFEFFAF0),
-          const Color(0xFFD4F0D8),
+          GreetingColors.noonLightGradientStart,
+          GreetingColors.noonLightGradientEnd,
         ],
         GreetingPeriod.evening => [
-          const Color(0xFFFFF0F3),
-          const Color(0xFFFFD6E0),
+          GreetingColors.eveningLightGradientStart,
+          GreetingColors.eveningLightGradientEnd,
         ],
         GreetingPeriod.night => [
-          const Color(0xFFF0ECFC),
-          const Color(0xFFE0D5F5),
+          GreetingColors.nightLightGradientStart,
+          GreetingColors.nightLightGradientEnd,
         ],
       };
     } else {
       return switch (period) {
         GreetingPeriod.morning => [
-          const Color(0xFF2A1F10),
-          const Color(0xFF1E1508),
+          GreetingColors.morningDarkGradientStart,
+          GreetingColors.morningDarkGradientEnd,
         ],
         GreetingPeriod.noon => [
-          const Color(0xFF0F1F12),
-          const Color(0xFF0A1A0C),
+          GreetingColors.noonDarkGradientStart,
+          GreetingColors.noonDarkGradientEnd,
         ],
         GreetingPeriod.evening => [
-          const Color(0xFF221018),
-          const Color(0xFF180A10),
+          GreetingColors.eveningDarkGradientStart,
+          GreetingColors.eveningDarkGradientEnd,
         ],
         GreetingPeriod.night => [
-          const Color(0xFF14102A),
-          const Color(0xFF0D0A1E),
+          GreetingColors.nightDarkGradientStart,
+          GreetingColors.nightDarkGradientEnd,
         ],
       };
     }
@@ -59,17 +60,17 @@ class GreetingStyle {
   static Color iconColor(GreetingPeriod period, bool isLight) {
     if (isLight) {
       return switch (period) {
-        GreetingPeriod.morning => const Color(0xFFE67E22),
-        GreetingPeriod.noon => const Color(0xFF27AE60),
-        GreetingPeriod.evening => const Color(0xFFE91E8C),
-        GreetingPeriod.night => const Color(0xFF7C4DFF),
+        GreetingPeriod.morning => GreetingColors.morningLightIcon,
+        GreetingPeriod.noon => GreetingColors.noonLightIcon,
+        GreetingPeriod.evening => GreetingColors.eveningLightIcon,
+        GreetingPeriod.night => GreetingColors.nightLightIcon,
       };
     } else {
       return switch (period) {
-        GreetingPeriod.morning => const Color(0xFFFFB74D),
-        GreetingPeriod.noon => const Color(0xFF81C784),
-        GreetingPeriod.evening => const Color(0xFFF48FB1),
-        GreetingPeriod.night => const Color(0xFFB39DDB),
+        GreetingPeriod.morning => GreetingColors.morningDarkIcon,
+        GreetingPeriod.noon => GreetingColors.noonDarkIcon,
+        GreetingPeriod.evening => GreetingColors.eveningDarkIcon,
+        GreetingPeriod.night => GreetingColors.nightDarkIcon,
       };
     }
   }
