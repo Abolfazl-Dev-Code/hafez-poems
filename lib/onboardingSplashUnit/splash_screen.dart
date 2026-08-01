@@ -1,6 +1,8 @@
+import 'package:hafez_poems/theme/text_style.dart';
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/color_style.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/bottomNavBar/bottom_nav_bar.dart';
 import 'package:hafez_poems/onboardingSplashUnit/onboarding_screen.dart';
@@ -203,7 +205,7 @@ class _SplashScreenState extends State<SplashScreen>
     final theme = Theme.of(context);
     final isLight = theme.brightness == Brightness.light;
 
-    final bgColor = isLight ? const Color(0xFFE1D4C2) : const Color(0xFF1E1712);
+    final bgColor = isLight ? AppColors.background : AppColors.darkBackground;
     final primaryColor = isLight
         ? const Color(0xFF6D4C41)
         : const Color(0xFFD7B896);
@@ -290,7 +292,7 @@ class _SplashScreenState extends State<SplashScreen>
                     textDirection: TextDirection.rtl,
                     style: TextStyle(
                       fontSize: 13,
-                      fontFamily: 'vazir',
+                      fontFamily: AppTextStyles.fontFamily,
                       color: primaryColor.withValues(alpha: 0.5),
                       letterSpacing: 0.5,
                     ),
@@ -361,7 +363,7 @@ class _LogoWidget extends StatelessWidget {
           textDirection: TextDirection.rtl,
           style: TextStyle(
             fontSize: 36,
-            fontFamily: 'vazir',
+            fontFamily: AppTextStyles.fontFamily,
             fontWeight: FontWeight.bold,
             color: primaryColor,
             letterSpacing: 2,
@@ -373,7 +375,7 @@ class _LogoWidget extends StatelessWidget {
           textDirection: TextDirection.rtl,
           style: TextStyle(
             fontSize: 14,
-            fontFamily: 'vazir',
+            fontFamily: AppTextStyles.fontFamily,
             color: primaryColor.withValues(alpha: 0.6),
             letterSpacing: 1,
           ),
@@ -435,7 +437,7 @@ class _StatusWidget extends StatelessWidget {
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontSize: 13,
-                fontFamily: 'vazir',
+                fontFamily: AppTextStyles.fontFamily,
                 color: color,
                 height: 1.5,
               ),

@@ -1,3 +1,4 @@
+import 'package:hafez_poems/theme/text_style.dart';
 import 'dart:async';
 import 'dart:math';
 
@@ -207,7 +208,7 @@ class _GreetingCardState extends State<GreetingCard>
                                   _greetingText(name: userName),
                                   key: ValueKey('${_period}_$userName'),
                                   style: theme.textTheme.titleSmall?.copyWith(
-                                    fontFamily: 'vazir',
+                                    fontFamily: AppTextStyles.fontFamily,
                                     fontWeight: FontWeight.bold,
                                     color: theme.colorScheme.onSurface
                                         .withValues(alpha: 0.85),
@@ -241,7 +242,7 @@ class _GreetingCardState extends State<GreetingCard>
                                     '${widget.streakDays} روز'
                                         .toPersianNumbers(),
                                     style: theme.textTheme.labelSmall?.copyWith(
-                                      fontFamily: 'vazir',
+                                      fontFamily: AppTextStyles.fontFamily,
                                       fontWeight: FontWeight.w600,
                                       color: iconColor,
                                     ),
@@ -255,7 +256,7 @@ class _GreetingCardState extends State<GreetingCard>
                       Text(
                         _greetingSubtitle.toPersianNumbers(),
                         style: theme.textTheme.bodySmall?.copyWith(
-                          fontFamily: 'vazir',
+                          fontFamily: AppTextStyles.fontFamily,
                           color: theme.colorScheme.onSurface.withValues(
                             alpha: 0.5,
                           ),
@@ -266,7 +267,7 @@ class _GreetingCardState extends State<GreetingCard>
                       Text(
                         dateLabel.toPersianNumbers(),
                         style: theme.textTheme.labelSmall?.copyWith(
-                          fontFamily: 'vazir',
+                          fontFamily: AppTextStyles.fontFamily,
                           color: theme.colorScheme.onSurface.withValues(
                             alpha: 0.35,
                           ),

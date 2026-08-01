@@ -1,3 +1,4 @@
+import 'package:hafez_poems/theme/text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_screen_book_cover.dart';
@@ -50,7 +51,7 @@ class FalBiography extends StatelessWidget {
               Text(
                 'رسمی از هزار سال عشق',
                 style: TextStyle(
-                  fontFamily: 'vazir',
+                  fontFamily: AppTextStyles.fontFamily,
                   fontSize: 16,
                   letterSpacing: 4,
                   color: _kGold.withValues(alpha: .9),
@@ -87,7 +88,7 @@ class FalBiography extends StatelessWidget {
                 'دل به حافظ بسپار و برای\nدیدن راهت روی کتاب بزن',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontFamily: 'vazir',
+                  fontFamily: AppTextStyles.fontFamily,
                   fontSize: 14,
                   height: 1.8,
                   color: _kCream.withValues(alpha: .68),

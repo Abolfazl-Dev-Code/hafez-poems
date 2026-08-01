@@ -1,3 +1,4 @@
+import 'package:hafez_poems/theme/text_style.dart';
 import 'package:flutter/material.dart';
 
 class SectionHeader extends StatelessWidget {
@@ -31,7 +32,7 @@ class SectionHeader extends StatelessWidget {
           Text(
             title,
             style: theme.textTheme.titleSmall?.copyWith(
-              fontFamily: 'vazir',
+              fontFamily: AppTextStyles.fontFamily,
               fontWeight: FontWeight.bold,
               color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
             ),

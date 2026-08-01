@@ -1,3 +1,4 @@
+import 'package:hafez_poems/theme/text_style.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_screen_particle_painter.dart';
@@ -113,7 +114,7 @@ class HeroAnimationBiography extends StatelessWidget {
                     'خواجه شمس‌الدین محمد\nزبان غزل پارسی و صدای جانِ شیراز',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontFamily: 'vazir',
+                      fontFamily: AppTextStyles.fontFamily,
                       fontSize: 13.5,
                       color: BiographyColors.cream.withValues(alpha: 0.60),
                       height: 1.9,

@@ -1,3 +1,4 @@
+import 'package:hafez_poems/theme/text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_icons_auto_play.dart';
 import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_screen_chapter_data.dart';
@@ -72,7 +73,7 @@ class ChapterCard extends StatelessWidget {
         Text(
           data.eyebrow,
           style: TextStyle(
-            fontFamily: 'vazir',
+            fontFamily: AppTextStyles.fontFamily,
             fontSize: 10,
             letterSpacing: 3.2,
             color: _kGold.withValues(alpha: 0.88),
@@ -84,7 +85,7 @@ class ChapterCard extends StatelessWidget {
         Text(
           data.title,
           style: const TextStyle(
-            fontFamily: 'vazir',
+            fontFamily: AppTextStyles.fontFamily,
             fontSize: 21,
             color: _kCream,
             fontWeight: FontWeight.bold,
@@ -96,7 +97,7 @@ class ChapterCard extends StatelessWidget {
         Text(
           data.body,
           style: TextStyle(
-            fontFamily: 'vazir',
+            fontFamily: AppTextStyles.fontFamily,
             fontSize: 13.5,
             color: _kCream.withValues(alpha: 0.62),
             height: 2.1,
@@ -123,7 +124,7 @@ class ChapterCard extends StatelessWidget {
                       child: Text(
                         line,
                         style: const TextStyle(
-                          fontFamily: 'vazir',
+                          fontFamily: AppTextStyles.fontFamily,
                           fontSize: 14,
                           color: Color(0xFFF1D9B8),
                           height: 2.4,

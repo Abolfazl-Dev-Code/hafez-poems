@@ -1,3 +1,4 @@
+import 'package:hafez_poems/theme/text_style.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/models/onboarding_slide_data.dart';
@@ -63,7 +64,7 @@ class OnboardingPage extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 28,
-                  fontFamily: 'vazir',
+                  fontFamily: AppTextStyles.fontFamily,
                   fontWeight: FontWeight.bold,
                   color: accent,
                 ),
@@ -80,7 +81,7 @@ class OnboardingPage extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15,
-                  fontFamily: 'vazir',
+                  fontFamily: AppTextStyles.fontFamily,
                   color: accent.withValues(alpha: 0.7),
                   height: 1.9,
                 ),

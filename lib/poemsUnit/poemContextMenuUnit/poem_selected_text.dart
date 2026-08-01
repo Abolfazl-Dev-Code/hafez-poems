@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/color_style.dart';
 
 class PoemSelectedText extends StatelessWidget {
   const PoemSelectedText({
@@ -40,7 +41,7 @@ class PoemSelectedText extends StatelessWidget {
       border = Colors.amber;
     } else if (isHighlighted) {
       bg = const Color(0xFFFFF3B0);
-      border = const Color(0xFFFFC107);
+      border = AppColors.accent;
       textColor = Colors.black87;
     } else if (isSelected) {
       bg = colorScheme.primary.withValues(alpha: 0.08);

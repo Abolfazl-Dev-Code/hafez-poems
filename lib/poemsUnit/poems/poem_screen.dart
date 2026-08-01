@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/color_style.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide_animated/flutter_lucide_animated.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/bottomNavBar/user_actions_saver.dart';
@@ -660,7 +661,7 @@ class _PoemScreenState extends State<PoemScreen>
       audioUrl: _args.audioUrl,
       highlightedLine: lineText,
       lineIndex: index,
-      color: const Color(0xFFFFC107),
+      color: AppColors.accent,
     );
 
     if (!mounted) return;

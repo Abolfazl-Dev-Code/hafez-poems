@@ -1,3 +1,4 @@
+import 'package:hafez_poems/theme/text_style.dart';
 import 'package:flutter/material.dart';
 
 class ActionButton extends StatelessWidget {
@@ -50,7 +51,7 @@ class ActionButton extends StatelessWidget {
                 Text(
                   label,
                   style: const TextStyle(
-                    fontFamily: 'Vazir',
+                    fontFamily: AppTextStyles.fontFamily,
                     fontSize: 14,
                     fontWeight: FontWeight.w900,
                     color: Colors.white,

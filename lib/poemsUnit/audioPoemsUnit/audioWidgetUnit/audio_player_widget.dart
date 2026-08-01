@@ -1,3 +1,4 @@
+import 'package:hafez_poems/theme/text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/core/data/contracts/i_audio_download_storage.dart';
@@ -236,7 +237,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
               Text(
                 'پخش صوتی',
                 style: TextStyle(
-                  fontFamily: 'Vazir',
+                  fontFamily: AppTextStyles.fontFamily,
                   fontSize: 14,
                   fontWeight: FontWeight.w900,
                   color: Colors.white,

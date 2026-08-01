@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/color_style.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_controller.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_header.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_informations_cards.dart';
@@ -45,8 +46,8 @@ class ProfileScreen extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: isLight
-                  ? [const Color(0xFFE1D4C2), const Color(0xFFE1D4C2)]
-                  : [const Color(0xFF1E1712), const Color(0xFF1E1712)],
+                  ? [AppColors.background, AppColors.background]
+                  : [AppColors.darkBackground, AppColors.darkBackground],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),

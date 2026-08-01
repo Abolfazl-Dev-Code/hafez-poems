@@ -1,3 +1,4 @@
+import 'package:hafez_poems/theme/text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/poemsUnit/poemContextMenuUnit/menu_item_data.dart';
 import 'package:hafez_poems/theme/color_style.dart';
@@ -104,7 +105,7 @@ class ActionMenu extends StatelessWidget {
                           Text(
                             item.label,
                             style: TextStyle(
-                              fontFamily: 'Vazir',
+                              fontFamily: AppTextStyles.fontFamily,
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
                               color: textColor,

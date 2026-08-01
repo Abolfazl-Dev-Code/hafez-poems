@@ -1,3 +1,4 @@
+import 'package:hafez_poems/theme/text_style.dart';
 import 'package:flutter/material.dart';
 
 const _kGold = Color(0xFFD4AF37);
@@ -114,7 +115,7 @@ class BookCover extends StatelessWidget {
                         const Text(
                           'دیوان',
                           style: TextStyle(
-                            fontFamily: 'vazir',
+                            fontFamily: AppTextStyles.fontFamily,
                             color: _kGold,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -123,7 +124,7 @@ class BookCover extends StatelessWidget {
                         const Text(
                           'حافظ',
                           style: TextStyle(
-                            fontFamily: 'vazir',
+                            fontFamily: AppTextStyles.fontFamily,
                             color: _kGold,
                             fontSize: 28,
                             fontWeight: FontWeight.bold,

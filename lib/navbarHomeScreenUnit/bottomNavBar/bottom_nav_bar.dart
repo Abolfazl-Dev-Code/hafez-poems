@@ -1,3 +1,4 @@
+import 'package:hafez_poems/theme/text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hafez_poems/collectionUnit/collection_screen.dart';
@@ -279,7 +280,7 @@ class _CurvedNavBarState extends State<_CurvedNavBar> {
                                   Text(
                                     widget.labels[index],
                                     style: TextStyle(
-                                      fontFamily: 'vazir',
+                                      fontFamily: AppTextStyles.fontFamily,
                                       fontSize: 11,
                                       color: widget.restingIconColor,
                                     ),

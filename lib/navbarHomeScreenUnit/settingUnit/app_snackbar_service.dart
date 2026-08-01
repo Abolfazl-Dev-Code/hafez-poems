@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/color_style.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_scaffold_messenger.dart';
 
 class AppSnackBarService {
@@ -131,7 +132,7 @@ class AppSnackBarService {
   static void warning(String message, {Duration? duration}) {
     _show(
       message: message,
-      color: const Color(0xFFFFC107),
+      color: AppColors.accent,
       icon: Icons.warning_amber_rounded,
       textColor: Colors.black,
       duration: duration ?? const Duration(milliseconds: 2400),

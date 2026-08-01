@@ -1,3 +1,4 @@
+import 'package:hafez_poems/theme/text_style.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 
@@ -47,7 +48,7 @@ class VerseShareCard extends StatelessWidget {
                         stepGranularity: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontFamily: 'Vazir',
+                          fontFamily: AppTextStyles.fontFamily,
                           fontSize: 64,
                           height: 1.9,
                           fontWeight: FontWeight.w700,
@@ -63,7 +64,7 @@ class VerseShareCard extends StatelessWidget {
                   textAlign: TextAlign.center,
                   textDirection: TextDirection.rtl,
                   style: TextStyle(
-                    fontFamily: 'Vazir',
+                    fontFamily: AppTextStyles.fontFamily,
                     fontSize: 34,
                     color: background.titleColor,
                   ),
@@ -74,7 +75,7 @@ class VerseShareCard extends StatelessWidget {
                   textAlign: TextAlign.center,
                   textDirection: TextDirection.rtl,
                   style: TextStyle(
-                    fontFamily: 'Vazir',
+                    fontFamily: AppTextStyles.fontFamily,
                     fontSize: 26,
                     color: background.titleColor.withValues(alpha: 0.75),
                   ),
@@ -133,7 +134,7 @@ class _BrandingFooter extends StatelessWidget {
                 textAlign: TextAlign.center,
                 textDirection: TextDirection.rtl,
                 style: TextStyle(
-                  fontFamily: 'Vazir',
+                  fontFamily: AppTextStyles.fontFamily,
                   fontSize: 34,
                   fontWeight: FontWeight.w800,
                   color: background.textColor,
@@ -148,7 +149,7 @@ class _BrandingFooter extends StatelessWidget {
           textAlign: TextAlign.center,
           textDirection: TextDirection.ltr,
           style: TextStyle(
-            fontFamily: 'Vazir',
+            fontFamily: AppTextStyles.fontFamily,
             fontSize: 22,
             color: background.textColor.withValues(alpha: 0.6),
           ),
