@@ -107,6 +107,12 @@ class AnimatedAppIconState extends State<AnimatedAppIcon>
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final delegates = <ValueDelegate>[
       if (widget.secondaryColor != null) ...[

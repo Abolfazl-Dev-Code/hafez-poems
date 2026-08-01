@@ -13,24 +13,30 @@ class ParticlePainter extends CustomPainter {
     required this.progress,
   });
 
+  final Paint _paint = Paint();
+
   @override
   void paint(Canvas canvas, Size size) {
     for (final p in particles) {
       final t = progress * 2 * pi * p.speed + p.phase;
 
-      final dx = cos(t * 0.6) * 10;
-      final dy = sin(t) * 18;
+      _paint.color = color.withValues(alpha: p.opacity);
 
       canvas.drawCircle(
-        Offset(p.x * size.width + dx, p.y * size.height + dy),
+        Offset(
+          p.x * size.width + cos(t * .6) * 10,
+          p.y * size.height + sin(t) * 18,
+        ),
         p.radius,
-        Paint()..color = color.withValues(alpha: p.opacity),
+        _paint,
       );
     }
   }
 
   @override
-  bool shouldRepaint(ParticlePainter oldDelegate) {
-    return oldDelegate.progress != progress;
+  bool shouldRepaint(covariant ParticlePainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.color != color ||
+        !identical(oldDelegate.particles, particles);
   }
 }

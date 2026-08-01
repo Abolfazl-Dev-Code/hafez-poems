@@ -199,30 +199,27 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             AnimatedBuilder(
               animation: _particleController,
               builder: (_, _) {
-                return CustomPaint(
-                  size: Size.infinite,
-                  painter: IslamicPatternPainter(
-                    color: accent.withValues(alpha: .05),
-                    progress: _particleController.value,
-                  ),
+                return Stack(
+                  children: [
+                    CustomPaint(
+                      size: Size.infinite,
+                      painter: IslamicPatternPainter(
+                        color: accent.withValues(alpha: .05),
+                        progress: _particleController.value,
+                      ),
+                    ),
+                    CustomPaint(
+                      size: Size.infinite,
+                      painter: ParticlePainter(
+                        particles: _particles,
+                        color: accent,
+                        progress: _particleController.value,
+                      ),
+                    ),
+                  ],
                 );
               },
             ),
-
-            AnimatedBuilder(
-              animation: _particleController,
-              builder: (_, _) {
-                return CustomPaint(
-                  size: Size.infinite,
-                  painter: ParticlePainter(
-                    particles: _particles,
-                    color: accent,
-                    progress: _particleController.value,
-                  ),
-                );
-              },
-            ),
-
             PageView.builder(
               controller: _pageController,
               itemCount: _slides.length,

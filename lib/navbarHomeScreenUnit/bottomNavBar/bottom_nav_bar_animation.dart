@@ -55,7 +55,10 @@ class BottomNavBarAnimation extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant BottomNavBarAnimation oldDelegate) => true;
+  bool shouldRepaint(covariant BottomNavBarAnimation oldDelegate) =>
+      oldDelegate.loc != loc ||
+      oldDelegate.s != s ||
+      oldDelegate.color != color;
 }
 
 extension PathExt on Path {
