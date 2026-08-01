@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_theme.dart';
 import 'package:hafez_poems/onboardingSplashUnit/onboarding_colors.dart';
 import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
