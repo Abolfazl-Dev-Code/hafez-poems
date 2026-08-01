@@ -67,9 +67,7 @@ class DownloadsListTab extends StatelessWidget {
       builder: (dialogContext) => Directionality(
         textDirection: TextDirection.rtl,
         child: AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: AppRadius.xlRadius,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.xlRadius),
           title: const Text('حذف فایل دانلودشده'),
           content: Text(
             'فایل صوتی «${row.reciterDisplayName}» حذف شود؟ برای پخش دوباره باید مجدداً دانلود کنید.',
@@ -137,7 +135,7 @@ class DownloadsListTab extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'از تب «خوانندگان» می‌توانید صدا را دانلود کنید',
+                  'از قسمت «خوانندگان» می‌توانید صدا را دانلود کنید',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: cs.onSurface.withValues(alpha: 0.35),
                     fontSize: 11,
@@ -147,7 +145,6 @@ class DownloadsListTab extends StatelessWidget {
             ),
           );
         }
-
         return ListView.builder(
           shrinkWrap: true,
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
