@@ -5,12 +5,14 @@ class PlayPauseButton extends StatelessWidget {
   final AudioPlayerController ctrl;
   final ColorScheme cs;
   final ThemeData theme;
+  final Future<void> Function()? onTap;
 
   const PlayPauseButton({
     super.key,
     required this.ctrl,
     required this.cs,
     required this.theme,
+    this.onTap,
   });
 
   @override
@@ -48,7 +50,7 @@ class PlayPauseButton extends StatelessWidget {
                 size: 32,
               ),
         color: cs.onPrimary,
-        onPressed: enabled ? ctrl.playOrPause : null,
+        onPressed: enabled ? () => (onTap ?? ctrl.playOrPause).call() : null,
       ),
     );
   }

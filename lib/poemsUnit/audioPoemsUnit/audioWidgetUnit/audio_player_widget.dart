@@ -91,8 +91,6 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       return;
     }
 
-    _initialized = true;
-
     await ctrl.loadRecitations(widget.id, widget.category);
 
     final storage = Get.find<IAudioDownloadStorage>();
@@ -130,6 +128,8 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       await _loadSyncForSelectedRecitation();
       return;
     }
+
+    _initialized = true;
 
     await ctrl.loadWithSourceResolution(
       id: widget.id,
@@ -357,7 +357,18 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                         tooltip: 'توقف',
                       ),
                       const SizedBox(width: 22),
-                      PlayPauseButton(ctrl: ctrl, cs: cs, theme: theme),
+                      PlayPauseButton(
+                        ctrl: ctrl,
+                        cs: cs,
+                        theme: theme,
+                        onTap: () async {
+                          if (!_initialized) {
+                            await _loadIfNeeded();
+                            if (!mounted) return;
+                          }
+                          await ctrl.playOrPause();
+                        },
+                      ),
                     ],
                   ),
                 ),
