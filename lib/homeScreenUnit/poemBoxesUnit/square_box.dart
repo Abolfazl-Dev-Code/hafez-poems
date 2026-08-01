@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 
 class SquareActionBox extends StatelessWidget {
   final Widget icon;
@@ -19,7 +20,7 @@ class SquareActionBox extends StatelessWidget {
     final textTheme = theme.textTheme;
 
     return InkWell(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: AppRadius.mdRadius,
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -35,7 +36,7 @@ class SquareActionBox extends StatelessWidget {
                 ? colorScheme.outlineVariant.withValues(alpha: 0.2)
                 : colorScheme.surfaceContainerHigh,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: AppRadius.mdRadius,
               side: BorderSide(
                 color: theme.dividerColor.withValues(
                   alpha: theme.brightness == Brightness.dark ? 0.25 : 0.10,

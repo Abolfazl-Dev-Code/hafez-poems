@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 
 enum VerseShareType { text, image }
 
@@ -98,9 +99,9 @@ class _ShareTypeCard extends StatelessWidget {
 
     return Material(
       color: theme.colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: AppRadius.xlRadius,
       child: InkWell(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: AppRadius.xlRadius,
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 22),

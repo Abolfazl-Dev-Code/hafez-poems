@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/color_style.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
@@ -59,7 +62,7 @@ class _FalDialogState extends State<FalDialog> {
         child: Container(
           decoration: BoxDecoration(
             color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: AppRadius.xxlRadius,
           ),
           clipBehavior: Clip.antiAlias,
           child: Column(
@@ -91,7 +94,7 @@ class _FalDialogState extends State<FalDialog> {
                           color: Theme.of(
                             context,
                           ).colorScheme.primary.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: AppRadius.smRadius,
                         ),
                         child: Text(
                           'غزل ${widget.falNumber}'.toPersianNumbers(),
@@ -112,14 +115,14 @@ class _FalDialogState extends State<FalDialog> {
                         ),
                         decoration: BoxDecoration(
                           color: Colors.green.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: AppRadius.xlRadius,
                         ),
                         child: const Text(
                           'فال حافظ',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF1FA855),
+                            color: AppColors.success,
                           ),
                         ),
                       ),
@@ -137,7 +140,7 @@ class _FalDialogState extends State<FalDialog> {
                   children: [
                     SingleChildScrollView(
                       controller: _scrollController,
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(AppSpacing.xl),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -185,7 +188,7 @@ class _FalDialogState extends State<FalDialog> {
                                 color: Theme.of(
                                   context,
                                 ).colorScheme.primary.withValues(alpha: 0.06),
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: AppRadius.mdRadius,
                                 border: Border.all(
                                   color: Theme.of(
                                     context,
@@ -271,7 +274,7 @@ class _FalDialogState extends State<FalDialog> {
                     onPressed: Get.back,
                     style: TextButton.styleFrom(
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: AppRadius.mdRadius,
                       ),
                     ),
                     child: const Text('بستن'),

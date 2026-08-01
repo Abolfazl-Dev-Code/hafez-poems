@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 
 class SectionCard extends StatelessWidget {
   final String title;
@@ -19,10 +21,10 @@ class SectionCard extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: AppSpacing.lg),
       decoration: BoxDecoration(
         color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.lgRadius,
         border: Border.all(color: theme.dividerColor.withValues(alpha: 0.8)),
         boxShadow: [
           BoxShadow(
@@ -35,7 +37,7 @@ class SectionCard extends StatelessWidget {
       child: Material(
         color: Colors
             .transparent, // فقط میزبان ink splash میشه، رنگی اضافه نمی‌کنه
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.lgRadius,
         clipBehavior: Clip.antiAlias,
         child: Padding(
           padding: const EdgeInsets.all(14),

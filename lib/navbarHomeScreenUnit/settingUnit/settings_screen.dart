@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/notification_service.dart';
@@ -316,7 +318,7 @@ class _SettingPageState extends State<SettingPage>
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: colorScheme.surface,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: AppRadius.lgRadius,
                   border: Border.all(
                     color: theme.dividerColor.withValues(alpha: 0.8),
                   ),
@@ -463,12 +465,12 @@ class _SettingPageState extends State<SettingPage>
                   const SizedBox(height: 10),
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                     decoration: BoxDecoration(
                       color: colorScheme.surfaceContainerHighest.withValues(
                         alpha: 0.35,
                       ),
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: AppRadius.mdRadius,
                       border: Border.all(
                         color: theme.dividerColor.withValues(alpha: 0.8),
                       ),
@@ -477,7 +479,7 @@ class _SettingPageState extends State<SettingPage>
                       child: DropdownButton<String>(
                         value: _fontFamily,
                         isExpanded: true,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: AppRadius.lgRadius,
                         dropdownColor: colorScheme.surface,
                         icon: Icon(
                           Icons.keyboard_arrow_down_rounded,
@@ -593,12 +595,12 @@ class _SettingPageState extends State<SettingPage>
                   const SizedBox(height: 16),
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
                       color: colorScheme.surfaceContainerHighest.withValues(
                         alpha: 0.45,
                       ),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: AppRadius.mdRadius,
                     ),
                     child: Text(
                       'الا یا ایها الساقی ادر کاساً و ناولها',
@@ -636,10 +638,10 @@ class _SettingPageState extends State<SettingPage>
                   if (_dailyReminderEnabled) ...[
                     const Divider(height: 1),
                     InkWell(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: AppRadius.mdRadius,
                       onTap: _pickReminderTime,
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [

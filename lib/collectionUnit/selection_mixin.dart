@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/core/data/contracts/i_keyed_item_storage.dart';
 import 'package:hafez_poems/theme/text_style.dart';
 
@@ -45,7 +46,7 @@ mixin SelectionMixin<T extends StatefulWidget> on State<T> {
           textDirection: TextDirection.ltr,
           child: AlertDialog(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: AppRadius.xlRadius,
             ),
             backgroundColor: colorScheme.surface,
             titlePadding: const EdgeInsets.fromLTRB(24, 22, 24, 8),
@@ -75,7 +76,7 @@ mixin SelectionMixin<T extends StatefulWidget> on State<T> {
                   foregroundColor: Colors.red.shade700,
                   backgroundColor: Colors.red.withValues(alpha: 0.10),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: AppRadius.mdRadius,
                     side: BorderSide(color: Colors.red.withValues(alpha: 0.20)),
                   ),
                   padding: const EdgeInsets.symmetric(
@@ -91,7 +92,7 @@ mixin SelectionMixin<T extends StatefulWidget> on State<T> {
                   foregroundColor: Colors.green.shade700,
                   backgroundColor: Colors.green.withValues(alpha: 0.10),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: AppRadius.mdRadius,
                     side: BorderSide(
                       color: Colors.green.withValues(alpha: 0.20),
                     ),

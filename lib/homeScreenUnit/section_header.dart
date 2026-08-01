@@ -1,5 +1,7 @@
 import 'package:hafez_poems/theme/text_style.dart';
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 
 class SectionHeader extends StatelessWidget {
   final String title;
@@ -10,7 +12,7 @@ class SectionHeader extends StatelessWidget {
     super.key,
     required this.title,
     this.icon,
-    this.padding = const EdgeInsets.symmetric(horizontal: 20),
+    this.padding = const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
   });
 
   @override
@@ -25,7 +27,7 @@ class SectionHeader extends StatelessWidget {
             height: 18,
             decoration: BoxDecoration(
               color: theme.colorScheme.primary,
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: AppRadius.xsRadius,
             ),
           ),
           const SizedBox(width: 8),

@@ -2,6 +2,8 @@ import 'package:hafez_poems/theme/text_style.dart';
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/theme/color_style.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/bottomNavBar/bottom_nav_bar.dart';
@@ -417,11 +419,11 @@ class _StatusWidget extends StatelessWidget {
     };
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 32),
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       decoration: BoxDecoration(
         color: color.withValues(alpha: isLight ? 0.08 : 0.15),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.lgRadius,
         border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Row(

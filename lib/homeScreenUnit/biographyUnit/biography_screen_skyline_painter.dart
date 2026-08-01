@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_theme.dart';
 
-const _kGold = Color(0xFFD4AF37);
+const _kGold = BiographyColors.gold;
 
 class SkylinePainter extends CustomPainter {
   const SkylinePainter();

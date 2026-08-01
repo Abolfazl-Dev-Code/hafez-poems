@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 
 class OnboardingIndicator extends StatelessWidget {
   final int length;
@@ -20,12 +22,12 @@ class OnboardingIndicator extends StatelessWidget {
         length,
         (i) => AnimatedContainer(
           duration: const Duration(milliseconds: 400),
-          margin: const EdgeInsets.symmetric(horizontal: 4),
+          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
           width: i == current ? 28 : 8,
           height: 8,
           decoration: BoxDecoration(
             color: i == current ? color : color.withValues(alpha: 0.25),
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: AppRadius.xsRadius,
           ),
         ),
       ),

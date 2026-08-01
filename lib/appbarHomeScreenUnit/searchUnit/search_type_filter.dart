@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/searchUnit/search_controller.dart'
     as app;
@@ -30,7 +32,7 @@ class SearchTypeFilter extends StatelessWidget {
           children: types.map((t) {
             final selected = c.selectedType.value == t.$1;
             return Padding(
-              padding: const EdgeInsets.only(left: 8),
+              padding: const EdgeInsets.only(left: AppSpacing.sm),
               child: GestureDetector(
                 onTap: () {
                   c.selectedType.value = t.$1;
@@ -45,7 +47,7 @@ class SearchTypeFilter extends StatelessWidget {
                     color: selected
                         ? colorScheme.primary
                         : colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: AppRadius.xlRadius,
                   ),
                   child: Text(
                     t.$2,

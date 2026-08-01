@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 
 class ArtistChip extends StatelessWidget {
   final String artist;
@@ -18,10 +20,10 @@ class ArtistChip extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: Container(
         height: 36,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
         decoration: BoxDecoration(
           color: cs.primary.withValues(alpha: 0.07),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: AppRadius.mdRadius,
           border: Border.all(color: cs.primary.withValues(alpha: 0.18)),
         ),
         child: Row(

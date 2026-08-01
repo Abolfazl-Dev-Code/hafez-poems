@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 
 class QuoteCard extends StatelessWidget {
   final String title;
@@ -16,12 +17,12 @@ class QuoteCard extends StatelessWidget {
       elevation: 2,
       margin: EdgeInsets.zero,
       color: Colors.transparent,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.xlRadius),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: AppRadius.xlRadius,
           gradient: LinearGradient(
             begin: Alignment.topRight,
             end: Alignment.bottomLeft,

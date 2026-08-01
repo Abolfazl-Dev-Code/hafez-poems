@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
@@ -27,7 +29,7 @@ class ProfileHeader extends StatelessWidget {
       color: isLight
           ? Colors.white
           : colorScheme.surfaceContainerHighest.withValues(alpha: 0.85),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.xxlRadius),
       child: Stack(
         alignment: AlignmentGeometry.center,
         children: [
@@ -56,7 +58,7 @@ class ProfileHeader extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(AppSpacing.xl),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

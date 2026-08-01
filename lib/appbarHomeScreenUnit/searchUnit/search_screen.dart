@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/searchUnit/search_controller.dart'
@@ -40,7 +41,7 @@ class _SearchScreenState extends State<SearchScreen> {
       child: Scaffold(
         appBar: AppBar(title: const Text('جستجوی اشعار')),
         body: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             children: [
               TextField(

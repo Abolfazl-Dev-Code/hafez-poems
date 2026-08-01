@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 
 class PoemListTitle extends StatelessWidget {
   final String title;
@@ -29,7 +30,7 @@ class PoemListTitle extends StatelessWidget {
           height: 42,
           decoration: BoxDecoration(
             color: colorScheme.primary.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: AppRadius.mdRadius,
           ),
           child: Icon(Icons.book_rounded, color: colorScheme.primary, size: 22),
         ),
@@ -58,7 +59,7 @@ class PoemListTitle extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                 decoration: BoxDecoration(
                   color: colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: AppRadius.smRadius,
                   border: Border.all(
                     color: colorScheme.primary.withValues(alpha: 0.2),
                     width: 0.8,

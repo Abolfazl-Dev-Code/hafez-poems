@@ -1,5 +1,8 @@
 import 'package:hafez_poems/theme/text_style.dart';
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_theme.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:flutter/services.dart';
 import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_screen_book_cover.dart';
 import 'package:hafez_poems/homeScreenUnit/faalUnit/fal_screen.dart';
@@ -7,8 +10,8 @@ import 'package:hafez_poems/homeScreenUnit/faalUnit/fal_screen.dart';
 const _kPanelTop = Color(0xFF1B2147);
 const _kPanelBottom = Color(0xFF121735);
 
-const _kGold = Color(0xFFD4AF37);
-const _kCream = Color(0xFFF3ECD9);
+const _kGold = BiographyColors.gold;
+const _kCream = BiographyColors.cream;
 
 class FalBiography extends StatelessWidget {
   const FalBiography({super.key});
@@ -16,9 +19,9 @@ class FalBiography extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.all(20),
+      margin: EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: AppRadius.xxlRadius,
         gradient: const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
@@ -41,7 +44,7 @@ class FalBiography extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.all(2),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(26),
+          borderRadius: AppRadius.xxlRadius,
           border: Border.all(color: Colors.white.withValues(alpha: .035)),
         ),
         child: Padding(
@@ -98,7 +101,7 @@ class FalBiography extends StatelessWidget {
               Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: AppRadius.smRadius,
                   splashColor: _kGold.withValues(alpha: .10),
                   highlightColor: Colors.transparent,
                   onTap: () {
@@ -108,7 +111,7 @@ class FalBiography extends StatelessWidget {
                     );
                   },
                   child: const Padding(
-                    padding: EdgeInsets.all(4),
+                    padding: EdgeInsets.all(AppSpacing.xs),
                     child: BookCover(),
                   ),
                 ),

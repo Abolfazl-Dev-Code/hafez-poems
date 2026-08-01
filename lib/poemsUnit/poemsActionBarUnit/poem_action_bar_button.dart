@@ -1,5 +1,6 @@
 import 'package:hafez_poems/theme/text_style.dart';
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 
 class ActionButton extends StatelessWidget {
   final String label;
@@ -27,7 +28,7 @@ class ActionButton extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: AppRadius.smRadius,
           onTap: onTap,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 220),
@@ -37,7 +38,7 @@ class ActionButton extends StatelessWidget {
               color: isActive
                   ? activeColor.withValues(alpha: 0.14)
                   : Colors.transparent,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: AppRadius.smRadius,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,

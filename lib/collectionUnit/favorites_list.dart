@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/poemsUnit/poemsActionBarUnit/poem_favorites_list_card_selector.dart';
 
 class FavoriteItem {
@@ -93,15 +95,15 @@ class _FavoriteCard extends StatelessWidget {
         : colorScheme.outlineVariant;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.lgRadius,
         onTap: selectionMode ? onToggleSelect : item.onTap,
         onLongPress: onLongPress,
         child: Container(
           decoration: BoxDecoration(
             color: cardColor,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: AppRadius.lgRadius,
             border: Border.all(
               color: borderColor,
               width: isSelected ? 1.6 : 0.8,
@@ -159,7 +161,7 @@ class _FavoriteCard extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: item.highlightBg!.withValues(alpha: 0.18),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: AppRadius.smRadius,
                         ),
                         child: Text(
                           item.subtitle,

@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/theme/color_style.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide_animated/flutter_lucide_animated.dart';
@@ -400,7 +402,7 @@ class _PoemScreenState extends State<PoemScreen>
                 const SizedBox(height: 24),
 
                 InkWell(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: AppRadius.lgRadius,
                   onTap: () {
                     Navigator.pop(context);
 
@@ -466,7 +468,7 @@ class _PoemScreenState extends State<PoemScreen>
                 ),
 
                 InkWell(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: AppRadius.lgRadius,
                   onTap: () {
                     Navigator.pop(context);
                     _startMultiLineSelection(index);
@@ -748,7 +750,7 @@ class _PoemScreenState extends State<PoemScreen>
           actions: _isMultiLineSelecting
               ? [
                   Padding(
-                    padding: const EdgeInsets.only(left: 12),
+                    padding: const EdgeInsets.only(left: AppSpacing.md),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -791,7 +793,7 @@ class _PoemScreenState extends State<PoemScreen>
                 ]
               : [
                   Padding(
-                    padding: const EdgeInsets.only(left: 12),
+                    padding: const EdgeInsets.only(left: AppSpacing.md),
                     child: IconButton(
                       icon: ColorFiltered(
                         colorFilter: ColorFilter.mode(
@@ -866,7 +868,7 @@ class _PoemScreenState extends State<PoemScreen>
                               ? 0
                               : 2,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
+                            borderRadius: AppRadius.lgRadius,
                             side: BorderSide(
                               color: theme.dividerColor.withValues(alpha: 0.5),
                             ),
@@ -1010,7 +1012,7 @@ class _PoemScreenState extends State<PoemScreen>
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                     child: PoemActionBar(
                       isLiked: _isLiked,
                       isSaved: _isSaved,

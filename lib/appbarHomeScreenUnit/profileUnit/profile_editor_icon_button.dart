@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 
 class EditProfileCornerButton extends StatelessWidget {
   final bool showHint;
@@ -43,7 +44,7 @@ class EditProfileCornerButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
             color: colorScheme.primary,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: AppRadius.mdRadius,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,

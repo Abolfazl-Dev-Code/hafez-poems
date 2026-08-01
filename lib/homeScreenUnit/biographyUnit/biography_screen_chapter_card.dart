@@ -1,12 +1,13 @@
 import 'package:hafez_poems/theme/text_style.dart';
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_theme.dart';
 import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_icons_auto_play.dart';
 import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_screen_chapter_data.dart';
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
 
-const _kGold = Color(0xFFD4AF37);
-const _kCream = Color(0xFFF3ECD9);
-const _kWine = Color(0xFF7A2436);
+const _kGold = BiographyColors.gold;
+const _kCream = BiographyColors.cream;
+const _kWine = BiographyColors.wine;
 
 class ChapterCard extends StatelessWidget {
   final ChapterData data;

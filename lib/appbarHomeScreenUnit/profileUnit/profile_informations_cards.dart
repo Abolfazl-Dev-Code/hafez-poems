@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 
 class InfoCard extends StatelessWidget {
   final String title;
@@ -26,9 +28,9 @@ class InfoCard extends StatelessWidget {
       color: isLight
           ? Colors.white.withValues(alpha: 0.94)
           : colorScheme.surfaceContainerHighest.withValues(alpha: 0.75),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.xlRadius),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

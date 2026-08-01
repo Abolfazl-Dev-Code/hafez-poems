@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/core/data/contracts/i_audio_download_storage.dart';
 import 'package:hafez_poems/core/data/drift/app_database.dart';
@@ -67,7 +68,7 @@ class DownloadsListTab extends StatelessWidget {
         textDirection: TextDirection.rtl,
         child: AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: AppRadius.xlRadius,
           ),
           title: const Text('حذف فایل دانلودشده'),
           content: Text(
@@ -158,7 +159,7 @@ class DownloadsListTab extends StatelessWidget {
                 ctrl.selectedReciterKey == row.reciterKey;
             return InkWell(
               onTap: () => _play(context, row),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: AppRadius.mdRadius,
               child: Container(
                 margin: const EdgeInsets.symmetric(vertical: 3),
                 padding: const EdgeInsets.symmetric(
@@ -169,7 +170,7 @@ class DownloadsListTab extends StatelessWidget {
                   color: isSelected
                       ? Colors.green.withValues(alpha: 0.08)
                       : cs.primary.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: AppRadius.mdRadius,
                   border: Border.all(
                     color: isSelected
                         ? Colors.green.withValues(alpha: 0.35)

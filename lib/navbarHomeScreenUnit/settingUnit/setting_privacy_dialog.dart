@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/theme/text_style.dart';
 
 void showPrivacyDialog(BuildContext context) {
@@ -11,7 +12,7 @@ void showPrivacyDialog(BuildContext context) {
         textDirection: TextDirection.rtl,
         child: AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: AppRadius.xlRadius,
           ),
           title: Row(
             children: [

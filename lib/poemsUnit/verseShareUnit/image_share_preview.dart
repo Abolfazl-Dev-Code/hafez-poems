@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
 import 'package:hafez_poems/theme/color_style.dart';
 import 'infinite_background_carousel.dart';
@@ -108,7 +110,7 @@ class _ImageSharePreviewState extends State<ImageSharePreview> {
 
               const SizedBox(height: 20),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
                 child: SizedBox(
                   width: double.infinity,
                   height: 54,
@@ -117,7 +119,7 @@ class _ImageSharePreviewState extends State<ImageSharePreview> {
                       if (_isSharing)
                         Positioned.fill(
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: AppRadius.mdRadius,
                             child: LinearProgressIndicator(
                               value: _shareProgress,
                               minHeight: 54,
@@ -142,7 +144,7 @@ class _ImageSharePreviewState extends State<ImageSharePreview> {
                             shadowColor: Colors.transparent,
 
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
+                              borderRadius: AppRadius.mdRadius,
                             ),
                           ),
 

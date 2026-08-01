@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 
 class SingleInfoTile extends StatelessWidget {
   final String title;
@@ -24,7 +25,7 @@ class SingleInfoTile extends StatelessWidget {
       color: isLight
           ? Colors.white.withValues(alpha: 0.95)
           : colorScheme.surfaceContainerHighest.withValues(alpha: 0.75),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.xlRadius),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
         child: Row(
@@ -34,7 +35,7 @@ class SingleInfoTile extends StatelessWidget {
               height: 42,
               decoration: BoxDecoration(
                 color: colorScheme.primary.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: AppRadius.mdRadius,
               ),
               child: Icon(icon, color: colorScheme.primary),
             ),

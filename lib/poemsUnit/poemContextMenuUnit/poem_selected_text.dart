@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/theme/color_style.dart';
 
 class PoemSelectedText extends StatelessWidget {
@@ -54,7 +55,7 @@ class PoemSelectedText extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: AppRadius.mdRadius,
         border: Border.all(color: border),
       ),
       child: Material(
@@ -63,7 +64,7 @@ class PoemSelectedText extends StatelessWidget {
           behavior: HitTestBehavior.translucent,
           onLongPressStart: onLongPress,
           child: InkWell(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: AppRadius.mdRadius,
             onTap: onTap,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),

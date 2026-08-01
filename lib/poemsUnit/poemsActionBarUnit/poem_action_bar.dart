@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
 import 'package:hafez_poems/poemsUnit/poemsActionBarUnit/poem_action_bar_button.dart';
 import 'package:hafez_poems/theme/color_style.dart';
@@ -32,7 +33,7 @@ class PoemActionBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 3),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.lgRadius,
         color: AppColors.primary,
       ),
       child: Row(

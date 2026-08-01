@@ -3,6 +3,8 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:flutter_lucide_animated/flutter_lucide_animated.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_controller.dart';
@@ -118,7 +120,7 @@ class _GreetingCardState extends State<GreetingCard>
     const ringStops = [0.0, 0.08, 0.15, 0.19, 0.23, 0.32, 1.0];
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: AnimatedBuilder(
         animation: _borderController,
         builder: (context, child) {
@@ -126,7 +128,7 @@ class _GreetingCardState extends State<GreetingCard>
           return Container(
             padding: const EdgeInsets.all(2.5),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: AppRadius.lgRadius,
               gradient: SweepGradient(
                 colors: ringColors,
                 stops: ringStops,
@@ -137,7 +139,7 @@ class _GreetingCardState extends State<GreetingCard>
           );
         },
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(14.5),
+          borderRadius: AppRadius.mdRadius,
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
@@ -220,14 +222,14 @@ class _GreetingCardState extends State<GreetingCard>
                           if (widget.streakDays != null &&
                               widget.streakDays! > 0)
                             Container(
-                              margin: const EdgeInsets.only(left: 8),
+                              margin: const EdgeInsets.only(left: AppSpacing.sm),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
                                 color: iconColor.withValues(alpha: 0.14),
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: AppRadius.xlRadius,
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,

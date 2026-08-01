@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 
 import 'verse_background_theme.dart';
 import 'verse_share_card.dart';
@@ -71,7 +73,7 @@ class _InfiniteBackgroundCarouselState
             child: AspectRatio(
               aspectRatio: 1080 / 1920,
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: AppRadius.xxlRadius,
                 child: FittedBox(
                   fit: BoxFit.contain,
                   child: SizedBox(
@@ -108,11 +110,11 @@ class CarouselDots extends StatelessWidget {
 
         return AnimatedContainer(
           duration: const Duration(milliseconds: 220),
-          margin: const EdgeInsets.symmetric(horizontal: 4),
+          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
           width: selected ? 20 : 8,
           height: 8,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(100),
+            borderRadius: AppRadius.pillRadius,
             color: selected
                 ? Theme.of(context).colorScheme.primary
                 : Colors.grey,

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:crop_your_image/crop_your_image.dart';
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
 
 class AvatarCropScreen extends StatefulWidget {
   final Uint8List imageBytes;
@@ -70,7 +71,7 @@ class _AvatarCropScreenState extends State<AvatarCropScreen> {
               ),
               const SizedBox(height: 20),
               const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl),
                 child: Text(
                   'تصویر را جوری تنظیم کنید که چهره داخل دایره قرار بگیرد.',
                   textAlign: TextAlign.center,

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/color_style.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
@@ -103,16 +106,14 @@ class _FalScreenState extends State<FalScreen>
           ),
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             children: [
               Card(
                 elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: AppRadius.xlRadius),
                 child: Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(AppSpacing.xl),
                   child: Text(
                     'ابتدا نیت کنید:\n'
                     'ای حافظ شیرازی! تو محرم هر رازی!\n'
@@ -130,14 +131,14 @@ class _FalScreenState extends State<FalScreen>
               const SizedBox(height: 24),
               if (_isLoading)
                 const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 32),
+                  padding: EdgeInsets.symmetric(vertical: AppSpacing.xxl),
                   child: CircularProgressIndicator(),
                 )
               else if (hasFal) ...[
                 Card(
                   elevation: 3,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: AppRadius.xxlRadius,
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(24),
@@ -147,7 +148,9 @@ class _FalScreenState extends State<FalScreen>
                         Align(
                           alignment: Alignment.center,
                           child: Container(
-                            margin: const EdgeInsets.only(bottom: 12),
+                            margin: const EdgeInsets.only(
+                              bottom: AppSpacing.md,
+                            ),
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,
                               vertical: 5,
@@ -156,7 +159,7 @@ class _FalScreenState extends State<FalScreen>
                               color: colorScheme.primary.withValues(
                                 alpha: 0.08,
                               ),
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: AppRadius.smRadius,
                             ),
                             child: Text(
                               'غزل ${_currentFal!.id}'.toPersianNumbers(),
@@ -196,10 +199,10 @@ class _FalScreenState extends State<FalScreen>
                         ),
                         const SizedBox(height: 10),
                         Container(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(AppSpacing.lg),
                           decoration: BoxDecoration(
                             color: colorScheme.primary.withValues(alpha: 0.06),
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: AppRadius.mdRadius,
                             border: Border.all(
                               color: colorScheme.primary.withValues(
                                 alpha: 0.18,
@@ -235,7 +238,7 @@ class _FalScreenState extends State<FalScreen>
                     ),
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: AppRadius.lgRadius,
                       ),
                     ),
                   ),
@@ -256,7 +259,7 @@ class _FalScreenState extends State<FalScreen>
                           ),
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: AppRadius.lgRadius,
                             ),
                           ),
                         ),
@@ -285,16 +288,16 @@ class _FalScreenState extends State<FalScreen>
                                   ? Colors.white
                                   : colorScheme.primary,
                               backgroundColor: _isSaved
-                                  ? const Color(0xFF1FA855)
+                                  ? AppColors.success
                                   : Colors.transparent,
                               side: BorderSide(
                                 color: _isSaved
-                                    ? const Color(0xFF1FA855)
+                                    ? AppColors.success
                                     : colorScheme.outline,
                                 width: 1.2,
                               ),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: AppRadius.lgRadius,
                               ),
                             ),
                           ),
@@ -332,7 +335,7 @@ class _FalScreenState extends State<FalScreen>
                         style: OutlinedButton.styleFrom(
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: AppRadius.lgRadius,
                           ),
                         ),
                         child: const Icon(Icons.menu_book_rounded),

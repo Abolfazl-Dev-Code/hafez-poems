@@ -1,7 +1,10 @@
 import 'package:hafez_poems/theme/text_style.dart';
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_theme.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 
-const _kGold = Color(0xFFD4AF37);
+const _kGold = BiographyColors.gold;
 const _kGoldDark = Color(0xFFB68B20);
 
 class BookCover extends StatelessWidget {
@@ -21,7 +24,7 @@ class BookCover extends StatelessWidget {
             child: Container(
               width: 12,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: AppRadius.smRadius,
                 gradient: const LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -41,7 +44,7 @@ class BookCover extends StatelessWidget {
             bottom: 0,
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: AppRadius.mdRadius,
                 gradient: const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -75,10 +78,10 @@ class BookCover extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(AppSpacing.md),
                     child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: AppRadius.smRadius,
                         border: Border.all(
                           color: _kGold.withValues(alpha: .55),
                         ),
@@ -89,7 +92,7 @@ class BookCover extends StatelessWidget {
                     padding: const EdgeInsets.all(22),
                     child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: AppRadius.smRadius,
                         border: Border.all(
                           color: _kGold.withValues(alpha: .25),
                         ),

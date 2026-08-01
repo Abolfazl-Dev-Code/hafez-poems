@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
 
@@ -17,7 +18,7 @@ class StreakBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: const Color(0xFFFF6B35),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: AppRadius.xlRadius,
         border: Border.all(
           color: isLight ? Colors.white : colorScheme.surfaceContainerHighest,
           width: 2,
@@ -104,7 +105,7 @@ class _StreakMotivationCardState extends State<StreakMotivationCard> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: AppRadius.xlRadius,
         gradient: LinearGradient(
           colors: isNewRecord
               ? [const Color(0xFFFF6B35), const Color(0xFFFFA45B)]
@@ -170,7 +171,7 @@ class _StreakMotivationCardState extends State<StreakMotivationCard> {
                               color: isNewRecord
                                   ? Colors.white.withValues(alpha: 0.25)
                                   : colorScheme.primary.withValues(alpha: 0.10),
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: AppRadius.smRadius,
                             ),
                             child: Text(
                               'رکورد: ${widget.bestStreak.toString().toPersianNumbers()}',
@@ -197,7 +198,7 @@ class _StreakMotivationCardState extends State<StreakMotivationCard> {
                     ),
                     const SizedBox(height: 8),
                     InkWell(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: AppRadius.smRadius,
                       onTap: () {
                         setState(() {
                           _isExpanded = !_isExpanded;

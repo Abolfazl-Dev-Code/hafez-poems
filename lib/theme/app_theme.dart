@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'color_style.dart';
 import 'text_style.dart';
 
@@ -46,7 +47,7 @@ class AppTheme {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         textStyle: AppTextStyles.button,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.mdRadius),
       ),
     ),
     switchTheme: SwitchThemeData(
@@ -67,15 +68,15 @@ class AppTheme {
       filled: true,
       fillColor: AppColors.surface,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadius.mdRadius,
         borderSide: const BorderSide(color: AppColors.border),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadius.mdRadius,
         borderSide: const BorderSide(color: AppColors.border),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadius.mdRadius,
         borderSide: const BorderSide(color: AppColors.primary, width: 2),
       ),
       labelStyle: AppTextStyles.bodyMedium,
@@ -136,7 +137,7 @@ class AppTheme {
         backgroundColor: AppColors.darkPrimary,
         foregroundColor: Colors.black,
         textStyle: AppTextStyles.button.copyWith(color: Colors.black),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.mdRadius),
       ),
     ),
     switchTheme: SwitchThemeData(
@@ -157,15 +158,15 @@ class AppTheme {
       filled: true,
       fillColor: AppColors.darkSurface,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadius.mdRadius,
         borderSide: const BorderSide(color: AppColors.darkBorder),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadius.mdRadius,
         borderSide: const BorderSide(color: AppColors.darkBorder),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadius.mdRadius,
         borderSide: const BorderSide(color: AppColors.darkPrimary, width: 2),
       ),
       labelStyle: AppTextStyles.bodyMedium.copyWith(

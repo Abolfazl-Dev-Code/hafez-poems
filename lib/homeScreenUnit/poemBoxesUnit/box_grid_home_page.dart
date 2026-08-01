@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/homeScreenUnit/poemBoxesUnit/square_box.dart';
 import 'package:hafez_poems/models/poem_list_config.dart';
@@ -232,7 +233,7 @@ class PoemBoxGridsHomePage extends StatelessWidget {
     ];
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: LayoutBuilder(
         builder: (context, constraints) {
           const gap = 0.0;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
 
 class StatCard extends StatefulWidget {
@@ -36,7 +37,7 @@ class _StatCardState extends State<StatCard> {
       curve: Curves.easeOut,
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: AppRadius.xlRadius,
           boxShadow: [
             BoxShadow(
               color: widget.color.withValues(alpha: isLight ? 0.18 : 0.28),
@@ -49,7 +50,7 @@ class _StatCardState extends State<StatCard> {
           color: isLight
               ? Colors.white.withValues(alpha: 0.92)
               : colorScheme.surfaceContainerHighest.withValues(alpha: 0.75),
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: AppRadius.xlRadius,
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: widget.onTap,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/models/recitation_models.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioWidgetUnit/audio_player_controller.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/audio_tabs_sheet.dart';
@@ -64,13 +66,13 @@ class RecitationPickerButton extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: InkWell(
         onTap: () => _openPicker(context),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: AppRadius.mdRadius,
         child: Container(
           height: 40,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           decoration: BoxDecoration(
             color: cs.surfaceContainerHighest.withValues(alpha: 0.45),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: AppRadius.mdRadius,
             border: Border.all(color: cs.outline.withValues(alpha: 0.25)),
           ),
           child: Row(
@@ -85,7 +87,7 @@ class RecitationPickerButton extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: badgeBackground,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: AppRadius.xlRadius,
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,

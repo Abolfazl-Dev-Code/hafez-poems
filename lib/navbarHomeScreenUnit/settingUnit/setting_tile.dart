@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
 
 class SettingTile extends StatelessWidget {
   final String title;
@@ -37,7 +38,7 @@ class SettingTile extends StatelessWidget {
         subtitle: subtitle == null
             ? null
             : Padding(
-                padding: const EdgeInsets.only(top: 4),
+                padding: const EdgeInsets.only(top: AppSpacing.xs),
                 child: Text(
                   subtitle!,
                   style: theme.textTheme.bodySmall?.copyWith(

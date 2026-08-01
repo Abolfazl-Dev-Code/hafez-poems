@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/theme/color_style.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_scaffold_messenger.dart';
 
@@ -35,7 +36,7 @@ class AppSnackBarService {
           child: Container(
             decoration: BoxDecoration(
               color: color,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: AppRadius.lgRadius,
               border: Border.all(
                 color: Colors.white.withValues(alpha: .95),
                 width: 1.2,
@@ -114,7 +115,7 @@ class AppSnackBarService {
   static void success(String message, {Duration? duration}) {
     _show(
       message: message,
-      color: const Color(0xFF1FA855),
+      color: AppColors.success,
       icon: Icons.check_rounded,
       duration: duration ?? const Duration(milliseconds: 2400),
     );

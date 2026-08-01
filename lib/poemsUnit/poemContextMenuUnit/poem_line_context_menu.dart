@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/poemsUnit/poemContextMenuUnit/poem_line_action_menu.dart';
 import 'package:hafez_poems/theme/color_style.dart';
 
@@ -221,7 +222,7 @@ class _PoemLineContextMenuOverlayState
                     scale: _scale.value,
                     child: Material(
                       color: cardColor,
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: AppRadius.mdRadius,
                       clipBehavior: Clip.antiAlias,
                       child: SizedBox(
                         width: widget.targetSize.width,

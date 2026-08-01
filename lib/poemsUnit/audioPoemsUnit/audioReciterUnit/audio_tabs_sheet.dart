@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/models/recitation_models.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
@@ -104,7 +106,7 @@ class _AudioTabsSheetState extends State<AudioTabsSheet>
         margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
         decoration: BoxDecoration(
           color: cs.surface,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: AppRadius.xlRadius,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -116,7 +118,7 @@ class _AudioTabsSheetState extends State<AudioTabsSheet>
                 height: 4,
                 decoration: BoxDecoration(
                   color: cs.onSurface.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: AppRadius.xsRadius,
                 ),
               ),
             ),
@@ -127,7 +129,7 @@ class _AudioTabsSheetState extends State<AudioTabsSheet>
 
                 return Container(
                   height: 45,
-                  margin: const EdgeInsets.symmetric(horizontal: 12),
+                  margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                   child: Stack(
                     children: [
                       Align(
@@ -137,7 +139,7 @@ class _AudioTabsSheetState extends State<AudioTabsSheet>
                           height: 38,
                           decoration: BoxDecoration(
                             color: cs.primary.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: AppRadius.mdRadius,
                           ),
                         ),
                       ),
@@ -262,7 +264,7 @@ class _AudioTabsSheetState extends State<AudioTabsSheet>
               filled: true,
               fillColor: cs.surfaceContainerHighest.withValues(alpha: 0.5),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: AppRadius.mdRadius,
                 borderSide: BorderSide.none,
               ),
             ),
@@ -271,7 +273,7 @@ class _AudioTabsSheetState extends State<AudioTabsSheet>
         Expanded(
           child: _filtered.isEmpty
               ? Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 32),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
                   child: Column(
                     children: [
                       Icon(
@@ -308,7 +310,7 @@ class _AudioTabsSheetState extends State<AudioTabsSheet>
                         widget.onSelect(r);
                         Navigator.pop(context);
                       },
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: AppRadius.mdRadius,
                       child: Container(
                         margin: const EdgeInsets.symmetric(vertical: 2),
                         padding: const EdgeInsets.symmetric(
@@ -319,7 +321,7 @@ class _AudioTabsSheetState extends State<AudioTabsSheet>
                           color: isSelected
                               ? cs.primary.withValues(alpha: 0.08)
                               : Colors.transparent,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: AppRadius.mdRadius,
                         ),
                         child: Row(
                           children: [

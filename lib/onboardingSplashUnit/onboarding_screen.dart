@@ -1,5 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_theme.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:hafez_poems/models/onboarding_particle.dart';
@@ -46,7 +49,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       darkBgTop: Color(0xFF0F172A),
       darkBgBottom: Color(0xFF020617),
       lightAccent: Color(0xFF8B5E3C),
-      darkAccent: Color(0xFFD4AF37),
+      darkAccent: BiographyColors.gold,
     ),
 
     SlideData(
@@ -259,9 +262,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 onPressed: _next,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: accent,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: AppRadius.mdRadius,
                   ),
                 ),
                 child: Text(

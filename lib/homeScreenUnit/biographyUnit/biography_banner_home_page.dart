@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_theme.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:flutter/services.dart';
 import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_screen.dart';
 
@@ -10,11 +13,11 @@ class BiographyBanner extends StatelessWidget {
     Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: AppRadius.xlRadius,
           onTap: () {
             HapticFeedback.mediumImpact();
             Navigator.of(context).push(
@@ -23,9 +26,9 @@ class BiographyBanner extends StatelessWidget {
           },
           child: Ink(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: AppRadius.xlRadius,
               border: Border.all(
-                color: const Color(0xFFD4AF37).withValues(alpha: 0.38),
+                color: BiographyColors.gold.withValues(alpha: 0.38),
                 width: 1,
               ),
               image: const DecorationImage(

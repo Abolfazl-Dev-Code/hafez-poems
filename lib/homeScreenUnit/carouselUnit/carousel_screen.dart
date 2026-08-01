@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:video_player/video_player.dart';
 import 'package:hafez_poems/theme/text_style.dart';
 
@@ -222,7 +223,7 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
     return Container(
       decoration: BoxDecoration(
         color: isDark ? widget.darkColor : widget.lightColor,
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: AppRadius.lgRadius,
         border: Border.all(
           color: theme.dividerColor.withValues(alpha: isDark ? 0.25 : 0.18),
         ),
@@ -316,7 +317,7 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
                 Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(50),
+                    borderRadius: AppRadius.pillRadius,
                     onTap: _isRefreshing ? null : _handleRefreshTap,
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 200),
@@ -326,7 +327,7 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
                         height: 30,
                         decoration: BoxDecoration(
                           color: colorScheme.primary,
-                          borderRadius: BorderRadius.circular(50),
+                          borderRadius: AppRadius.pillRadius,
                           boxShadow: [
                             BoxShadow(
                               color: colorScheme.primary.withValues(

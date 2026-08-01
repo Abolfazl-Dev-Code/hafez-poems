@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/core/data/contracts/i_audio_download_storage.dart';
 import 'package:hafez_poems/core/data/drift/app_database.dart';
@@ -80,9 +82,9 @@ class ReciterDownloadControl extends StatelessWidget {
         final pct = progress?.percentage ?? 0;
         return InkWell(
           onTap: () => manager.cancelDownload(poemId, category, reciterKey),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: AppRadius.xlRadius,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [

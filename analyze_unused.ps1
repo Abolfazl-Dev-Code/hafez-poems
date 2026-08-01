@@ -1,34 +1,32 @@
 ﻿$libRoot = "D:\Hafez App\hafez_poems\lib"
 
-$candidates = @(
-    "homeScreenUnit\biographyUnit\biography_audio_button.dart",
-    "homeScreenUnit\biographyUnit\biography_screen_auto_scroll.dart",
-    "homeScreenUnit\podcastUnit\podcast_banner.dart",
-    "homeScreenUnit\moshaereHelper\moshaere_helper_banner.dart",
-    "homeScreenUnit\faalUnit\fal_service.dart",
-    "homeScreenUnit\poemBoxesUnit\box_names_and_subnames.dart",
-    "poemsUnit\poemContextMenuUnit\poem_menu_measure_size.dart",
-    "poemsUnit\poems\api_services.dart",
-    "poemsUnit\verseShareUnit\share_preview_card.dart",
-    "navbarHomeScreenUnit\bottomNavBar\selectable_cards_page.dart",
-    "models\search_utils.dart",
-    "core\data\box_names.dart"
-)
+$map = @{
+    "const Color(0xFF1FA855)" = "AppColors.success"
+    "Color(0xFF1FA855)"       = "AppColors.success"
+}
 
-$allDartFiles = Get-ChildItem -Path $libRoot -Recurse -Filter *.dart
+$files = Get-ChildItem -Path $libRoot -Recurse -Filter *.dart
 
-foreach ($candidate in $candidates) {
-    $fullPath = Join-Path $libRoot $candidate
-    $baseName = Split-Path $candidate -Leaf
+foreach ($file in $files) {
+    $content = Get-Content -Path $file.FullName -Raw
+    $touched = $false
 
-    $refs = $allDartFiles | Where-Object { $_.FullName -ne $fullPath } | ForEach-Object {
-        Select-String -Path $_.FullName -Pattern ([regex]::Escape($baseName)) -SimpleMatch
+    foreach ($key in $map.Keys) {
+        if ($content -match [regex]::Escape($key)) {
+            $content = $content -replace [regex]::Escape($key), $map[$key]
+            $touched = $true
+        }
     }
 
-    if ($refs) {
-        Write-Host "USED: $candidate" -ForegroundColor Green
-        $refs | ForEach-Object { Write-Host "    $($_.Path):$($_.LineNumber)" }
-    } else {
-        Write-Host "NOT USED: $candidate" -ForegroundColor Red
+    if ($touched) {
+        if ($content -notmatch "theme/color_style.dart") {
+            if ($content -match "import 'package:flutter/material.dart';") {
+                $content = $content -replace "import 'package:flutter/material.dart';", "import 'package:flutter/material.dart';`nimport 'package:hafez_poems/theme/color_style.dart';"
+            } else {
+                $content = "import 'package:hafez_poems/theme/color_style.dart';`n" + $content
+            }
+        }
+        Set-Content -Path $file.FullName -Value $content -NoNewline
+        Write-Host "UPDATED: $($file.FullName)" -ForegroundColor Green
     }
 }

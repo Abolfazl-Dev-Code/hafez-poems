@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_screen.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/searchUnit/search_screen.dart';
@@ -18,13 +20,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     final textTheme = theme.textTheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Container(
         height: 60,
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
         decoration: BoxDecoration(
           color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: AppRadius.xlRadius,
           border: Border.all(color: theme.dividerColor.withValues(alpha: 0.35)),
           boxShadow: [
             BoxShadow(

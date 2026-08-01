@@ -29,7 +29,7 @@ class HeroAnimationBiography extends StatelessWidget {
               gradient: RadialGradient(
                 center: Alignment(0, -0.35),
                 radius: 1.3,
-                colors: [Color(0x22D4AF37), Color(0xFF0C1029)],
+                colors: [Color(0x22D4AF37), BiographyColors.night],
               ),
             ),
           ),
@@ -56,7 +56,7 @@ class HeroAnimationBiography extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: const RadialGradient(
-                      colors: [Color(0xFFFFF9E3), Color(0xFFD4AF37)],
+                      colors: [Color(0xFFFFF9E3), BiographyColors.gold],
                     ),
                     boxShadow: [
                       BoxShadow(
@@ -92,7 +92,7 @@ class HeroAnimationBiography extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     letterSpacing: 4,
-                    color: Color(0xFFD4AF37),
+                    color: BiographyColors.gold,
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -102,7 +102,7 @@ class HeroAnimationBiography extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 84,
                     fontWeight: FontWeight.w900,
-                    color: Color(0xFFF3ECD9),
+                    color: BiographyColors.cream,
                   ),
                 ),
 

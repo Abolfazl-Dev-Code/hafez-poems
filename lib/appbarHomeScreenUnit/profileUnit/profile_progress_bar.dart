@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
 
 class ProgressStatBar extends StatelessWidget {
@@ -48,7 +49,7 @@ class ProgressStatBar extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         ClipRRect(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: AppRadius.smRadius,
           child: Stack(
             alignment: AlignmentDirectional.centerStart,
             children: [
@@ -103,7 +104,7 @@ class ProgressOverviewCard extends StatelessWidget {
       color: isLight
           ? Colors.white.withValues(alpha: 0.94)
           : colorScheme.surfaceContainerHighest.withValues(alpha: 0.75),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.xlRadius),
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(

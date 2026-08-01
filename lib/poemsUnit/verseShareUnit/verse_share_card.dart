@@ -1,6 +1,7 @@
 import 'package:hafez_poems/theme/text_style.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 
 import 'share_branding.dart';
 import 'verse_background_theme.dart';
@@ -116,7 +117,7 @@ class _BrandingFooter extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: AppRadius.lgRadius,
               child: Image.asset(
                 ShareBranding.logoAsset,
                 width: 72,

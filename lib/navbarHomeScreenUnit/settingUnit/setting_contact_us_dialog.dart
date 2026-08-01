@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
 
 void showContactOptions({
   required BuildContext context,
@@ -14,7 +15,7 @@ void showContactOptions({
         textDirection: TextDirection.rtl,
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: Wrap(
               children: [
                 ListTile(

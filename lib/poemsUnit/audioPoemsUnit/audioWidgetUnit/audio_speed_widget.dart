@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioWidgetUnit/audio_player_controller.dart';
 
 class SpeedButtons extends StatelessWidget {
@@ -19,7 +20,7 @@ class SpeedButtons extends StatelessWidget {
       enabled: ctrl.hasPreparedAudio,
       onSelected: (speed) => ctrl.setPlaybackSpeed(speed),
       offset: const Offset(-20, -180),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.mdRadius),
       color: cs.surface,
       tooltip: 'سرعت پخش',
       itemBuilder: (_) => AudioPlayerController.supportedSpeeds.map((speed) {
@@ -51,7 +52,7 @@ class SpeedButtons extends StatelessWidget {
           color: ctrl.hasPreparedAudio
               ? cs.surfaceContainerHighest.withValues(alpha: 0.6)
               : cs.surfaceContainerHighest.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: AppRadius.smRadius,
           border: Border.all(color: theme.dividerColor.withValues(alpha: 0.4)),
         ),
         child: Text(

@@ -1,5 +1,6 @@
 import 'package:hafez_poems/theme/text_style.dart';
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/poemsUnit/poemContextMenuUnit/menu_item_data.dart';
 import 'package:hafez_poems/theme/color_style.dart';
 
@@ -68,7 +69,7 @@ class ActionMenu extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: bg,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: AppRadius.lgRadius,
           boxShadow: [
             BoxShadow(
               color: shadow,

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/theme_reveal_service.dart';
 
 class ThemeModeIconToggle extends StatefulWidget {
@@ -124,7 +125,7 @@ class _ThemeModeIconToggleState extends State<ThemeModeIconToggle>
             height: 58,
             decoration: BoxDecoration(
               color: colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: AppRadius.lgRadius,
               border: Border.all(
                 color: theme.dividerColor.withValues(alpha: 0.8),
               ),
@@ -137,7 +138,7 @@ class _ThemeModeIconToggleState extends State<ThemeModeIconToggle>
               ],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: AppRadius.lgRadius,
               child: Stack(
                 alignment: Alignment.center,
                 children: [

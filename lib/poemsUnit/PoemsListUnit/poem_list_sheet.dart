@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_lucide_animated/flutter_lucide_animated.dart';
 import 'package:get/get.dart';
@@ -151,13 +153,13 @@ class _PoemListSheetState extends State<PoemListSheet> {
       context: context,
       position: position,
       elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.mdRadius),
       color: cs.surface,
       items: _ReadFilter.values.map((f) {
         final isActive = currentFilter == f;
         return PopupMenuItem<_ReadFilter>(
           value: f,
-          padding: EdgeInsets.only(left: 12),
+          padding: EdgeInsets.only(left: AppSpacing.md),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 120),
             width: 150,
@@ -171,7 +173,7 @@ class _PoemListSheetState extends State<PoemListSheet> {
               color: isActive
                   ? cs.primary.withValues(alpha: 0.08)
                   : Colors.transparent,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: AppRadius.smRadius,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -225,7 +227,7 @@ class _PoemListSheetState extends State<PoemListSheet> {
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -286,7 +288,7 @@ class _PoemListSheetState extends State<PoemListSheet> {
                   height: 5,
                   decoration: BoxDecoration(
                     color: cs.onSurface.withValues(alpha: 0.25),
-                    borderRadius: BorderRadius.circular(100),
+                    borderRadius: AppRadius.pillRadius,
                   ),
                 ),
 
@@ -316,7 +318,7 @@ class _PoemListSheetState extends State<PoemListSheet> {
                     Builder(
                       builder: (btnCtx) => InkWell(
                         onTap: () => _showFilterDropdown(btnCtx),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: AppRadius.smRadius,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,
@@ -326,7 +328,7 @@ class _PoemListSheetState extends State<PoemListSheet> {
                             color: _filter != _ReadFilter.all
                                 ? cs.primary.withValues(alpha: 0.1)
                                 : Colors.transparent,
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: AppRadius.smRadius,
                             border: Border.all(
                               color: _filter != _ReadFilter.all
                                   ? cs.primary.withValues(alpha: 0.3)

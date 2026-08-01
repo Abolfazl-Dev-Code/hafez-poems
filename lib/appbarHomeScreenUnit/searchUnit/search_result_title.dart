@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/searchUnit/search_result_category_mapper.dart';
 import 'package:hafez_poems/models/search_result.dart';
@@ -86,14 +88,14 @@ class SearchResultTitle extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4),
+      margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       elevation: theme.brightness == Brightness.dark ? 0 : 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.lgRadius,
         side: BorderSide(color: theme.dividerColor.withValues(alpha: 0.3)),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.lgRadius,
         onTap: () {
           Get.to(
             () => PoemScreen(

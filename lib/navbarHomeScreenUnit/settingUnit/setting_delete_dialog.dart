@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/theme/text_style.dart';
 
 Future<bool?> showDeleteDataDialog(BuildContext context) {
@@ -50,7 +51,7 @@ Future<bool?> showDeleteDataDialog(BuildContext context) {
                 foregroundColor: Colors.green.shade700,
                 backgroundColor: Colors.green.withValues(alpha: 0.10),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: AppRadius.smRadius,
                   side: BorderSide(color: Colors.green.withValues(alpha: 0.20)),
                 ),
                 padding: const EdgeInsets.symmetric(
@@ -66,7 +67,7 @@ Future<bool?> showDeleteDataDialog(BuildContext context) {
                 foregroundColor: Colors.red.shade700,
                 backgroundColor: Colors.red.withValues(alpha: 0.10),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: AppRadius.smRadius,
                   side: BorderSide(color: Colors.red.withValues(alpha: 0.20)),
                 ),
                 padding: const EdgeInsets.symmetric(

@@ -1,6 +1,8 @@
 import 'package:hafez_poems/theme/text_style.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
+import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/models/onboarding_slide_data.dart';
 
 class OnboardingPage extends StatelessWidget {
@@ -26,7 +28,7 @@ class OnboardingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -37,7 +39,7 @@ class OnboardingPage extends StatelessWidget {
               builder: (_, _) => Transform.scale(
                 scale: breatheScale.value,
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(70),
+                  borderRadius: AppRadius.pillRadius,
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                     child: Container(
