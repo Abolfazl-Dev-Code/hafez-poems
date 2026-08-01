@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:hafez_poems/core/security/trusted_media_host.dart';
 import 'package:hafez_poems/models/recitation_models.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,40 +20,41 @@ class RecitationService {
           .get(url, headers: {'Accept': 'application/json'})
           .timeout(const Duration(seconds: 12));
 
-      debugPrint('📡 recitations status: ${response.statusCode}');
+      if (kDebugMode) {
+        debugPrint('📡 recitations status: ${response.statusCode}');
+      }
 
       if (response.statusCode == 200) {
         final List data = jsonDecode(response.body);
-        if (data.isNotEmpty) {
-          debugPrint(
-            '📡 first recitation keys: ${(data.first as Map).keys.toList()}',
-          );
-          debugPrint('📡 first recitation: ${data.first}');
-        }
         final list = data
             .map((e) => RecitationInfo.fromJson(e as Map<String, dynamic>))
-            .where((r) => r.mp3Url.isNotEmpty)
+            .where((r) => r.mp3Url.isNotEmpty && isTrustedMediaUrl(r.mp3Url))
             .toList();
-        debugPrint('✅ parsed ${list.length} recitations');
+        if (kDebugMode) {
+          debugPrint('✅ parsed ${list.length} recitations');
+        }
         return list;
       }
       return [];
     } catch (e) {
-      debugPrint('❌ fetchRecitations error ($poemId): $e');
+      if (kDebugMode) {
+        debugPrint('❌ fetchRecitations error ($poemId): $e');
+      }
       return [];
     }
   }
 
   // ── دریافت زمان‌بندی مصراع‌ها ─────────────────────────
   Future<List<VerseSyncPoint>> fetchSyncPoints(String xmlUrl) async {
-    if (xmlUrl.isEmpty) return [];
+    if (xmlUrl.isEmpty || !isTrustedMediaUrl(xmlUrl)) return [];
     try {
-      debugPrint('📡 fetchSyncPoints URL: $xmlUrl');
       final response = await http
           .get(Uri.parse(xmlUrl), headers: {'Accept': 'application/xml'})
           .timeout(const Duration(seconds: 12));
 
-      debugPrint('📡 syncPoints status: ${response.statusCode}');
+      if (kDebugMode) {
+        debugPrint('📡 syncPoints status: ${response.statusCode}');
+      }
 
       if (response.statusCode != 200) return [];
 
@@ -76,10 +78,14 @@ class RecitationService {
 
       points.sort((a, b) => a.audioMilliseconds.compareTo(b.audioMilliseconds));
 
-      debugPrint('✅ parsed ${points.length} sync points');
+      if (kDebugMode) {
+        debugPrint('✅ parsed ${points.length} sync points');
+      }
       return points;
     } catch (e) {
-      debugPrint('❌ fetchSyncPoints error: $e');
+      if (kDebugMode) {
+        debugPrint('❌ fetchSyncPoints error: $e');
+      }
       return [];
     }
   }

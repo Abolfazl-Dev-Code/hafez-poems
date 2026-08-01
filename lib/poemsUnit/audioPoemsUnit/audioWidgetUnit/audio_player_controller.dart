@@ -8,6 +8,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/Initializers_and_Boot/globals.dart';
 import 'package:hafez_poems/core/data/contracts/i_audio_download_storage.dart';
+import 'package:hafez_poems/core/security/trusted_media_host.dart';
 import 'package:hafez_poems/core/utils/connectivity_checker.dart';
 import 'package:hafez_poems/models/recitation_models.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
@@ -332,7 +333,7 @@ class AudioPlayerController extends ChangeNotifier {
 
     if (_disposed || myGeneration != _loadGeneration) return;
 
-    if (url.isEmpty) {
+    if (url.isEmpty || !isTrustedMediaUrl(url)) {
       _state = HafezPlayerState.idle;
       _isUsingOfflineAudio = false;
       _notify();
