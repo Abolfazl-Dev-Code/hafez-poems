@@ -47,7 +47,7 @@ class ActionMenu extends StatelessWidget {
         icon: isHighlighted
             ? Icons.highlight_remove_rounded
             : Icons.highlight_rounded,
-        label: isHighlighted ? 'حذف هایلایت' : 'هایلایت مصرع',
+        label: isHighlighted ? 'حذف برگزیده' : 'برگزیدن مصرع',
         onTap: onToggleHighlight,
       ),
       MenuItemData(

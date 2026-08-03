@@ -11,7 +11,6 @@ import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioWidgetUnit/audio_playe
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioWidgetUnit/audio_player_widget.dart';
 import 'package:hafez_poems/poemsUnit/poemContextMenuUnit/poem_line_context_menu.dart';
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
-import 'package:hafez_poems/poemsUnit/poemsActionBarUnit/poem_action_bar.dart';
 import 'package:hafez_poems/poemsUnit/poemContextMenuUnit/poem_selected_text.dart';
 import 'package:hafez_poems/poemsUnit/verseShareUnit/verse_share_sheet.dart';
 import 'package:hafez_poems/poemsUnit/verseSyncUnit/active_verse_indicator_widget.dart';
@@ -21,6 +20,57 @@ import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/core/data/contracts/i_read_status_storage.dart';
+
+class _AppBarToggleIcon extends StatelessWidget {
+  final bool isActive;
+  final IconData activeIcon;
+  final IconData inactiveIcon;
+  final Color activeColor;
+  final Color inactiveColor;
+  final VoidCallback onTap;
+
+  const _AppBarToggleIcon({
+    required this.isActive,
+    required this.activeIcon,
+    required this.inactiveIcon,
+    required this.activeColor,
+    required this.inactiveColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: AppRadius.smRadius,
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeInOut,
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: isActive
+                ? activeColor.withValues(alpha: 0.14)
+                : Colors.transparent,
+            borderRadius: AppRadius.smRadius,
+          ),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            transitionBuilder: (child, anim) =>
+                ScaleTransition(scale: anim, child: child),
+            child: Icon(
+              isActive ? activeIcon : inactiveIcon,
+              key: ValueKey(isActive),
+              size: 22,
+              color: isActive ? activeColor : inactiveColor,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class PoemScreenArgs {
   final String id;
@@ -115,10 +165,6 @@ class _PoemScreenState extends State<PoemScreen>
       .map((e) => e.trim())
       .where((e) => e.isNotEmpty)
       .toList();
-
-  bool get _isSelectedLineHighlighted =>
-      _selectedLineIndex != null &&
-      _highlightedLineIndexes.contains(_selectedLineIndex);
 
   @override
   void initState() {
@@ -305,8 +351,8 @@ class _PoemScreenState extends State<PoemScreen>
         fontFamily: _fontFamily,
         fontColor: _fontColor,
         isFlashing: false,
-        onTap: () {},
         isContextMenuOpen: true,
+        onTap: () {},
       ),
       onCopy: () => _copyLine(_poemLines[index]),
       onToggleHighlight: () {
@@ -701,7 +747,7 @@ class _PoemScreenState extends State<PoemScreen>
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
     const double breathingRoom = 16;
-    final double bottomInset = _args.hasAudio ? 10 : 110;
+    final double bottomInset = _args.hasAudio ? 10 : 16;
     final double overlayHeight = !_args.hasAudio
         ? 0
         : (_isAudioExpanded
@@ -794,32 +840,54 @@ class _PoemScreenState extends State<PoemScreen>
                 ]
               : [
                   Padding(
-                    padding: const EdgeInsets.only(left: AppSpacing.md),
-                    child: IconButton(
-                      icon: ColorFiltered(
-                        colorFilter: ColorFilter.mode(
-                          colorScheme.onSurface,
-                          BlendMode.srcIn,
+                    padding: const EdgeInsets.only(left: AppSpacing.xs),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _AppBarToggleIcon(
+                          isActive: _isLiked,
+                          activeIcon: Icons.favorite,
+                          inactiveIcon: Icons.favorite_border,
+                          activeColor: Colors.red.shade400,
+                          inactiveColor: colorScheme.onSurface,
+                          onTap: _toggleLike,
                         ),
-                        child: Lottie.asset(
-                          AppIcons.share,
-                          height: 20,
-                          controller: _shareController,
-                          repeat: false,
-                          onLoaded: (composition) {
-                            _shareController.duration = composition.duration;
-                          },
+                        _AppBarToggleIcon(
+                          isActive: _isSaved,
+                          activeIcon: Icons.bookmark,
+                          inactiveIcon: Icons.bookmark_border,
+                          activeColor: Colors.greenAccent,
+                          inactiveColor: colorScheme.onSurface,
+                          onTap: _toggleSave,
                         ),
-                      ),
-                      onPressed: _isTextLoading
-                          ? null
-                          : () {
-                              _shareController
-                                ..reset()
-                                ..forward();
+                        IconButton(
+                          icon: ColorFiltered(
+                            colorFilter: ColorFilter.mode(
+                              colorScheme.onSurface,
+                              BlendMode.srcIn,
+                            ),
+                            child: Lottie.asset(
+                              AppIcons.share,
+                              height: 20,
+                              controller: _shareController,
+                              repeat: false,
+                              onLoaded: (composition) {
+                                _shareController.duration =
+                                    composition.duration;
+                              },
+                            ),
+                          ),
+                          onPressed: _isTextLoading
+                              ? null
+                              : () {
+                                  _shareController
+                                    ..reset()
+                                    ..forward();
 
-                              _sharePoem();
-                            },
+                                  _sharePoem();
+                                },
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -862,7 +930,7 @@ class _PoemScreenState extends State<PoemScreen>
                         physics: _isContextMenuOpen
                             ? const NeverScrollableScrollPhysics()
                             : const AlwaysScrollableScrollPhysics(),
-                        padding: EdgeInsets.fromLTRB(12, 10, 12, bottomPadding),
+                        padding: EdgeInsets.fromLTRB(12, 0, 12, bottomPadding),
                         child: Card(
                           color: colorScheme.surface,
                           elevation: theme.brightness == Brightness.dark
@@ -882,121 +950,156 @@ class _PoemScreenState extends State<PoemScreen>
                                 final activeOrder =
                                     _verseSyncCtrl.activeVerseOrder;
                                 return Column(
-                                  children: List.generate(_poemLines.length, (
-                                    i,
-                                  ) {
-                                    final isActive =
-                                        _verseSyncCtrl.hasSyncData &&
-                                        activeOrder == i;
-                                    final isFlashing = _flashingLineIndex == i;
-
-                                    final layerLink = _lineLayerLinks[i] ??=
-                                        LayerLink();
-                                    final verseKey = _verseTargetKeys[i] ??=
-                                        GlobalKey();
-
-                                    final verseText = CompositedTransformTarget(
-                                      link: layerLink,
-                                      child: KeyedSubtree(
-                                        key: verseKey,
-                                        child: Opacity(
-                                          opacity: _menuOpenLineIndex == i
-                                              ? 0
-                                              : 1,
-                                          child: PoemSelectedText(
-                                            text: _poemLines[i],
-                                            isSelected: _isMultiLineSelecting
-                                                ? _selectedShareLines.contains(
-                                                    i,
-                                                  )
-                                                : _selectedLineIndex == i,
-                                            isHighlighted:
-                                                _highlightedLineIndexes
-                                                    .contains(i),
-                                            isContextMenuOpen:
-                                                _menuOpenLineIndex == i,
-                                            fontSize: _fontSize,
-                                            lineHeight: _lineHeight,
-                                            isFlashing: isFlashing,
-                                            fontFamily: _fontFamily,
-                                            fontColor: _fontColor,
-                                            onTap: () {
-                                              if (_isMultiLineSelecting) {
-                                                _toggleShareLineSelection(i);
-                                                return;
-                                              }
-
-                                              setState(() {
-                                                _selectedLineIndex =
-                                                    _selectedLineIndex == i
-                                                    ? null
-                                                    : i;
-                                              });
-                                            },
-                                            onLongPress: (details) =>
-                                                _showLineMenu(i, details),
-                                          ),
+                                  children: [
+                                    if (_highlightedLineIndexes.isEmpty)
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          bottom: 10,
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.touch_app_outlined,
+                                              size: 16,
+                                              color: colorScheme.onSurface
+                                                  .withValues(alpha: 0.55),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Expanded(
+                                              child: Text(
+                                                'برای برگزیدن یک مصرع، روی آن نگه دارید',
+                                                style: textTheme.bodySmall
+                                                    ?.copyWith(
+                                                      color: colorScheme
+                                                          .onSurface
+                                                          .withValues(
+                                                            alpha: 0.55,
+                                                          ),
+                                                    ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                    );
-                                    return Padding(
-                                      key: _lineKeys[i] ??= GlobalKey(),
-                                      padding: const EdgeInsets.only(
-                                        bottom: 8,
-                                        right: 0,
-                                      ),
-                                      child: _verseSyncCtrl.hasSyncData
-                                          ? Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                SizedBox(
-                                                  width: indicatorSlotSize,
-                                                  height: indicatorSlotSize,
-                                                  child: Center(
-                                                    child: AnimatedSwitcher(
-                                                      duration: const Duration(
-                                                        milliseconds: 250,
-                                                      ),
-                                                      transitionBuilder:
-                                                          (
-                                                            child,
-                                                            anim,
-                                                          ) => ScaleTransition(
-                                                            scale: anim,
-                                                            child:
-                                                                FadeTransition(
-                                                                  opacity: anim,
-                                                                  child: child,
-                                                                ),
-                                                          ),
-                                                      child: isActive
-                                                          ? ActiveVerseIndicator(
-                                                              key: const ValueKey(
-                                                                'active_indicator',
-                                                              ),
-                                                              color:
-                                                                  Theme.of(
-                                                                        context,
-                                                                      )
-                                                                      .colorScheme
-                                                                      .primary,
-                                                            )
-                                                          : const SizedBox.shrink(
-                                                              key: ValueKey(
-                                                                'inactive_indicator',
-                                                              ),
+                                    ...List.generate(_poemLines.length, (i) {
+                                      final isActive =
+                                          _verseSyncCtrl.hasSyncData &&
+                                          activeOrder == i;
+                                      final isFlashing =
+                                          _flashingLineIndex == i;
+
+                                      final layerLink = _lineLayerLinks[i] ??=
+                                          LayerLink();
+                                      final verseKey = _verseTargetKeys[i] ??=
+                                          GlobalKey();
+
+                                      final verseText =
+                                          CompositedTransformTarget(
+                                            link: layerLink,
+                                            child: KeyedSubtree(
+                                              key: verseKey,
+                                              child: Opacity(
+                                                opacity: _menuOpenLineIndex == i
+                                                    ? 0
+                                                    : 1,
+                                                child: PoemSelectedText(
+                                                  text: _poemLines[i],
+                                                  isSelected:
+                                                      _isMultiLineSelecting
+                                                      ? _selectedShareLines
+                                                            .contains(i)
+                                                      : _selectedLineIndex == i,
+                                                  isHighlighted:
+                                                      _highlightedLineIndexes
+                                                          .contains(i),
+                                                  fontSize: _fontSize,
+                                                  lineHeight: _lineHeight,
+                                                  isFlashing: isFlashing,
+                                                  isContextMenuOpen:
+                                                      _menuOpenLineIndex == i,
+                                                  fontFamily: _fontFamily,
+                                                  fontColor: _fontColor,
+                                                  onTap: () {
+                                                    if (_isMultiLineSelecting) {
+                                                      _toggleShareLineSelection(
+                                                        i,
+                                                      );
+                                                      return;
+                                                    }
+
+                                                    setState(() {
+                                                      _selectedLineIndex =
+                                                          _selectedLineIndex ==
+                                                              i
+                                                          ? null
+                                                          : i;
+                                                    });
+                                                  },
+                                                  onLongPress: (details) =>
+                                                      _showLineMenu(i, details),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                      return Padding(
+                                        key: _lineKeys[i] ??= GlobalKey(),
+                                        padding: const EdgeInsets.only(
+                                          bottom: 8,
+                                          right: 0,
+                                        ),
+                                        child: _verseSyncCtrl.hasSyncData
+                                            ? Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                children: [
+                                                  SizedBox(
+                                                    width: indicatorSlotSize,
+                                                    height: indicatorSlotSize,
+                                                    child: Center(
+                                                      child: AnimatedSwitcher(
+                                                        duration:
+                                                            const Duration(
+                                                              milliseconds: 250,
                                                             ),
+                                                        transitionBuilder:
+                                                            (
+                                                              child,
+                                                              anim,
+                                                            ) => ScaleTransition(
+                                                              scale: anim,
+                                                              child:
+                                                                  FadeTransition(
+                                                                    opacity:
+                                                                        anim,
+                                                                    child:
+                                                                        child,
+                                                                  ),
+                                                            ),
+                                                        child: isActive
+                                                            ? ActiveVerseIndicator(
+                                                                key: const ValueKey(
+                                                                  'active_indicator',
+                                                                ),
+                                                                color: Theme.of(
+                                                                  context,
+                                                                ).colorScheme.primary,
+                                                              )
+                                                            : const SizedBox.shrink(
+                                                                key: ValueKey(
+                                                                  'inactive_indicator',
+                                                                ),
+                                                              ),
+                                                      ),
                                                     ),
                                                   ),
-                                                ),
-                                                SizedBox(width: 6.5),
-                                                Expanded(child: verseText),
-                                              ],
-                                            )
-                                          : verseText,
-                                    );
-                                  }),
+                                                  SizedBox(width: 6.5),
+                                                  Expanded(child: verseText),
+                                                ],
+                                              )
+                                            : verseText,
+                                      );
+                                    }),
+                                  ],
                                 );
                               },
                             ),
@@ -1014,22 +1117,6 @@ class _PoemScreenState extends State<PoemScreen>
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.lg,
-                    ),
-                    child: PoemActionBar(
-                      isLiked: _isLiked,
-                      isSaved: _isSaved,
-                      canHighlight: _selectedLineIndex != null,
-                      isHighlightActive: _isSelectedLineHighlighted,
-                      onLikeTap: _toggleLike,
-                      onSaveTap: _toggleSave,
-                      onHighlightTap: _toggleHighlight,
-                      scaffoldContext: context,
-                    ),
-                  ),
-                  if (_args.hasAudio) const SizedBox(height: 5),
                   if (_args.hasAudio)
                     AudioPlayerWidget(
                       key: _audioWidgetKey,

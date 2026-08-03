@@ -223,7 +223,10 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
         borderRadius: AppRadius.lgRadius,
         onTap: _expand,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.lg),
+          padding: const EdgeInsets.symmetric(
+            vertical: AppSpacing.lg,
+            horizontal: AppSpacing.lg,
+          ),
           decoration: BoxDecoration(
             color: AppColors.primary,
             borderRadius: AppRadius.lgRadius,
@@ -241,7 +244,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                 'پخش صوتی',
                 style: TextStyle(
                   fontFamily: AppTextStyles.fontFamily,
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: FontWeight.w900,
                   color: Colors.white,
                 ),
