@@ -23,12 +23,20 @@ class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   final CarouselSliderController _carouselController =
       CarouselSliderController();
-  final GhazalCacheService _cache = Get.find<GhazalCacheService>();
+  final GhazalCacheService _ghazalCache = Get.find<GhazalCacheService>();
+  final List<BasePoemCacheService> _allCaches = [
+    Get.find<GhazalCacheService>(),
+    Get.find<GhataatCacheService>(),
+    Get.find<GhasayedCacheService>(),
+    Get.find<RobaeyatCacheService>(),
+    Get.find<MontasabCacheService>(),
+    Get.find<OtherPoemCacheService>(),
+  ];
   final ProfileController profileController = Get.put(ProfileController());
+  final List<Worker> _indexingWorkers = [];
   Worker? _textsReadyWorker;
-  Worker? _indexingWorker;
-  List<GhazalExcerpt> _allTexts = [];
-  List<GhazalExcerpt> _carouselTexts = [];
+  List<PoemExcerpt> _allTexts = [];
+  List<PoemExcerpt> _carouselTexts = [];
   late final AnimationController _shimmerController;
 
   @override
@@ -48,21 +56,26 @@ class _HomeScreenState extends State<HomeScreen>
 
   void _initCarousel() {
     if (_trySetCarouselTexts()) return;
-    _textsReadyWorker = ever(_cache.textsReadyCount, (count) {
+    _textsReadyWorker = ever(_ghazalCache.textsReadyCount, (count) {
       if (count >= 5 && _carouselTexts.isEmpty && mounted) {
         _trySetCarouselTexts();
       }
     });
-    _indexingWorker = ever(_cache.isIndexing, (indexing) {
-      if (!indexing && mounted) {
-        if (_carouselTexts.isEmpty) _trySetCarouselTexts();
-        if (mounted) {}
-      }
-    });
+    for (final cache in _allCaches) {
+      _indexingWorkers.add(
+        ever(cache.isIndexing, (indexing) {
+          if (!indexing && mounted && _carouselTexts.isEmpty) {
+            _trySetCarouselTexts();
+          }
+        }),
+      );
+    }
   }
 
   bool _trySetCarouselTexts() {
-    final excerpts = _cache.randomExcerpts(count: 10);
+    final excerpts = <PoemExcerpt>[
+      for (final cache in _allCaches) ...cache.randomExcerpts(count: 10),
+    ]..shuffle(Random());
     if (excerpts.isEmpty) return false;
     if (mounted) {
       setState(() {
@@ -75,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   void _refreshSlide(int index) {
     if (_allTexts.length <= 1 || index >= _carouselTexts.length) return;
-    GhazalExcerpt newItem;
+    PoemExcerpt newItem;
     do {
       newItem = _allTexts[Random().nextInt(_allTexts.length)];
     } while (newItem.id == _carouselTexts[index].id && _allTexts.length > 1);
@@ -86,7 +99,9 @@ class _HomeScreenState extends State<HomeScreen>
   void dispose() {
     _shimmerController.dispose();
     _textsReadyWorker?.dispose();
-    _indexingWorker?.dispose();
+    for (final w in _indexingWorkers) {
+      w.dispose();
+    }
     super.dispose();
   }
 
@@ -127,6 +142,7 @@ class _HomeScreenState extends State<HomeScreen>
                     key: ValueKey('carousel_slide_$index'),
                     initialGhazal: _carouselTexts[index].excerpt,
                     ghazalNumber: _carouselTexts[index].number,
+                    categoryLabel: _carouselTexts[index].category,
                     imagePath: 'assets/icons/hafez-light.png',
                     darkImagePath: 'assets/icons/hafez-dark.png',
                     lightColor: const Color.fromARGB(255, 255, 255, 255),

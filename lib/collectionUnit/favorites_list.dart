@@ -117,7 +117,7 @@ class _FavoriteCard extends StatelessWidget {
                 ),
             ],
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
           child: Row(
             children: [
               if (selectionMode) ...[

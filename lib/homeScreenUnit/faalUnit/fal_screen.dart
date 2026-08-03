@@ -94,7 +94,7 @@ class _FalScreenState extends State<FalScreen>
           centerTitle: true,
           toolbarHeight: 50,
           leading: Padding(
-            padding: const EdgeInsets.only(top: 0.0, right: 22.0),
+            padding: const EdgeInsets.only(top: 0.0, right: AppSpacing.xl),
             child: IconButton(
               icon: const Icon(Icons.arrow_back_rounded),
               onPressed: () => Navigator.of(context).pop(),

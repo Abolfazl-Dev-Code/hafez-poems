@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
@@ -103,7 +104,7 @@ class _StreakMotivationCardState extends State<StreakMotivationCard> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
       decoration: BoxDecoration(
         borderRadius: AppRadius.xlRadius,
         gradient: LinearGradient(
@@ -242,7 +243,7 @@ class _StreakMotivationCardState extends State<StreakMotivationCard> {
             curve: Curves.easeInOut,
             child: _isExpanded
                 ? Padding(
-                    padding: const EdgeInsets.only(top: 14),
+                    padding: const EdgeInsets.only(top: AppSpacing.lg),
                     child: Text(
                       textAlign: TextAlign.right,
                       '🔥 روزشمار نشان می‌دهد چند روز پشت‌سرهم برنامه را باز کرده‌ای.\n'

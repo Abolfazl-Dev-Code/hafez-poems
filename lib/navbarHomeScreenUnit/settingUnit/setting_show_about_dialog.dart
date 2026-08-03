@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/theme/text_style.dart';
 
@@ -19,7 +20,7 @@ void showAboutDialogCustom({
           ),
           titlePadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
           contentPadding: const EdgeInsets.fromLTRB(24, 16, 24, 10),
-          actionsPadding: const EdgeInsets.only(left: 16, bottom: 10),
+          actionsPadding: const EdgeInsets.only(left: AppSpacing.lg, bottom: AppSpacing.md),
           title: Row(
             children: [
               Icon(

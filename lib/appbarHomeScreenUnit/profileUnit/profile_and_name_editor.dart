@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_controller.dart';
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
@@ -195,7 +196,7 @@ class _EditProfileSheetContentState extends State<_EditProfileSheetContent> {
               duration: const Duration(milliseconds: 200),
               child: hasError
                   ? Padding(
-                      padding: const EdgeInsets.only(top: 6),
+                      padding: const EdgeInsets.only(top: AppSpacing.sm),
                       child: Row(
                         children: [
                           Icon(

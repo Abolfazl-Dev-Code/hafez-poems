@@ -60,9 +60,9 @@ class HeroAnimationBiography extends StatelessWidget {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(
-                          0xFFD4AF37,
-                        ).withValues(alpha: 0.35 + 0.35 * glow),
+                        color: BiographyColors.gold.withValues(
+                          alpha: 0.35 + 0.35 * glow,
+                        ),
                         blurRadius: 40 + 30 * glow,
                         spreadRadius: 3,
                       ),

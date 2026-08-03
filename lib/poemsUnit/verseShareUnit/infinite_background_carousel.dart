@@ -68,7 +68,7 @@ class _InfiniteBackgroundCarouselState
         final background = VerseBackgroundThemes.byIndex(page);
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
           child: Center(
             child: AspectRatio(
               aspectRatio: 1080 / 1920,

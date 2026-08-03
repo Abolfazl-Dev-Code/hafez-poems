@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_shadows.dart';
 import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:get/get.dart';
@@ -28,15 +29,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           color: colorScheme.surface,
           borderRadius: AppRadius.xlRadius,
           border: Border.all(color: theme.dividerColor.withValues(alpha: 0.35)),
-          boxShadow: [
-            BoxShadow(
-              color: theme.shadowColor.withValues(
-                alpha: theme.brightness == Brightness.dark ? 0.22 : 0.08,
-              ),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          boxShadow: AppShadows.card(context),
         ),
         child: Stack(
           alignment: Alignment.center,
@@ -59,7 +52,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             Align(
               alignment: Alignment.centerRight,
               child: Padding(
-                padding: const EdgeInsets.only(right: 11),
+                padding: const EdgeInsets.only(right: AppSpacing.md),
                 child: AnimatedAppIcon(
                   asset: AppIcons.search,
                   size: 27,

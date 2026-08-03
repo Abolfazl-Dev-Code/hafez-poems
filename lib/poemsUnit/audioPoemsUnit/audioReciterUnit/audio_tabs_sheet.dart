@@ -112,7 +112,7 @@ class _AudioTabsSheetState extends State<AudioTabsSheet>
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 10, bottom: 4),
+              padding: const EdgeInsets.only(top: AppSpacing.md, bottom: AppSpacing.xs),
               child: Container(
                 width: 36,
                 height: 4,
@@ -312,7 +312,7 @@ class _AudioTabsSheetState extends State<AudioTabsSheet>
                       },
                       borderRadius: AppRadius.mdRadius,
                       child: Container(
-                        margin: const EdgeInsets.symmetric(vertical: 2),
+                        margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
                           vertical: 10,

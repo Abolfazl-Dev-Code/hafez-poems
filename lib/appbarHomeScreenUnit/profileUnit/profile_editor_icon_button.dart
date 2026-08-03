@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
 
 class EditProfileCornerButton extends StatelessWidget {
@@ -41,7 +42,7 @@ class EditProfileCornerButton extends StatelessWidget {
         const SizedBox(height: 6),
         Container(
           constraints: const BoxConstraints(maxWidth: 150),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
           decoration: BoxDecoration(
             color: colorScheme.primary,
             borderRadius: AppRadius.mdRadius,

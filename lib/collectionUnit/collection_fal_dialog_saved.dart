@@ -58,7 +58,7 @@ class _FalDialogState extends State<FalDialog> {
       textDirection: TextDirection.rtl,
       child: Dialog(
         backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        insetPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xl),
         child: Container(
           decoration: BoxDecoration(
             color: Theme.of(context).scaffoldBackgroundColor,
@@ -239,7 +239,7 @@ class _FalDialogState extends State<FalDialog> {
                               ),
                             ),
                             alignment: Alignment.bottomCenter,
-                            padding: const EdgeInsets.only(bottom: 10),
+                            padding: const EdgeInsets.only(bottom: AppSpacing.md),
                             child: Icon(
                               Icons.keyboard_arrow_down_rounded,
                               color: Theme.of(

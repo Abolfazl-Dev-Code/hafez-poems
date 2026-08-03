@@ -420,7 +420,7 @@ class _StatusWidget extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
       decoration: BoxDecoration(
         color: color.withValues(alpha: isLight ? 0.08 : 0.15),
         borderRadius: AppRadius.lgRadius,

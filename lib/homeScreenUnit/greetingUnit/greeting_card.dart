@@ -142,7 +142,7 @@ class _GreetingCardState extends State<GreetingCard>
           borderRadius: AppRadius.mdRadius,
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: gradColors,

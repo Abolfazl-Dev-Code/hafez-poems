@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_shadows.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:video_player/video_player.dart';
 import 'package:hafez_poems/theme/text_style.dart';
@@ -7,6 +8,7 @@ import 'package:hafez_poems/theme/text_style.dart';
 class CarouselScreenWidget extends StatefulWidget {
   final String initialGhazal;
   final String ghazalNumber;
+  final String categoryLabel;
   final String imagePath;
   final String changeButtonIcon;
   final String darkImagePath;
@@ -18,6 +20,7 @@ class CarouselScreenWidget extends StatefulWidget {
     super.key,
     required this.initialGhazal,
     required this.ghazalNumber,
+    required this.categoryLabel,
     required this.imagePath,
     required this.darkImagePath,
     required this.changeButtonIcon,
@@ -34,6 +37,7 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
   double _turns = 0.0;
   late String _displayedGhazal;
   late String _displayedGhazalNumber;
+  late String _displayedCategoryLabel;
 
   VideoPlayerController? _videoController;
   bool _isRefreshing = false;
@@ -53,6 +57,7 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
     super.initState();
     _displayedGhazal = _extractFirstFourMesras(widget.initialGhazal);
     _displayedGhazalNumber = widget.ghazalNumber;
+    _displayedCategoryLabel = widget.categoryLabel;
   }
 
   @override
@@ -73,6 +78,9 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
     }
     if (oldWidget.ghazalNumber != widget.ghazalNumber) {
       _displayedGhazalNumber = widget.ghazalNumber;
+    }
+    if (oldWidget.categoryLabel != widget.categoryLabel) {
+      _displayedCategoryLabel = widget.categoryLabel;
     }
   }
 
@@ -227,13 +235,7 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
         border: Border.all(
           color: theme.dividerColor.withValues(alpha: isDark ? 0.25 : 0.18),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: theme.shadowColor.withValues(alpha: isDark ? 0.28 : 0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: AppShadows.card(context),
       ),
       child: Stack(
         children: [
@@ -369,12 +371,14 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
                     );
                   },
                   child: Column(
-                    key: ValueKey(_displayedGhazalNumber),
+                    key: ValueKey(
+                      '$_displayedCategoryLabel$_displayedGhazalNumber',
+                    ),
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'دیوان حافظ',
+                        'دیوان حافظ - شعر روز',
                         textAlign: TextAlign.right,
                         style: AppTextStyles.bodyMedium.copyWith(
                           color: colorScheme.onSurface,
@@ -384,7 +388,7 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'غزل $_displayedGhazalNumber',
+                        '$_displayedCategoryLabel $_displayedGhazalNumber',
                         textAlign: TextAlign.right,
                         style: AppTextStyles.bodyMedium.copyWith(
                           color: colorScheme.onSurface.withValues(alpha: 0.55),

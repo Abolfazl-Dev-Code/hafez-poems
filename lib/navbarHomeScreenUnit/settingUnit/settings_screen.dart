@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_shadows.dart';
 import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:get/get.dart';
@@ -302,7 +303,6 @@ class _SettingPageState extends State<SettingPage>
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
-    final isDark = theme.brightness == Brightness.dark;
     final previewColor = Color(_fontColorValue);
 
     return Directionality(
@@ -322,15 +322,7 @@ class _SettingPageState extends State<SettingPage>
                   border: Border.all(
                     color: theme.dividerColor.withValues(alpha: 0.8),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: theme.shadowColor.withValues(
-                        alpha: isDark ? 0.22 : 0.08,
-                      ),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  boxShadow: AppShadows.card(context),
                 ),
                 child: Obx(() {
                   final darkMode = themeController.isDarkMode.value;
@@ -465,7 +457,9 @@ class _SettingPageState extends State<SettingPage>
                   const SizedBox(height: 10),
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                    ),
                     decoration: BoxDecoration(
                       color: colorScheme.surfaceContainerHighest.withValues(
                         alpha: 0.35,
@@ -641,7 +635,9 @@ class _SettingPageState extends State<SettingPage>
                       borderRadius: AppRadius.mdRadius,
                       onTap: _pickReminderTime,
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.md,
+                        ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [

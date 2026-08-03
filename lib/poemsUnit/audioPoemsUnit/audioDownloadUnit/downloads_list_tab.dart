@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/core/data/contracts/i_audio_download_storage.dart';
@@ -158,7 +159,7 @@ class DownloadsListTab extends StatelessWidget {
               onTap: () => _play(context, row),
               borderRadius: AppRadius.mdRadius,
               child: Container(
-                margin: const EdgeInsets.symmetric(vertical: 3),
+                margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 12,

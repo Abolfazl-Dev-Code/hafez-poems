@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
 
 enum VerseShareType { text, image }
@@ -104,7 +105,7 @@ class _ShareTypeCard extends StatelessWidget {
         borderRadius: AppRadius.xlRadius,
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 22),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xl),
           child: Column(
             children: [
               CircleAvatar(

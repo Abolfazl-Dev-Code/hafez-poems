@@ -71,7 +71,7 @@ class FalBiography extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                     child: Icon(
                       Icons.auto_awesome,
                       size: 18,

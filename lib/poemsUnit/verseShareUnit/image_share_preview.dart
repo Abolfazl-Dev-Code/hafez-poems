@@ -74,7 +74,7 @@ class _ImageSharePreviewState extends State<ImageSharePreview> {
           centerTitle: true,
 
           leading: Padding(
-            padding: const EdgeInsets.only(right: 18),
+            padding: const EdgeInsets.only(right: AppSpacing.xl),
             child: IconButton(
               iconSize: 26,
               color: Colors.white,

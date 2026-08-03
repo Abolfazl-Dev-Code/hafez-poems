@@ -59,12 +59,12 @@ class InfoCard extends StatelessWidget {
             else
               ...items.map(
                 (item) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        margin: const EdgeInsets.only(top: 7),
+                        margin: const EdgeInsets.only(top: AppSpacing.sm),
                         width: 7,
                         height: 7,
                         decoration: BoxDecoration(

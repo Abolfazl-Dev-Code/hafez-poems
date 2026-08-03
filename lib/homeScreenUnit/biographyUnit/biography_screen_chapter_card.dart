@@ -1,5 +1,6 @@
 import 'package:hafez_poems/theme/text_style.dart';
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_theme.dart';
 import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_icons_auto_play.dart';
 import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_screen_chapter_data.dart';
@@ -137,7 +138,7 @@ class ChapterCard extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(right: 5, top: 7),
+            padding: const EdgeInsets.only(right: AppSpacing.xs, top: AppSpacing.sm),
             child: Text('غزل شماره 46'.toPersianNumbers()),
           ),
         ],

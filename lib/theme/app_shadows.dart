@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import 'color_style.dart';
 
 class AppShadows {
   AppShadows._();
 
-  static List<BoxShadow> card(Brightness brightness) => [
-    BoxShadow(
-      color: brightness == Brightness.dark
-          ? AppColors.darkShadow
-          : AppColors.shadow,
-      blurRadius: 10,
-      offset: const Offset(0, 2),
-    ),
-  ];
+  static List<BoxShadow> card(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    return [
+      BoxShadow(
+        color: theme.shadowColor.withValues(alpha: isDark ? 0.22 : 0.08),
+        blurRadius: 12,
+        offset: const Offset(0, 4),
+      ),
+    ];
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:hafez_poems/theme/text_style.dart';
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_shadows.dart';
 import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:get/get.dart';
@@ -222,7 +223,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
         borderRadius: AppRadius.lgRadius,
         onTap: _expand,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.lg),
           decoration: BoxDecoration(
             color: AppColors.primary,
             borderRadius: AppRadius.lgRadius,
@@ -271,15 +272,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
           color: cs.surface,
           borderRadius: AppRadius.xxlRadius,
           border: Border.all(color: theme.dividerColor.withValues(alpha: 0.4)),
-          boxShadow: [
-            BoxShadow(
-              color: theme.shadowColor.withValues(
-                alpha: theme.brightness == Brightness.dark ? 0.18 : 0.08,
-              ),
-              blurRadius: 14,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          boxShadow: AppShadows.card(context),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

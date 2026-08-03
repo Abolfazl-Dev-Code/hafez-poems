@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
 
 class SingleInfoTile extends StatelessWidget {
@@ -27,7 +28,7 @@ class SingleInfoTile extends StatelessWidget {
           : colorScheme.surfaceContainerHighest.withValues(alpha: 0.75),
       shape: RoundedRectangleBorder(borderRadius: AppRadius.xlRadius),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
         child: Row(
           children: [
             Container(

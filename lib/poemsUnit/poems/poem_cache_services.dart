@@ -53,6 +53,63 @@ abstract class BasePoemCacheService<T> extends GetxService {
   BasePoemLocalService<T> get localService;
   bool get sortById => false;
   int get audioIndex => 0; // قطعات: override با 1
+  String get categoryLabel;
+
+  String numberOf(T item) {
+    final idx = cachedItemsRx.indexWhere((e) => idOf(e) == idOf(item));
+    return idx == -1 ? idOf(item) : '${idx + 1}';
+  }
+
+  List<PoemExcerpt> randomExcerpts({int count = 5}) {
+    final valid =
+        _map.values
+            .where(
+              (item) => hasFullTextOf(item) && textOf(item).trim().isNotEmpty,
+            )
+            .toList()
+          ..shuffle(Random());
+    final result = <PoemExcerpt>[];
+    for (final item in valid) {
+      final excerpt = extractFirstFourBeyts(textOf(item));
+      if (excerpt.isNotEmpty) {
+        result.add(
+          PoemExcerpt(
+            id: idOf(item),
+            number: numberOf(item),
+            excerpt: excerpt,
+            category: categoryLabel,
+          ),
+        );
+        if (result.length >= count) break;
+      }
+    }
+    return result;
+  }
+
+  String extractPoemNumber(String title) {
+    final matches = RegExp(
+      r'[0-9\u06F0-\u06F9\u0660-\u0669]+',
+    ).allMatches(title).toList();
+    if (matches.isEmpty) return '';
+    return matches.last.group(0) ?? '';
+  }
+
+  String extractFirstFourBeyts(String text) {
+    final lines = text
+        .replaceAll('\r\n', '\n')
+        .replaceAll('\r', '\n')
+        .split('\n')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+    if (lines.isEmpty) return '';
+    final beyts = <String>[];
+    for (int i = 0; i < lines.length && beyts.length < 4; i += 2) {
+      final m2 = (i + 1 < lines.length) ? lines[i + 1] : '';
+      beyts.add(m2.isNotEmpty ? '${lines[i]}\n$m2' : lines[i]);
+    }
+    return beyts.join('\n\n');
+  }
 
   // ── init ─────────────────────────────────────────
   Future<BasePoemCacheService<T>> init() async {
@@ -197,19 +254,29 @@ abstract class BasePoemCacheService<T> extends GetxService {
 //  GHAZAL
 // ══════════════════════════════════════════════════════════
 
-class GhazalExcerpt {
+class PoemExcerpt {
   final String id;
   final String number;
   final String excerpt;
+  final String category;
 
-  const GhazalExcerpt({
+  const PoemExcerpt({
     required this.id,
     required this.number,
     required this.excerpt,
+    required this.category,
   });
 }
 
 class GhazalCacheService extends BasePoemCacheService<Ghazal> {
+  @override
+  String get categoryLabel => 'غزل';
+  @override
+  String numberOf(Ghazal item) {
+    final fromTitle = extractPoemNumber(titleOf(item));
+    return fromTitle.isNotEmpty ? fromTitle : super.numberOf(item);
+  }
+
   @override
   String idOf(Ghazal g) => g.id;
   @override
@@ -251,55 +318,6 @@ class GhazalCacheService extends BasePoemCacheService<Ghazal> {
     return (valid..shuffle(Random())).first;
   }
 
-  List<GhazalExcerpt> randomExcerpts({int count = 5}) {
-    final valid =
-        _map.values
-            .where((g) => g.hasFullText && g.text.trim().isNotEmpty)
-            .toList()
-          ..shuffle(Random());
-    final result = <GhazalExcerpt>[];
-    for (final g in valid) {
-      final excerpt = _extractFirstFourBeyts(g.text);
-      if (excerpt.isNotEmpty) {
-        final number = _extractGhazalNumber(g.title);
-        result.add(
-          GhazalExcerpt(
-            id: g.id,
-            number: number.isNotEmpty ? number : g.id,
-            excerpt: excerpt,
-          ),
-        );
-        if (result.length >= count) break;
-      }
-    }
-    return result;
-  }
-
-  String _extractGhazalNumber(String title) {
-    final matches = RegExp(
-      r'[0-9\u06F0-\u06F9\u0660-\u0669]+',
-    ).allMatches(title).toList();
-    if (matches.isEmpty) return '';
-    return matches.last.group(0) ?? '';
-  }
-
-  String _extractFirstFourBeyts(String text) {
-    final lines = text
-        .replaceAll('\r\n', '\n')
-        .replaceAll('\r', '\n')
-        .split('\n')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
-    if (lines.isEmpty) return '';
-    final beyts = <String>[];
-    for (int i = 0; i < lines.length && beyts.length < 4; i += 2) {
-      final m2 = (i + 1 < lines.length) ? lines[i + 1] : '';
-      beyts.add(m2.isNotEmpty ? '${lines[i]}\n$m2' : lines[i]);
-    }
-    return beyts.join('\n\n');
-  }
-
   RxList<Ghazal> get cachedGhazalsRx => cachedItemsRx;
   List<Ghazal> get cachedGhazals => cachedItemsRx.toList();
   Future<Ghazal> getGhazalDetail(String id) => getDetail(id);
@@ -310,6 +328,8 @@ class GhazalCacheService extends BasePoemCacheService<Ghazal> {
 // ══════════════════════════════════════════════════════════
 
 class GhataatCacheService extends BasePoemCacheService<GhataatModel> {
+  @override
+  String get categoryLabel => 'قطعه';
   @override
   int get audioIndex => 1;
   @override
@@ -339,6 +359,8 @@ class GhataatCacheService extends BasePoemCacheService<GhataatModel> {
 
 class RobaeyatCacheService extends BasePoemCacheService<RobaeyatModel> {
   @override
+  String get categoryLabel => 'رباعی';
+  @override
   bool get sortById => true;
   @override
   String idOf(RobaeyatModel r) => r.id;
@@ -367,6 +389,8 @@ class RobaeyatCacheService extends BasePoemCacheService<RobaeyatModel> {
 
 class MontasabCacheService extends BasePoemCacheService<MontasabModel> {
   @override
+  String get categoryLabel => 'اشعار منتسب';
+  @override
   bool get sortById => true;
   @override
   String idOf(MontasabModel m) => m.id;
@@ -394,6 +418,8 @@ class MontasabCacheService extends BasePoemCacheService<MontasabModel> {
 // ══════════════════════════════════════════════════════════
 
 class GhasayedCacheService extends BasePoemCacheService<GhasayedModel> {
+  @override
+  String get categoryLabel => 'قصیده';
   @override
   bool get sortById => true;
   @override
@@ -424,6 +450,8 @@ class GhasayedCacheService extends BasePoemCacheService<GhasayedModel> {
 // ══════════════════════════════════════════════════════════
 
 class OtherPoemCacheService extends BasePoemCacheService<OtherPoemModel> {
+  @override
+  String get categoryLabel => 'اشعار دیگر';
   @override
   String idOf(OtherPoemModel o) => o.id;
   @override
