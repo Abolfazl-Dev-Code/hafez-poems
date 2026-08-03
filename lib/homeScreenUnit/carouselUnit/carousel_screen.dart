@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:hafez_poems/theme/app_shadows.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:video_player/video_player.dart';
 import 'package:hafez_poems/theme/text_style.dart';
@@ -93,7 +92,10 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
   }
 
   String _extractFirstFourMesras(String text) {
-    final normalized = text.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
+    final normalized = text
+        .replaceAll('\r\n', '\n')
+        .replaceAll('\r', '\n')
+        .replaceAll('/', '\n');
     final lines = normalized
         .split('\n')
         .map((e) => e.replaceAll(RegExp(r'[\t\u00A0]+'), ' ').trim())
@@ -235,7 +237,13 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
         border: Border.all(
           color: theme.dividerColor.withValues(alpha: isDark ? 0.25 : 0.18),
         ),
-        boxShadow: AppShadows.card(context),
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withValues(alpha: isDark ? 0.28 : 0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Stack(
         children: [
@@ -378,7 +386,7 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'دیوان حافظ - شعر روز',
+                        'دیوان حافظ',
                         textAlign: TextAlign.right,
                         style: AppTextStyles.bodyMedium.copyWith(
                           color: colorScheme.onSurface,

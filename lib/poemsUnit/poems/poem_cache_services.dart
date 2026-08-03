@@ -63,9 +63,7 @@ abstract class BasePoemCacheService<T> extends GetxService {
   List<PoemExcerpt> randomExcerpts({int count = 5}) {
     final valid =
         _map.values
-            .where(
-              (item) => hasFullTextOf(item) && textOf(item).trim().isNotEmpty,
-            )
+            .where((item) => hasFullTextOf(item) && textOf(item).trim().isNotEmpty)
             .toList()
           ..shuffle(Random());
     final result = <PoemExcerpt>[];
@@ -98,6 +96,7 @@ abstract class BasePoemCacheService<T> extends GetxService {
     final lines = text
         .replaceAll('\r\n', '\n')
         .replaceAll('\r', '\n')
+        .replaceAll('/', '\n')
         .split('\n')
         .map((e) => e.trim())
         .where((e) => e.isNotEmpty)
@@ -276,7 +275,6 @@ class GhazalCacheService extends BasePoemCacheService<Ghazal> {
     final fromTitle = extractPoemNumber(titleOf(item));
     return fromTitle.isNotEmpty ? fromTitle : super.numberOf(item);
   }
-
   @override
   String idOf(Ghazal g) => g.id;
   @override
