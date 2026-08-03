@@ -32,13 +32,9 @@ class PoemLineContextMenuController {
     _overlayKey = GlobalKey<_PoemLineContextMenuOverlayState>();
 
     final media = MediaQuery.of(context);
-
     const menuGap = 0.0;
-
     final menuHeight = ActionMenu.estimatedHeight();
-
     final topSpace = targetOffset.dy - media.padding.top;
-
     final bottomSpace =
         media.size.height -
         media.padding.bottom -
@@ -86,12 +82,9 @@ class PoemLineContextMenuController {
 
   Future<void> hide() async {
     if (_entry == null) return;
-
     await _overlayKey?.currentState?.reverse();
-
     _entry?.remove();
     _entry = null;
-
     _onClosedCallback?.call();
     _onClosedCallback = null;
   }
@@ -158,14 +151,11 @@ class _PoemLineContextMenuOverlayState
       duration: const Duration(milliseconds: 240),
       reverseDuration: const Duration(milliseconds: 180),
     );
-
     _scale = Tween<double>(
       begin: .92,
       end: 1,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
-
     _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-
     _lift = Tween<double>(
       begin: 0,
       end: widget.showBelow ? -_liftDistance : _liftDistance,
@@ -185,9 +175,7 @@ class _PoemLineContextMenuOverlayState
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
     final blurTint = isDark ? AppColors.darkBackground : AppColors.textPrimary;
-
     final cardColor = isDark ? AppColors.darkSurface : AppColors.surface;
 
     return Directionality(

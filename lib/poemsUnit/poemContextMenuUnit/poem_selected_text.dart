@@ -15,6 +15,7 @@ class PoemSelectedText extends StatelessWidget {
     required this.fontColor,
     required this.onTap,
     required this.isFlashing,
+    required this.isContextMenuOpen,
     this.onLongPress,
   });
 
@@ -28,11 +29,13 @@ class PoemSelectedText extends StatelessWidget {
   final VoidCallback onTap;
   final bool isFlashing;
   final ValueChanged<LongPressStartDetails>? onLongPress;
+  final bool isContextMenuOpen;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     Color bg = Colors.transparent;
     Color border = Colors.transparent;
@@ -45,14 +48,14 @@ class PoemSelectedText extends StatelessWidget {
       bg = const Color(0xFFFFF3B0);
       border = AppColors.accent;
       textColor = Colors.black87;
+    } else if (isContextMenuOpen) {
+      border = isDark ? colorScheme.onSurface : colorScheme.surface;
     } else if (isSelected) {
-      bg = colorScheme.primary.withValues(alpha: 0.08);
-      border = colorScheme.primary.withValues(alpha: 0.45);
+      bg = colorScheme.primary.withValues(alpha: isDark ? 0.22 : 0.08);
+      border = colorScheme.primary.withValues(alpha: isDark ? 0.85 : 0.45);
     }
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeInOut,
+    return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         color: bg,
@@ -68,7 +71,10 @@ class PoemSelectedText extends StatelessWidget {
             borderRadius: AppRadius.mdRadius,
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.md,
+              ),
               child: Text(
                 text,
                 textAlign: TextAlign.center,

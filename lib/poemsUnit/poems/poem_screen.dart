@@ -306,6 +306,7 @@ class _PoemScreenState extends State<PoemScreen>
         fontColor: _fontColor,
         isFlashing: false,
         onTap: () {},
+        isContextMenuOpen: true,
       ),
       onCopy: () => _copyLine(_poemLines[index]),
       onToggleHighlight: () {
@@ -861,7 +862,7 @@ class _PoemScreenState extends State<PoemScreen>
                         physics: _isContextMenuOpen
                             ? const NeverScrollableScrollPhysics()
                             : const AlwaysScrollableScrollPhysics(),
-                        padding: EdgeInsets.fromLTRB(12, 0, 12, bottomPadding),
+                        padding: EdgeInsets.fromLTRB(12, 10, 12, bottomPadding),
                         child: Card(
                           color: colorScheme.surface,
                           elevation: theme.brightness == Brightness.dark
@@ -912,6 +913,8 @@ class _PoemScreenState extends State<PoemScreen>
                                             isHighlighted:
                                                 _highlightedLineIndexes
                                                     .contains(i),
+                                            isContextMenuOpen:
+                                                _menuOpenLineIndex == i,
                                             fontSize: _fontSize,
                                             lineHeight: _lineHeight,
                                             isFlashing: isFlashing,
@@ -1012,7 +1015,9 @@ class _PoemScreenState extends State<PoemScreen>
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                    ),
                     child: PoemActionBar(
                       isLiked: _isLiked,
                       isSaved: _isSaved,

@@ -70,6 +70,7 @@ class ActionMenu extends StatelessWidget {
         decoration: BoxDecoration(
           color: bg,
           borderRadius: AppRadius.lgRadius,
+          border: Border.all(color: border.withValues(alpha: 0.75), width: 1),
           boxShadow: [
             BoxShadow(
               color: shadow,
@@ -91,7 +92,12 @@ class ActionMenu extends StatelessWidget {
               child: Column(
                 children: [
                   if (i > 0)
-                    Divider(height: 1, color: border.withValues(alpha: 0.5)),
+                    Divider(
+                      height: 0.75,
+                      color: border.withValues(alpha: 0.5),
+                      indent: 10,
+                      endIndent: 10,
+                    ),
                   InkWell(
                     onTap: item.onTap,
                     child: Padding(
