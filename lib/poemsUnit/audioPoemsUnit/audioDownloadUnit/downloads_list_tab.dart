@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/core/data/contracts/i_audio_download_storage.dart';
 import 'package:hafez_poems/core/data/drift/app_database.dart';
-import 'package:hafez_poems/core/utils/audio_file_size_formatter.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioDownloadUnit/audio_download_manager.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioDownloadUnit/audio_messages.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioWidgetUnit/audio_player_controller.dart';
 import 'package:hafez_poems/poemsUnit/verseSyncUnit/verse_sync_controller.dart';
+import 'download_row_tile.dart';
+import 'downloads_empty_state.dart';
 
 class DownloadsListTab extends StatelessWidget {
   final String poemId;
@@ -118,33 +118,7 @@ class DownloadsListTab extends StatelessWidget {
         final items = snapshot.data ?? [];
 
         if (items.isEmpty) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 40),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.download_for_offline_outlined,
-                  size: 36,
-                  color: cs.onSurface.withValues(alpha: 0.25),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'هنوز فایلی برای این شعر دانلود نکرده‌اید',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: cs.onSurface.withValues(alpha: 0.45),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'از قسمت «خوانندگان» می‌توانید صدا را دانلود کنید',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: cs.onSurface.withValues(alpha: 0.35),
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-          );
+          return DownloadsEmptyState(theme: theme, cs: cs);
         }
         return ListView.builder(
           shrinkWrap: true,
@@ -155,103 +129,13 @@ class DownloadsListTab extends StatelessWidget {
             final isSelected =
                 ctrl.isUsingOfflineAudio &&
                 ctrl.selectedReciterKey == row.reciterKey;
-            return InkWell(
+            return DownloadRowTile(
+              row: row,
+              isSelected: isSelected,
+              theme: theme,
+              cs: cs,
               onTap: () => _play(context, row),
-              borderRadius: AppRadius.mdRadius,
-              child: Container(
-                margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? Colors.green.withValues(alpha: 0.08)
-                      : cs.primary.withValues(alpha: 0.05),
-                  borderRadius: AppRadius.mdRadius,
-                  border: Border.all(
-                    color: isSelected
-                        ? Colors.green.withValues(alpha: 0.35)
-                        : cs.primary.withValues(alpha: 0.15),
-                    width: isSelected ? 1.4 : 1,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: isSelected ? Colors.green : cs.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        isSelected
-                            ? Icons.check_rounded
-                            : Icons.play_arrow_rounded,
-                        color: Colors.white,
-                        size: 22,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            row.reciterDisplayName,
-                            textAlign: TextAlign.right,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: cs.onSurface,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2),
-                          if (isSelected) ...[
-                            const SizedBox(height: 3),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.check_circle,
-                                  size: 12,
-                                  color: Colors.green.shade700,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'در حال استفاده',
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    color: Colors.green.shade700,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                          Text(
-                            '${FileSizeFormatter.format(row.fileSizeBytes)} · برای پخش لمس کنید',
-                            textAlign: TextAlign.right,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: cs.primary.withValues(alpha: 0.7),
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.delete_outline_rounded,
-                        size: 18,
-                        color: cs.error,
-                      ),
-                      tooltip: 'حذف',
-                      onPressed: () => _confirmDelete(context, row),
-                    ),
-                  ],
-                ),
-              ),
+              onDelete: () => _confirmDelete(context, row),
             );
           },
         );

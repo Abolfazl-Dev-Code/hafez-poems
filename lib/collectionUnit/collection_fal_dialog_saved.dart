@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:hafez_poems/theme/color_style.dart';
 import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
-import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
+import 'fal_dialog_header.dart';
+import 'fal_dialog_scroll_hint.dart';
 
 class FalDialog extends StatefulWidget {
   final String title;
@@ -69,67 +69,7 @@ class _FalDialogState extends State<FalDialog> {
             mainAxisSize: MainAxisSize.min,
             children: [
               // ── Header ──
-              Container(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: Theme.of(
-                        context,
-                      ).dividerColor.withValues(alpha: 0.4),
-                    ),
-                  ),
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // غزل و شماره — وسط
-                    if (widget.falNumber.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.primary.withValues(alpha: 0.08),
-                          borderRadius: AppRadius.smRadius,
-                        ),
-                        child: Text(
-                          'غزل ${widget.falNumber}'.toPersianNumbers(),
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                    // فال حافظ — گوشه راست
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.green.withValues(alpha: 0.12),
-                          borderRadius: AppRadius.xlRadius,
-                        ),
-                        child: const Text(
-                          'فال حافظ',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.success,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              FalDialogHeader(falNumber: widget.falNumber),
 
               // ── Scrollable body + fade ──
               ConstrainedBox(
@@ -216,41 +156,7 @@ class _FalDialogState extends State<FalDialog> {
                     ),
 
                     // ── fade + arrow ──
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: AnimatedOpacity(
-                        opacity: _showScrollHint ? 1.0 : 0.0,
-                        duration: const Duration(milliseconds: 250),
-                        child: IgnorePointer(
-                          child: Container(
-                            height: 64,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Theme.of(context).scaffoldBackgroundColor
-                                      .withValues(alpha: 0.0),
-                                  Theme.of(context).scaffoldBackgroundColor
-                                      .withValues(alpha: 0.95),
-                                ],
-                              ),
-                            ),
-                            alignment: Alignment.bottomCenter,
-                            padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                            child: Icon(
-                              Icons.keyboard_arrow_down_rounded,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primary.withValues(alpha: 0.7),
-                              size: 22,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                    FalDialogScrollHint(visible: _showScrollHint),
                   ],
                 ),
               ),

@@ -1,16 +1,16 @@
 import 'package:hafez_poems/theme/text_style.dart';
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
-import 'package:flutter_lucide_animated/flutter_lucide_animated.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/appbarHomeScreenUnit/profileUnit/profile_controller.dart';
 import 'package:hafez_poems/homeScreenUnit/greetingUnit/greeting_schedule.dart';
 import 'package:hafez_poems/homeScreenUnit/greetingUnit/greeting_style.dart';
 import 'package:hafez_poems/homeScreenUnit/greetingUnit/persian_date_utils.dart';
+import 'package:hafez_poems/homeScreenUnit/greetingUnit/greeting_streak_chip.dart';
+import 'package:hafez_poems/homeScreenUnit/greetingUnit/greeting_animated_ring.dart';
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
 import 'package:hafez_poems/theme/animated_app_icons.dart';
 
@@ -121,23 +121,10 @@ class _GreetingCardState extends State<GreetingCard>
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-      child: AnimatedBuilder(
-        animation: _borderController,
-        builder: (context, child) {
-          final angle = _borderController.value * 2 * pi;
-          return Container(
-            padding: const EdgeInsets.all(2.5),
-            decoration: BoxDecoration(
-              borderRadius: AppRadius.lgRadius,
-              gradient: SweepGradient(
-                colors: ringColors,
-                stops: ringStops,
-                transform: GradientRotation(angle),
-              ),
-            ),
-            child: child,
-          );
-        },
+      child: GreetingAnimatedRing(
+        controller: _borderController,
+        ringColors: ringColors,
+        ringStops: ringStops,
         child: ClipRRect(
           borderRadius: AppRadius.mdRadius,
           child: Container(
@@ -221,36 +208,10 @@ class _GreetingCardState extends State<GreetingCard>
                           ),
                           if (widget.streakDays != null &&
                               widget.streakDays! > 0)
-                            Container(
-                              margin: const EdgeInsets.only(left: AppSpacing.sm),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: iconColor.withValues(alpha: 0.14),
-                                borderRadius: AppRadius.xlRadius,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  LucideAnimatedIcon(
-                                    icon: flame,
-                                    size: 14,
-                                    color: iconColor,
-                                  ),
-                                  const SizedBox(width: 3),
-                                  Text(
-                                    '${widget.streakDays} روز'
-                                        .toPersianNumbers(),
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                      fontFamily: AppTextStyles.fontFamily,
-                                      fontWeight: FontWeight.w600,
-                                      color: iconColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            GreetingStreakChip(
+                              streakDays: widget.streakDays!,
+                              iconColor: iconColor,
+                              textStyle: theme.textTheme.labelSmall,
                             ),
                         ],
                       ),

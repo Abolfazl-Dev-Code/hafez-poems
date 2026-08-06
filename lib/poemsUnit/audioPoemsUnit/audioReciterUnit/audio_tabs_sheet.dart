@@ -6,9 +6,8 @@ import 'package:hafez_poems/models/recitation_models.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioDownloadUnit/audio_download_manager.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioDownloadUnit/downloads_list_tab.dart';
-import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/reciter_download_control.dart';
-import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/reciter_key.dart';
-import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/set_default_reciter.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/audio_tabs_bar.dart';
+import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioReciterUnit/reciter_list_tile.dart';
 import 'package:hafez_poems/poemsUnit/audioPoemsUnit/audioWidgetUnit/audio_player_controller.dart';
 import 'package:hafez_poems/poemsUnit/verseSyncUnit/verse_sync_controller.dart';
 
@@ -122,80 +121,7 @@ class _AudioTabsSheetState extends State<AudioTabsSheet>
                 ),
               ),
             ),
-            AnimatedBuilder(
-              animation: _tabController.animation!,
-              builder: (context, child) {
-                final animationValue = _tabController.animation!.value;
-
-                return Container(
-                  height: 45,
-                  margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                  child: Stack(
-                    children: [
-                      Align(
-                        alignment: Alignment(1 - (animationValue * 2), 0),
-                        child: Container(
-                          width: MediaQuery.of(context).size.width / 2 - 24,
-                          height: 38,
-                          decoration: BoxDecoration(
-                            color: cs.primary.withValues(alpha: 0.12),
-                            borderRadius: AppRadius.mdRadius,
-                          ),
-                        ),
-                      ),
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: () {
-                                _tabController.animateTo(0);
-                              },
-                              child: Center(
-                                child: Text(
-                                  'خوانندگان',
-                                  style: TextStyle(
-                                    color: animationValue < 0.5
-                                        ? cs.primary
-                                        : cs.onSurface.withValues(alpha: 0.5),
-                                    fontWeight: animationValue < 0.5
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          Expanded(
-                            child: GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: () {
-                                _tabController.animateTo(1);
-                              },
-                              child: Center(
-                                child: Text(
-                                  'دانلودها',
-                                  style: TextStyle(
-                                    color: animationValue > 0.5
-                                        ? cs.primary
-                                        : cs.onSurface.withValues(alpha: 0.5),
-                                    fontWeight: animationValue > 0.5
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
+            AudioTabsBar(tabController: _tabController, cs: cs),
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.5,
               child: TabBarView(
@@ -300,92 +226,17 @@ class _AudioTabsSheetState extends State<AudioTabsSheet>
                   itemBuilder: (context, index) {
                     final r = _filtered[index];
                     final isSelected = r == widget.selected;
-                    final initial = r.audioArtist.isNotEmpty
-                        ? r.audioArtist.characters.first
-                        : '؟';
-                    final reciterKey = ReciterKey.from(r.audioArtist);
 
-                    return InkWell(
-                      onTap: () {
-                        widget.onSelect(r);
-                        Navigator.pop(context);
-                      },
-                      borderRadius: AppRadius.mdRadius,
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? cs.primary.withValues(alpha: 0.08)
-                              : Colors.transparent,
-                          borderRadius: AppRadius.mdRadius,
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: isSelected
-                                    ? cs.primary.withValues(alpha: 0.15)
-                                    : cs.onSurface.withValues(alpha: 0.07),
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                initial,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                  color: isSelected
-                                      ? cs.primary
-                                      : cs.onSurface.withValues(alpha: 0.55),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                r.audioArtist,
-                                textAlign: TextAlign.right,
-                                textDirection: TextDirection.rtl,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: isSelected ? cs.primary : cs.onSurface,
-                                  fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            ReciterDownloadControl(
-                              poemId: widget.poemId,
-                              category: widget.category,
-                              poemTitle: widget.poemTitle,
-                              reciterKey: reciterKey,
-                              reciterDisplayName: r.audioArtist,
-                              sourceUrl: r.mp3Url,
-                              sourceRecitationId: r.id,
-                              syncXml: r.xmlText,
-                              cs: cs,
-                            ),
-                            DefaultReciterStar(
-                              category: widget.category,
-                              reciterKey: reciterKey,
-                              reciterDisplayName: r.audioArtist,
-                              cs: cs,
-                              onSetDefault: () {
-                                widget.ctrl.selectRecitation(widget.poemId, r);
-                                widget.onSelect(r);
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
+                    return ReciterListTile(
+                      recitation: r,
+                      isSelected: isSelected,
+                      theme: theme,
+                      cs: cs,
+                      poemId: widget.poemId,
+                      category: widget.category,
+                      poemTitle: widget.poemTitle,
+                      ctrl: widget.ctrl,
+                      onSelect: widget.onSelect,
                     );
                   },
                 ),

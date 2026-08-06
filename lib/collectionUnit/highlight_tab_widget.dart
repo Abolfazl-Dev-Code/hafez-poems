@@ -51,7 +51,10 @@ class _HighlightsTabState extends State<HighlightsTab> with SelectionMixin {
 
           if (items.isEmpty) {
             return const Center(
-              child: Text('هنوز هیچ مصرعی را برگزیده‌ نکرده‌اید.'),
+              child: Text(
+                'هنوز هیچ مصرعی را برنگزیده‌اید\n برای تنظیمات بیشتر در صفحه شعر دستتان را روی \nیک مصرع نگه دارید',
+                textAlign: TextAlign.center,
+              ),
             );
           }
 

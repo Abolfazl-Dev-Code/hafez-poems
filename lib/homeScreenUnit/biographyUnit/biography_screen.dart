@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_audio_controller.dart';
 import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_screen_chapter_data.dart';
-import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_screen_fal.dart';
-import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_screen_hero_animation.dart';
-import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_screen_story.dart';
 import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_theme.dart';
+import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_floating_controls.dart';
+import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_app_bar.dart';
+import 'package:hafez_poems/homeScreenUnit/biographyUnit/biography_scroll_body.dart';
 import 'package:hafez_poems/homeScreenUnit/biographyUnit/route_observer_screen.dart';
 import 'package:hafez_poems/models/biography_models.dart';
+
+part 'biography_scroll_controls.dart';
 
 class HafezBiographyScreen extends StatefulWidget {
   const HafezBiographyScreen({super.key});
@@ -116,59 +118,6 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
     }
   }
 
-  void _showControls() {
-    _hideControlsTimer?.cancel();
-    if (!_controlsVisible && mounted) {
-      setState(() => _controlsVisible = true);
-    }
-  }
-
-  void _scheduleHideControls() {
-    _hideControlsTimer?.cancel();
-    _hideControlsTimer = Timer(_hideControlsDelay, () {
-      if (mounted) setState(() => _controlsVisible = false);
-    });
-  }
-
-  Future<void> _startAutoScroll() async {
-    if (!mounted || !_scrollCtrl.hasClients) return;
-
-    final max = _scrollCtrl.position.maxScrollExtent;
-    final current = _scrollCtrl.offset;
-
-    if (max <= 0 || current >= max) return;
-
-    final remaining = max - current;
-    const double scrollSpeed = 30.0;
-
-    final ms = (remaining / scrollSpeed * 1000).round().clamp(3000, 120000);
-
-    setState(() => _autoScrolling = true);
-    _scheduleHideControls();
-
-    try {
-      await _scrollCtrl.animateTo(
-        max,
-        duration: Duration(milliseconds: ms),
-        curve: Curves.linear,
-      );
-    } catch (_) {}
-
-    if (mounted) setState(() => _autoScrolling = false);
-  }
-
-  void _stopAutoScroll() {
-    if (!_scrollCtrl.hasClients) return;
-    _scrollCtrl.jumpTo(_scrollCtrl.offset);
-    if (mounted) setState(() => _autoScrolling = false);
-    _showControls();
-  }
-
-  void _toggleAutoScroll() {
-    HapticFeedback.lightImpact();
-    _autoScrolling ? _stopAutoScroll() : _startAutoScroll();
-  }
-
   void _onScroll() => _checkChapterVisibility();
 
   void _checkChapterVisibility() {
@@ -195,39 +144,6 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
     if (changed && mounted) setState(() {});
   }
 
-  Widget _buildAudioControls() {
-    return ValueListenableBuilder<bool>(
-      valueListenable: BiographyAudioController.isPlayingNotifier,
-      builder: (context, isPlaying, _) {
-        return FloatingActionButton(
-          heroTag: 'audio_btn',
-          backgroundColor: BiographyColors.panel,
-          onPressed: () {
-            isPlaying
-                ? BiographyAudioController.pause()
-                : BiographyAudioController.play();
-          },
-          child: Icon(
-            isPlaying ? Icons.volume_up : Icons.volume_off,
-            color: BiographyColors.gold,
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildControls() {
-    return FloatingActionButton(
-      heroTag: 'scroll_btn',
-      onPressed: _toggleAutoScroll,
-      backgroundColor: BiographyColors.panel,
-      child: Icon(
-        _autoScrolling ? Icons.pause : Icons.play_arrow,
-        color: BiographyColors.gold,
-      ),
-    );
-  }
-
   @override
   void dispose() {
     _ambientCtrl.dispose();
@@ -246,22 +162,7 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
       child: Scaffold(
         backgroundColor: BiographyColors.night,
         extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          systemOverlayStyle: const SystemUiOverlayStyle(
-            statusBarBrightness: Brightness.dark,
-            statusBarIconBrightness: Brightness.light,
-          ),
-          leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: BiographyColors.gold,
-            ),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ),
-
+        appBar: const BiographyAppBar(),
         floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
         floatingActionButton: AnimatedOpacity(
           opacity: _controlsVisible ? 1 : 0,
@@ -272,41 +173,26 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _buildAudioControls(),
+                const BiographyAudioButton(),
                 const SizedBox(height: 12),
-                _buildControls(),
+                BiographyAutoScrollButton(
+                  autoScrolling: _autoScrolling,
+                  onToggle: _toggleAutoScroll,
+                ),
               ],
             ),
           ),
         ),
-
-        body: NotificationListener<ScrollNotification>(
-          onNotification: (n) {
-            if (n is ScrollStartNotification && n.dragDetails != null) {
-              _showControls();
-              if (_autoScrolling) _stopAutoScroll();
-            }
-            return false;
-          },
-          child: SingleChildScrollView(
-            controller: _scrollCtrl,
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              children: [
-                HeroAnimationBiography(
-                  animation: _ambientCtrl,
-                  particles: _particles,
-                ),
-                StoryBiography(
-                  chapters: chapters,
-                  chapterKeys: _chapterKeys,
-                  chapterVisible: _chapterVisible,
-                ),
-                const FalBiography(),
-                const SizedBox(height: 48),
-              ],
-            ),
-          ),
+        body: BiographyScrollBody(
+          scrollController: _scrollCtrl,
+          ambientController: _ambientCtrl,
+          particles: _particles,
+          chapters: chapters,
+          chapterKeys: _chapterKeys,
+          chapterVisible: _chapterVisible,
+          autoScrolling: _autoScrolling,
+          onShowControls: _showControls,
+          onStopAutoScroll: _stopAutoScroll,
         ),
       ),
     );

@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:hafez_poems/onboardingSplashUnit/onboarding_colors.dart';
 import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -12,6 +11,7 @@ import 'package:hafez_poems/onboardingSplashUnit/onboarding_indicator.dart';
 import 'package:hafez_poems/onboardingSplashUnit/onboarding_islamic_pattern.dart';
 import 'package:hafez_poems/onboardingSplashUnit/onboarding_particle_painter.dart';
 import 'package:hafez_poems/onboardingSplashUnit/onboarding_slide_pages.dart';
+import 'package:hafez_poems/onboardingSplashUnit/onboarding_slides_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -39,43 +39,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   final List<Particle> _particles = [];
 
-  static const List<SlideData> _slides = [
-    SlideData(
-      icon: Icons.menu_book_rounded,
-      title: "دیوان کامل حافظ",
-      subtitle: "تمام غزلیات، رباعیات و قصاید حافظ\nدر یک مجموعه زیبا و خوانا",
-      lightBgTop: OnboardingColors.slide1LightBgTop,
-      lightBgBottom: OnboardingColors.slide1LightBgBottom,
-      darkBgTop: OnboardingColors.slide1DarkBgTop,
-      darkBgBottom: OnboardingColors.slide1DarkBgBottom,
-      lightAccent: OnboardingColors.slide1LightAccent,
-      darkAccent: OnboardingColors.slide1DarkAccent,
-    ),
-
-    SlideData(
-      icon: Icons.auto_awesome_rounded,
-      title: "فال حافظ",
-      subtitle: "با نیتی از دل فال بگیر\nو پیام حافظ را بخوان",
-      lightBgTop: OnboardingColors.slide2LightBgTop,
-      lightBgBottom: OnboardingColors.slide2LightBgBottom,
-      darkBgTop: OnboardingColors.slide2DarkBgTop,
-      darkBgBottom: OnboardingColors.slide2DarkBgBottom,
-      lightAccent: OnboardingColors.slide2LightAccent,
-      darkAccent: OnboardingColors.slide2DarkAccent,
-    ),
-
-    SlideData(
-      icon: Icons.headphones_rounded,
-      title: "پخش صوتی اشعار",
-      subtitle: "به غزل‌های حافظ با صدای دلنشین گوش بده\nو در شعرها غرق شو",
-      lightBgTop: OnboardingColors.slide3LightBgTop,
-      lightBgBottom: OnboardingColors.slide3LightBgBottom,
-      darkBgTop: OnboardingColors.slide3DarkBgTop,
-      darkBgBottom: OnboardingColors.slide3DarkBgBottom,
-      lightAccent: OnboardingColors.slide3LightAccent,
-      darkAccent: OnboardingColors.slide3DarkAccent,
-    ),
-  ];
+  static const List<SlideData> _slides = onboardingSlides;
 
   @override
   void initState() {
