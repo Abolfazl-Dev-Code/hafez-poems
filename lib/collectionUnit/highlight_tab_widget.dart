@@ -10,7 +10,6 @@ import 'package:hafez_poems/navbarHomeScreenUnit/bottomNavBar/user_actions_saver
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_category_resolver.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_screen.dart';
-import 'package:hafez_poems/theme/text_style.dart';
 
 class HighlightsTab extends StatefulWidget {
   const HighlightsTab({super.key});
