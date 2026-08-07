@@ -1,16 +1,10 @@
 part of 'biography_screen.dart';
 
 extension _BiographyScrollControls on _HafezBiographyScreenState {
-  void _setState(VoidCallback fn) {
-    if (mounted) {
-      (this as dynamic).setState(fn);
-    }
-  }
-
   void _showControls() {
     _hideControlsTimer?.cancel();
     if (!_controlsVisible && mounted) {
-      _setState(() => _controlsVisible = true);
+      _setControlsVisible(true);
     }
   }
 
@@ -19,7 +13,7 @@ extension _BiographyScrollControls on _HafezBiographyScreenState {
     _hideControlsTimer = Timer(
       _HafezBiographyScreenState._hideControlsDelay,
       () {
-        _setState(() => _controlsVisible = false);
+        if (mounted) _setControlsVisible(false);
       },
     );
   }
@@ -37,7 +31,7 @@ extension _BiographyScrollControls on _HafezBiographyScreenState {
 
     final ms = (remaining / scrollSpeed * 1000).round().clamp(3000, 120000);
 
-    _setState(() => _autoScrolling = true);
+    _setAutoScrolling(true);
     _scheduleHideControls();
 
     try {
@@ -48,13 +42,13 @@ extension _BiographyScrollControls on _HafezBiographyScreenState {
       );
     } catch (_) {}
 
-    _setState(() => _autoScrolling = false);
+    if (mounted) _setAutoScrolling(false);
   }
 
   void _stopAutoScroll() {
     if (!_scrollCtrl.hasClients) return;
     _scrollCtrl.jumpTo(_scrollCtrl.offset);
-    _setState(() => _autoScrolling = false);
+    if (mounted) _setAutoScrolling(false);
     _showControls();
   }
 

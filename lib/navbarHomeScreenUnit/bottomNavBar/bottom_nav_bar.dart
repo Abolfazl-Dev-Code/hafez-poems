@@ -76,11 +76,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
     if (index == _currentIndex) return;
     AppSnackBarService.dismiss();
     setState(() => _currentIndex = index);
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeOut,
-    );
+    _pageController.jumpToPage(index);
   }
 
   void _onPageChanged(int index) {
@@ -122,4 +118,3 @@ class _BottomNavBarState extends State<BottomNavBar> {
     );
   }
 }
-

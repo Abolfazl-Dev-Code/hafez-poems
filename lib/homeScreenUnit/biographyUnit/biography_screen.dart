@@ -41,6 +41,17 @@ class _HafezBiographyScreenState extends State<HafezBiographyScreen>
   late final List<Particle> _particles;
   bool _wasPlayingBeforePause = false;
   bool _wasPlayingBeforeNavigate = false;
+  // داخل کلاس _HafezBiographyScreenState
+
+  void _setControlsVisible(bool visible) {
+    if (_controlsVisible == visible) return;
+    setState(() => _controlsVisible = visible);
+  }
+
+  void _setAutoScrolling(bool value) {
+    if (_autoScrolling == value) return;
+    setState(() => _autoScrolling = value);
+  }
 
   @override
   void initState() {

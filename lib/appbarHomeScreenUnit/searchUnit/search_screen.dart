@@ -15,15 +15,18 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  final controller = Get.put(app.SearchController());
+  late final app.SearchController controller;
   final textController = TextEditingController();
   final focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      focusNode.requestFocus();
+    controller = Get.find<app.SearchController>();
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        focusNode.requestFocus();
+      }
     });
   }
 

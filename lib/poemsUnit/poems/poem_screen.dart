@@ -20,87 +20,19 @@ import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/core/data/contracts/i_read_status_storage.dart';
-
-class _AppBarToggleIcon extends StatelessWidget {
-  final bool isActive;
-  final IconData activeIcon;
-  final IconData inactiveIcon;
-  final Color activeColor;
-  final Color inactiveColor;
-  final VoidCallback onTap;
-
-  const _AppBarToggleIcon({
-    required this.isActive,
-    required this.activeIcon,
-    required this.inactiveIcon,
-    required this.activeColor,
-    required this.inactiveColor,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: AppRadius.smRadius,
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeInOut,
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: isActive
-                ? activeColor.withValues(alpha: 0.14)
-                : Colors.transparent,
-            borderRadius: AppRadius.smRadius,
-          ),
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
-            transitionBuilder: (child, anim) =>
-                ScaleTransition(scale: anim, child: child),
-            child: Icon(
-              isActive ? activeIcon : inactiveIcon,
-              key: ValueKey(isActive),
-              size: 22,
-              color: isActive ? activeColor : inactiveColor,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class PoemScreenArgs {
-  final String id;
-  final String category;
-  final String title;
-  final String text;
-  final String audioUrl;
-  final Future<String> Function(String id) fetchText;
-  final Future<String> Function(String id)? fetchAudioUrl;
-  final int? highlightLineIndex;
-
-  const PoemScreenArgs({
-    required this.id,
-    required this.category,
-    required this.title,
-    required this.text,
-    required this.fetchText,
-    this.audioUrl = '',
-    this.fetchAudioUrl,
-    this.highlightLineIndex,
-  });
-
-  bool get hasAudio => audioUrl.isNotEmpty || fetchAudioUrl != null;
-}
+import 'poem_screen_app_bar_toggle_icon.dart';
+import 'share_mode_option_tile.dart';
+export 'poem_screen_args.dart';
+import 'poem_screen_args.dart';
+part 'poem_screen_scroll.dart';
+part 'poem_screen_line_menu.dart';
+part 'poem_screen_actions.dart';
+part 'poem_screen_app_bar_builder.dart';
+part 'poem_screen_lines_card_builder.dart';
 
 class PoemScreen extends StatefulWidget {
   final PoemScreenArgs args;
-
   const PoemScreen({super.key, required this.args});
-
   @override
   State<PoemScreen> createState() => _PoemScreenState();
 }
@@ -136,16 +68,12 @@ class _PoemScreenState extends State<PoemScreen>
   double? _expandedOverlayHeight;
   static const Duration _minReadDuration = Duration(seconds: 9);
   Timer? _markAsReadTimer;
-
   static const double indicatorSlotSize = 18.0;
-
   late final AnimationController _shareController;
-
   double _fontSize = 20;
   double _lineHeight = 1.9;
   String _fontFamily = 'Vazir';
   Color _fontColor = Colors.black;
-
   final UserActionsSaver _actionController = UserActionsSaver();
   bool _isLiked = false;
   bool _isSaved = false;
@@ -179,99 +107,7 @@ class _PoemScreenState extends State<PoemScreen>
     _shareController = AnimationController(vsync: this);
   }
 
-  void _syncPosition() {
-    if (!_audioCtrl.isPlaying) return;
-
-    _verseSyncCtrl.updatePosition(_audioCtrl.position);
-  }
-
-  void _onActiveVerseChanged() {
-    if (_audioCtrl.isPlaying && _verseSyncCtrl.hasSyncData) {
-      _verseSyncCtrl.updatePosition(_audioCtrl.position);
-    }
-
-    // فقط هنگام پخش
-    if (!_audioCtrl.isPlaying) return;
-
-    if (_userIsInteractingWithScroll) return;
-    if (_isContextMenuOpen) return;
-
-    final order = _verseSyncCtrl.activeVerseOrder;
-
-    if (order < 0) return;
-    if (order == _lastAutoScrolledVerseOrder) return;
-
-    _lastAutoScrolledVerseOrder = order;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToLineIndex(order);
-    });
-  }
-
-  Future<void> _scrollToLineIndex(
-    int index, {
-    Duration duration = const Duration(milliseconds: 450),
-    double anchorFraction = 1 / 3,
-  }) async {
-    if (!mounted) return;
-    if (_isContextMenuOpen) return;
-    final key = _lineKeys[index];
-    final ctx = key?.currentContext;
-    if (ctx == null) return;
-
-    final box = ctx.findRenderObject() as RenderBox?;
-    if (box == null || !_scrollController.hasClients) return;
-
-    final scrollBox =
-        _scrollController.position.context.storageContext.findRenderObject()
-            as RenderBox?;
-    if (scrollBox == null || !scrollBox.attached) return;
-
-    final tileOffset = box.localToGlobal(Offset.zero, ancestor: scrollBox);
-    final screenHeight = scrollBox.size.height;
-    final targetOffset =
-        (_scrollController.offset +
-                tileOffset.dy -
-                screenHeight * anchorFraction)
-            .clamp(0.0, _scrollController.position.maxScrollExtent);
-
-    await _scrollController.animateTo(
-      targetOffset,
-      duration: duration,
-      curve: Curves.easeInOut,
-    );
-  }
-
-  void _pauseAutoScroll() {
-    _resumeAutoScrollTimer?.cancel();
-    _userIsInteractingWithScroll = true;
-  }
-
-  void _scheduleResumeAutoScroll() {
-    _resumeAutoScrollTimer?.cancel();
-    _resumeAutoScrollTimer = Timer(const Duration(seconds: 4), () {
-      if (!mounted) return;
-      _userIsInteractingWithScroll = false;
-      _lastAutoScrolledVerseOrder = null;
-      _onActiveVerseChanged();
-    });
-  }
-
-  void _resumeAutoScrollImmediately() {
-    _resumeAutoScrollTimer?.cancel();
-    if (!mounted) return;
-    _userIsInteractingWithScroll = false;
-    _lastAutoScrolledVerseOrder = null;
-    _onActiveVerseChanged();
-  }
-
-  void _measureBottomOverlay() {
-    if (!mounted) return;
-    final box =
-        _bottomOverlayKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null || !box.hasSize) return;
-
-    final height = box.size.height;
+  void _updateOverlayHeight(double height) {
     setState(() {
       if (_isAudioExpanded) {
         _expandedOverlayHeight = height;
@@ -281,18 +117,97 @@ class _PoemScreenState extends State<PoemScreen>
     });
   }
 
-  void _scheduleMeasureBottomOverlay({Duration delay = Duration.zero}) {
-    Future.delayed(delay, () {
-      if (!mounted) return;
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => _measureBottomOverlay(),
-      );
+  void _toggleSelectedLineIndex(int index) {
+    setState(() {
+      _selectedLineIndex = _selectedLineIndex == index ? null : index;
+    });
+  }
+
+  void _exitMultiLineSelection() {
+    setState(() {
+      _isMultiLineSelecting = false;
+      _selectedShareLines.clear();
+    });
+  }
+
+  void _setAudioExpanded(bool expanded) {
+    setState(() => _isAudioExpanded = expanded);
+  }
+
+  void _setTextLoadingState({required bool isLoading, String error = ''}) {
+    setState(() {
+      _isTextLoading = isLoading;
+      _textError = error;
+    });
+  }
+
+  void _setPoemText(String text) {
+    setState(() {
+      _poemText = text;
+      _isTextLoading = false;
+    });
+  }
+
+  void _setFlashingLineIndex(int? index) {
+    setState(() => _flashingLineIndex = index);
+  }
+
+  void _setIsLiked(bool value) {
+    setState(() => _isLiked = value);
+  }
+
+  void _setIsSaved(bool value) {
+    setState(() => _isSaved = value);
+  }
+
+  void _updateHighlightedLines() {
+    setState(() {
+      if (_selectedLineIndex == null) return;
+      final index = _selectedLineIndex!;
+      if (_actionController.isLineHighlighted(
+        _args.id,
+        _args.category,
+        index,
+      )) {
+        _highlightedLineIndexes.add(index);
+      } else {
+        _highlightedLineIndexes.remove(index);
+      }
+    });
+  }
+
+  void _setLineMenuState({int? selectedLineIndex, int? menuOpenLineIndex}) {
+    setState(() {
+      if (selectedLineIndex != null || selectedLineIndex == null) {
+        _selectedLineIndex = selectedLineIndex;
+      }
+      if (menuOpenLineIndex != null || menuOpenLineIndex == null) {
+        _menuOpenLineIndex = menuOpenLineIndex;
+      }
+    });
+  }
+
+  void _setMultiLineSelection(int index) {
+    setState(() {
+      _isMultiLineSelecting = true;
+      _selectedShareLines
+        ..clear()
+        ..add(index);
+    });
+  }
+
+  void _toggleShareLine(int index) {
+    setState(() {
+      if (_selectedShareLines.contains(index)) {
+        _selectedShareLines.remove(index);
+      } else {
+        _selectedShareLines.add(index);
+      }
     });
   }
 
   void _sharePoem() {
     if (_isTextLoading || _poemText.isEmpty) return;
-
     showVerseShareSheet(context, verseText: _poemText, poemTitle: _args.title);
   }
 
@@ -314,416 +229,6 @@ class _PoemScreenState extends State<PoemScreen>
       _lineHeight = prefs.getDouble(_lineHeightKey) ?? 1;
       _fontFamily = prefs.getString(_fontFamilyKey) ?? 'Vazir';
       _fontColor = Color(prefs.getInt(_fontColorKey) ?? 0xFF000000);
-    });
-  }
-
-  Future<void> _showLineMenu(int index, LongPressStartDetails details) async {
-    if (_contextMenuController.isOpen) return;
-
-    final renderObject = _verseTargetKeys[index]?.currentContext
-        ?.findRenderObject();
-    if (renderObject is! RenderBox || !renderObject.attached) return;
-
-    final targetSize = renderObject.size;
-    final targetOffset = renderObject.localToGlobal(Offset.zero);
-
-    HapticFeedback.mediumImpact();
-    _pauseAutoScroll();
-    setState(() {
-      _selectedLineIndex = index;
-      _menuOpenLineIndex = index;
-    });
-
-    final layerLink = _lineLayerLinks[index] ??= LayerLink();
-
-    _contextMenuController.show(
-      context: context,
-      layerLink: layerLink,
-      targetSize: targetSize,
-      targetOffset: targetOffset,
-      isHighlighted: _highlightedLineIndexes.contains(index),
-      lineBuilder: (ctx) => PoemSelectedText(
-        text: _poemLines[index],
-        isSelected: _selectedShareLines.contains(index),
-        isHighlighted: _highlightedLineIndexes.contains(index),
-        fontSize: _fontSize,
-        lineHeight: _lineHeight,
-        fontFamily: _fontFamily,
-        fontColor: _fontColor,
-        isFlashing: false,
-        isContextMenuOpen: true,
-        onTap: () {},
-      ),
-      onCopy: () => _copyLine(_poemLines[index]),
-      onToggleHighlight: () {
-        _selectedLineIndex = index;
-        _toggleHighlight();
-      },
-      onShareAsImage: () => _showShareModeSheet(index),
-      onClosed: () {
-        if (!mounted) return;
-        setState(() {
-          _menuOpenLineIndex = null;
-          _selectedLineIndex = null;
-        });
-        _resumeAutoScrollImmediately();
-      },
-      onPlayFromHere: () => _playFromVerse(index),
-    );
-  }
-
-  Future<void> _playFromVerse(int verseOrder) async {
-    final player = _audioWidgetKey.currentState;
-    if (player == null) return;
-
-    final loadingTimer = Timer(const Duration(seconds: 4), () {
-      if (!mounted) return;
-      AppSnackBarService.info('درحال بارگیری صدا، لطفاً منتظر بمانید.');
-    });
-
-    try {
-      await player.prepareForPlay();
-    } finally {
-      loadingTimer.cancel();
-    }
-
-    if (!mounted) return;
-
-    const manualOffset = Duration(milliseconds: 200);
-
-    final position = _verseSyncCtrl.positionForVerse(verseOrder);
-
-    if (position == null) {
-      AppSnackBarService.error('موقعیت این مصرع پیدا نشد.');
-      return;
-    }
-
-    final playPosition = position > manualOffset
-        ? position - manualOffset
-        : Duration.zero;
-
-    await player.playFromPosition(playPosition);
-  }
-
-  void _startMultiLineSelection(int index) {
-    setState(() {
-      _isMultiLineSelecting = true;
-      _selectedShareLines
-        ..clear()
-        ..add(index);
-    });
-  }
-
-  void _showShareModeSheet(int index) {
-    final theme = Theme.of(context);
-
-    showModalBottomSheet(
-      context: context,
-      showDragHandle: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      builder: (_) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'اشتراک‌گذاری مصرع',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                Text(
-                  'انتخاب کنید فقط همین مصرع یا چند مصرع را به اشتراک بگذارید.',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                InkWell(
-                  borderRadius: AppRadius.lgRadius,
-                  onTap: () {
-                    Navigator.pop(context);
-
-                    showVerseShareSheet(
-                      context,
-                      verseText: _poemLines[index],
-                      poemTitle: _args.title,
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 14,
-                    ),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 22,
-                          backgroundColor: theme.colorScheme.primary.withValues(
-                            alpha: .12,
-                          ),
-                          child: Icon(
-                            Icons.text_fields_rounded,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-
-                        const SizedBox(width: 16),
-
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'همین مصرع',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'اشتراک‌گذاری فقط همین مصرع',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        Icon(
-                          Icons.chevron_left_rounded,
-                          color: theme.colorScheme.outline,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                Divider(
-                  height: 20,
-                  color: theme.dividerColor.withValues(alpha: .5),
-                ),
-
-                InkWell(
-                  borderRadius: AppRadius.lgRadius,
-                  onTap: () {
-                    Navigator.pop(context);
-                    _startMultiLineSelection(index);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 14,
-                    ),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 22,
-                          backgroundColor: theme.colorScheme.primary.withValues(
-                            alpha: .12,
-                          ),
-                          child: Icon(
-                            Icons.library_books_rounded,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-
-                        const SizedBox(width: 16),
-
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'انتخاب چند مصرع',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'ادامه انتخاب و اشتراک چند مصرع',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        Icon(
-                          Icons.chevron_left_rounded,
-                          color: theme.colorScheme.outline,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _toggleShareLineSelection(int index) {
-    setState(() {
-      if (_selectedShareLines.contains(index)) {
-        _selectedShareLines.remove(index);
-      } else {
-        _selectedShareLines.add(index);
-      }
-    });
-  }
-
-  Future<void> _fetchPoemText() async {
-    setState(() {
-      _isTextLoading = true;
-      _textError = '';
-    });
-    try {
-      final text = await _args.fetchText(_args.id);
-      if (!mounted) return;
-      setState(() {
-        _poemText = text;
-        _isTextLoading = false;
-      });
-      _scheduleScrollToHighlight();
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _textError = 'خطا در دریافت متن';
-        _isTextLoading = false;
-      });
-    }
-  }
-
-  void _scheduleScrollToHighlight() {
-    final targetIndex = _args.highlightLineIndex;
-    if (targetIndex == null) return;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.delayed(const Duration(milliseconds: 350));
-      if (!mounted) return;
-
-      await _scrollToLineIndex(
-        targetIndex,
-        duration: const Duration(milliseconds: 500),
-      );
-
-      if (!mounted) return;
-      setState(() => _flashingLineIndex = targetIndex);
-      await Future.delayed(const Duration(milliseconds: 600));
-      if (!mounted) return;
-      setState(() => _flashingLineIndex = null);
-      await Future.delayed(const Duration(milliseconds: 400));
-      if (!mounted) return;
-      setState(() => _flashingLineIndex = targetIndex);
-      await Future.delayed(const Duration(milliseconds: 600));
-      if (!mounted) return;
-      setState(() => _flashingLineIndex = null);
-    });
-  }
-
-  void _loadInitialActionsState() {
-    _isLiked = _actionController.isLiked(_args.id, _args.category);
-    _isSaved = _actionController.isSaved(_args.id, _args.category);
-    _highlightedLineIndexes.addAll(
-      _actionController.getHighlightedLineIndexes(_args.id, _args.category),
-    );
-  }
-
-  void _scheduleMarkAsRead() {
-    _markAsReadTimer = Timer(_minReadDuration, () {
-      if (!mounted) return;
-      _markAsRead();
-    });
-  }
-
-  void _markAsRead() {
-    Get.find<IReadStatusStorage>().markAsRead(_args.id);
-  }
-
-  Future<void> _toggleLike() async {
-    await _actionController.toggleLike(
-      poemId: _args.id,
-      category: _args.category,
-      poemTitle: _args.title,
-      poemText: _poemText,
-      audioUrl: _args.audioUrl,
-    );
-    if (mounted) {
-      setState(
-        () => _isLiked = _actionController.isLiked(_args.id, _args.category),
-      );
-    }
-  }
-
-  Future<void> _toggleSave() async {
-    await _actionController.toggleSave(
-      poemId: _args.id,
-      category: _args.category,
-      poemTitle: _args.title,
-      poemText: _poemText,
-      audioUrl: _args.audioUrl,
-    );
-    if (mounted) {
-      setState(
-        () => _isSaved = _actionController.isSaved(_args.id, _args.category),
-      );
-    }
-  }
-
-  Future<void> _copyLine(String text) async {
-    await Clipboard.setData(ClipboardData(text: text));
-    if (!mounted) return;
-    AppSnackBarService.success('مصرع کپی شد');
-  }
-
-  Future<void> _toggleHighlight() async {
-    if (_selectedLineIndex == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('لطفاً ابتدا یک مصرع را انتخاب کنید')),
-      );
-      return;
-    }
-
-    final index = _selectedLineIndex!;
-    final lineText = _poemLines[index];
-
-    await _actionController.toggleHighlight(
-      poemId: _args.id,
-      category: _args.category,
-      poemTitle: _args.title,
-      poemText: _poemText,
-      audioUrl: _args.audioUrl,
-      highlightedLine: lineText,
-      lineIndex: index,
-      color: AppColors.accent,
-    );
-
-    if (!mounted) return;
-    setState(() {
-      if (_actionController.isLineHighlighted(
-        _args.id,
-        _args.category,
-        index,
-      )) {
-        _highlightedLineIndexes.add(index);
-      } else {
-        _highlightedLineIndexes.remove(index);
-      }
     });
   }
 
@@ -756,142 +261,11 @@ class _PoemScreenState extends State<PoemScreen>
               150;
     final double bottomPadding =
         (_args.hasAudio ? overlayHeight + bottomInset : 110) + breathingRoom;
-
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
-        appBar: AppBar(
-          toolbarHeight: 50,
-          automaticallyImplyLeading: false,
-          leadingWidth: 70,
-          leading: _isMultiLineSelecting
-              ? null
-              : Center(
-                  child: LucideAnimatedIcon(
-                    icon: arrow_right,
-                    size: 25,
-                    trigger: AnimationTrigger.onTap,
-                    duration: const Duration(milliseconds: 300),
-                    color: colorScheme.onSurface,
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      if (_args.hasAudio) _audioCtrl.stop();
-                    },
-                  ),
-                ),
-          titleSpacing: 35,
-          title: _isMultiLineSelecting
-              ? Align(
-                  alignment: Alignment.centerRight,
-                  child: Text(
-                    '${_selectedShareLines.length} مصرع انتخاب شده'
-                        .toPersianNumbers(),
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                )
-              : Text(_args.title, style: textTheme.headlineMedium),
-
-          actions: _isMultiLineSelecting
-              ? [
-                  Padding(
-                    padding: const EdgeInsets.only(left: AppSpacing.md),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _isMultiLineSelecting = false;
-                              _selectedShareLines.clear();
-                            });
-                          },
-                          child: const Text('لغو'),
-                        ),
-                        TextButton(
-                          onPressed: _selectedShareLines.isEmpty
-                              ? null
-                              : () {
-                                  final indexes = _selectedShareLines.toList()
-                                    ..sort();
-
-                                  final text = indexes
-                                      .map((i) => _poemLines[i])
-                                      .join('\n');
-
-                                  setState(() {
-                                    _isMultiLineSelecting = false;
-                                    _selectedShareLines.clear();
-                                  });
-
-                                  showVerseShareSheet(
-                                    context,
-                                    verseText: text,
-                                    poemTitle: _args.title,
-                                  );
-                                },
-                          child: const Text('تایید'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ]
-              : [
-                  Padding(
-                    padding: const EdgeInsets.only(left: AppSpacing.xs),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _AppBarToggleIcon(
-                          isActive: _isLiked,
-                          activeIcon: Icons.favorite,
-                          inactiveIcon: Icons.favorite_border,
-                          activeColor: Colors.red.shade400,
-                          inactiveColor: colorScheme.onSurface,
-                          onTap: _toggleLike,
-                        ),
-                        _AppBarToggleIcon(
-                          isActive: _isSaved,
-                          activeIcon: Icons.bookmark,
-                          inactiveIcon: Icons.bookmark_border,
-                          activeColor: Colors.greenAccent,
-                          inactiveColor: colorScheme.onSurface,
-                          onTap: _toggleSave,
-                        ),
-                        IconButton(
-                          icon: ColorFiltered(
-                            colorFilter: ColorFilter.mode(
-                              colorScheme.onSurface,
-                              BlendMode.srcIn,
-                            ),
-                            child: Lottie.asset(
-                              AppIcons.share,
-                              height: 20,
-                              controller: _shareController,
-                              repeat: false,
-                              onLoaded: (composition) {
-                                _shareController.duration =
-                                    composition.duration;
-                              },
-                            ),
-                          ),
-                          onPressed: _isTextLoading
-                              ? null
-                              : () {
-                                  _shareController
-                                    ..reset()
-                                    ..forward();
-
-                                  _sharePoem();
-                                },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-        ),
+        appBar: _buildAppBar(theme, colorScheme, textTheme),
         body: Stack(
           children: [
             // ── متن شعر ──────────────────────────────────────────
@@ -931,179 +305,10 @@ class _PoemScreenState extends State<PoemScreen>
                             ? const NeverScrollableScrollPhysics()
                             : const AlwaysScrollableScrollPhysics(),
                         padding: EdgeInsets.fromLTRB(12, 0, 12, bottomPadding),
-                        child: Card(
-                          color: colorScheme.surface,
-                          elevation: theme.brightness == Brightness.dark
-                              ? 0
-                              : 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: AppRadius.lgRadius,
-                            side: BorderSide(
-                              color: theme.dividerColor.withValues(alpha: 0.5),
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(14),
-                            child: ListenableBuilder(
-                              listenable: _verseSyncCtrl,
-                              builder: (context, _) {
-                                final activeOrder =
-                                    _verseSyncCtrl.activeVerseOrder;
-                                return Column(
-                                  children: [
-                                    if (_highlightedLineIndexes.isEmpty)
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                          bottom: 10,
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.touch_app_outlined,
-                                              size: 16,
-                                              color: colorScheme.onSurface
-                                                  .withValues(alpha: 0.35),
-                                            ),
-                                            const SizedBox(width: 6),
-                                            Expanded(
-                                              child: Text(
-                                                'برای گزینه‌های بیشتر، روی یک مصرع نگه دارید',
-                                                style: textTheme.bodySmall
-                                                    ?.copyWith(
-                                                      color: colorScheme
-                                                          .onSurface
-                                                          .withValues(
-                                                            alpha: 0.35,
-                                                          ),
-                                                    ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ...List.generate(_poemLines.length, (i) {
-                                      final isActive =
-                                          _verseSyncCtrl.hasSyncData &&
-                                          activeOrder == i;
-                                      final isFlashing =
-                                          _flashingLineIndex == i;
-
-                                      final layerLink = _lineLayerLinks[i] ??=
-                                          LayerLink();
-                                      final verseKey = _verseTargetKeys[i] ??=
-                                          GlobalKey();
-
-                                      final verseText =
-                                          CompositedTransformTarget(
-                                            link: layerLink,
-                                            child: KeyedSubtree(
-                                              key: verseKey,
-                                              child: Opacity(
-                                                opacity: _menuOpenLineIndex == i
-                                                    ? 0
-                                                    : 1,
-                                                child: PoemSelectedText(
-                                                  text: _poemLines[i],
-                                                  isSelected:
-                                                      _isMultiLineSelecting
-                                                      ? _selectedShareLines
-                                                            .contains(i)
-                                                      : _selectedLineIndex == i,
-                                                  isHighlighted:
-                                                      _highlightedLineIndexes
-                                                          .contains(i),
-                                                  fontSize: _fontSize,
-                                                  lineHeight: _lineHeight,
-                                                  isFlashing: isFlashing,
-                                                  isContextMenuOpen:
-                                                      _menuOpenLineIndex == i,
-                                                  fontFamily: _fontFamily,
-                                                  fontColor: _fontColor,
-                                                  onTap: () {
-                                                    if (_isMultiLineSelecting) {
-                                                      _toggleShareLineSelection(
-                                                        i,
-                                                      );
-                                                      return;
-                                                    }
-
-                                                    setState(() {
-                                                      _selectedLineIndex =
-                                                          _selectedLineIndex ==
-                                                              i
-                                                          ? null
-                                                          : i;
-                                                    });
-                                                  },
-                                                  onLongPress: (details) =>
-                                                      _showLineMenu(i, details),
-                                                ),
-                                              ),
-                                            ),
-                                          );
-                                      return Padding(
-                                        key: _lineKeys[i] ??= GlobalKey(),
-                                        padding: const EdgeInsets.only(
-                                          bottom: 8,
-                                          right: 0,
-                                        ),
-                                        child: _verseSyncCtrl.hasSyncData
-                                            ? Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                children: [
-                                                  SizedBox(
-                                                    width: indicatorSlotSize,
-                                                    height: indicatorSlotSize,
-                                                    child: Center(
-                                                      child: AnimatedSwitcher(
-                                                        duration:
-                                                            const Duration(
-                                                              milliseconds: 250,
-                                                            ),
-                                                        transitionBuilder:
-                                                            (
-                                                              child,
-                                                              anim,
-                                                            ) => ScaleTransition(
-                                                              scale: anim,
-                                                              child:
-                                                                  FadeTransition(
-                                                                    opacity:
-                                                                        anim,
-                                                                    child:
-                                                                        child,
-                                                                  ),
-                                                            ),
-                                                        child: isActive
-                                                            ? ActiveVerseIndicator(
-                                                                key: const ValueKey(
-                                                                  'active_indicator',
-                                                                ),
-                                                                color: Theme.of(
-                                                                  context,
-                                                                ).colorScheme.primary,
-                                                              )
-                                                            : const SizedBox.shrink(
-                                                                key: ValueKey(
-                                                                  'inactive_indicator',
-                                                                ),
-                                                              ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  SizedBox(width: 6.5),
-                                                  Expanded(child: verseText),
-                                                ],
-                                              )
-                                            : verseText,
-                                      );
-                                    }),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
+                        child: _buildPoemLinesCard(
+                          theme,
+                          colorScheme,
+                          textTheme,
                         ),
                       ),
                     ),
@@ -1112,35 +317,7 @@ class _PoemScreenState extends State<PoemScreen>
               left: 12,
               right: 12,
               bottom: _args.hasAudio ? 10 : 100,
-              child: Column(
-                key: _bottomOverlayKey,
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (_args.hasAudio)
-                    AudioPlayerWidget(
-                      key: _audioWidgetKey,
-                      id: _args.id,
-                      category: _args.category,
-                      audioUrl: _args.audioUrl,
-                      fetchAudioUrl: _args.fetchAudioUrl,
-                      controller: _audioCtrl,
-                      title: _args.title,
-                      verseSyncController: _verseSyncCtrl,
-                      onRecitationChanged: (recitation) {
-                        if (recitation.xmlText.isNotEmpty) {
-                          _verseSyncCtrl.loadSyncPoints(recitation.xmlText);
-                        }
-                      },
-                      onExpansionChanged: (expanded) {
-                        setState(() => _isAudioExpanded = expanded);
-                        _scheduleMeasureBottomOverlay(
-                          delay: const Duration(milliseconds: 260),
-                        );
-                      },
-                    ),
-                ],
-              ),
+              child: _buildBottomOverlay(),
             ),
           ],
         ),

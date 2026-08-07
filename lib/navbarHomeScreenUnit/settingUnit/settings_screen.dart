@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/theme/app_shadows.dart';
-import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/app_snackbar_service.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/notification_service.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/setting_contact_us_dialog.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/setting_delete_dialog.dart';
-import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/setting_privacy_dialog.dart';
-import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/setting_section_card.dart';
-import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/setting_show_about_dialog.dart';
 import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/setting_theme_toggle_mode.dart';
-import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/setting_tile.dart';
 import 'package:hafez_poems/theme/theme_controller.dart';
 import 'package:hafez_poems/core/data/contracts/i_keyed_item_storage.dart';
 import 'package:hafez_poems/models/highlight_item.dart';
@@ -21,6 +16,11 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/settings_reading_section.dart';
+import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/settings_reminder_section.dart';
+import 'package:hafez_poems/navbarHomeScreenUnit/settingUnit/settings_more_sections.dart';
+
+part 'settings_actions.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key, required this.title});
@@ -38,6 +38,8 @@ class _SettingPageState extends State<SettingPage>
   static const String _fontFamilyPrefKey = 'reading_font_family';
   static const String _fontColorPrefKey = 'reading_font_color';
   static const String _dailyReminderPrefKey = 'daily_ghazal_reminder_enabled';
+  static const String _reminderHourPrefKey = 'notif_hour';
+  static const String _reminderMinutePrefKey = 'notif_minute';
 
   double _fontSize = 13;
   double _lineHeight = 1;
@@ -83,216 +85,65 @@ class _SettingPageState extends State<SettingPage>
     super.dispose();
   }
 
+  void _applyLoadedSettings({
+    required double fontSize,
+    required double lineHeight,
+    required String fontFamily,
+    required int fontColorValue,
+    required bool dailyReminderEnabled,
+    required int reminderHour,
+    required int reminderMinute,
+  }) {
+    setState(() {
+      _fontSize = fontSize;
+      _lineHeight = lineHeight;
+      _fontFamily = fontFamily;
+      _fontColorValue = fontColorValue;
+      _dailyReminderEnabled = dailyReminderEnabled;
+      _reminderHour = reminderHour;
+      _reminderMinute = reminderMinute;
+    });
+  }
+
+  void _setAppVersion(String version) {
+    setState(() => _appVersion = version);
+  }
+
+  void _setFontSize(double value) {
+    setState(() => _fontSize = value);
+  }
+
+  void _setLineHeight(double value) {
+    setState(() => _lineHeight = value);
+  }
+
+  void _setFontFamily(String value) {
+    setState(() => _fontFamily = value);
+  }
+
+  void _setFontColorValue(int value) {
+    setState(() => _fontColorValue = value);
+  }
+
+  void _setReminderTime(int hour, int minute) {
+    setState(() {
+      _reminderHour = hour;
+      _reminderMinute = minute;
+    });
+  }
+
+  void _setDailyReminderEnabled(bool value) {
+    setState(() => _dailyReminderEnabled = value);
+  }
+
+  void _setIsTogglingReminder(bool value) {
+    setState(() => _isTogglingReminder = value);
+  }
+
   String get _reminderTimeText {
     final hour = _reminderHour.toString().padLeft(2, '0');
     final minute = _reminderMinute.toString().padLeft(2, '0');
     return '$hour:$minute';
-  }
-
-  Future<void> _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    final validFonts = fontOptions.map((f) => f['value']).toSet();
-
-    final savedFont = prefs.getString(_fontFamilyPrefKey) ?? 'vazir';
-    final savedReminder = prefs.getBool(_dailyReminderPrefKey) ?? false;
-    final isReminderScheduled = await NotificationService.instance
-        .isDailyReminderScheduled()
-        .timeout(
-          const Duration(milliseconds: 300),
-          onTimeout: () => savedReminder,
-        );
-
-    final reminderEnabled = savedReminder && isReminderScheduled;
-    if (savedReminder != reminderEnabled) {
-      await prefs.setBool(_dailyReminderPrefKey, reminderEnabled);
-    }
-
-    if (!mounted) return;
-
-    setState(() {
-      _fontSize = prefs.getDouble(_fontSizePrefKey) ?? 13;
-      _lineHeight = prefs.getDouble(_lineHeightPrefKey) ?? 1;
-      _fontFamily = validFonts.contains(savedFont) ? savedFont : 'vazir';
-      _fontColorValue = prefs.getInt(_fontColorPrefKey) ?? 0xFF000000;
-      _dailyReminderEnabled = reminderEnabled;
-      _reminderHour = prefs.getInt('notif_hour') ?? 13;
-      _reminderMinute = prefs.getInt('notif_minute') ?? 0;
-    });
-  }
-
-  Future<void> _loadAppVersion() async {
-    final info = await PackageInfo.fromPlatform();
-    if (!mounted) return;
-    setState(() {
-      _appVersion = '${info.version} (${info.buildNumber})';
-    });
-  }
-
-  Future<void> _saveFontSize(double value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble(_fontSizePrefKey, value);
-    setState(() => _fontSize = value);
-  }
-
-  Future<void> _saveLineHeight(double value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble(_lineHeightPrefKey, value);
-    setState(() => _lineHeight = value);
-  }
-
-  Future<void> _saveFontFamily(String value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_fontFamilyPrefKey, value);
-    setState(() => _fontFamily = value);
-  }
-
-  Future<void> _saveFontColor(Color color) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_fontColorPrefKey, color.toARGB32());
-    setState(() => _fontColorValue = color.toARGB32());
-  }
-
-  Future<void> _pickReminderTime() async {
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay(hour: _reminderHour, minute: _reminderMinute),
-      helpText: 'زمان یادآوری را انتخاب کنید',
-    );
-    if (picked == null || !mounted) return;
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('notif_hour', picked.hour);
-    await prefs.setInt('notif_minute', picked.minute);
-
-    setState(() {
-      _reminderHour = picked.hour;
-      _reminderMinute = picked.minute;
-    });
-
-    if (_dailyReminderEnabled) {
-      await NotificationService.instance.scheduleDailyReminderAt(
-        hour: picked.hour,
-        minute: picked.minute,
-      );
-      if (!mounted) return;
-      AppSnackBarService.success(
-        'زمان یادآوری به $_reminderTimeText تغییر کرد',
-      );
-    }
-  }
-
-  Future<void> _toggleReminder(bool enabled) async {
-    if (_isTogglingReminder) return;
-    setState(() => _isTogglingReminder = true);
-
-    try {
-      final prefs = await SharedPreferences.getInstance();
-
-      if (enabled) {
-        final granted = await NotificationService.instance
-            .requestReminderPermissions();
-
-        if (!granted) {
-          if (!mounted) return;
-          setState(() => _dailyReminderEnabled = false);
-          AppSnackBarService.error('اجازه ارسال اعلان‌ها داده نشد');
-          return;
-        }
-
-        await NotificationService.instance.scheduleDailyReminder();
-        final isScheduled = await NotificationService.instance
-            .isDailyReminderScheduled();
-        await prefs.setBool(_dailyReminderPrefKey, isScheduled);
-
-        if (!mounted) return;
-        setState(() => _dailyReminderEnabled = isScheduled);
-        if (isScheduled) {
-          AppSnackBarService.success('یادآوری روزانه فعال شد');
-        }
-      } else {
-        await NotificationService.instance.cancelDailyReminder();
-        final isStillScheduled = await NotificationService.instance
-            .isDailyReminderScheduled();
-        await prefs.setBool(_dailyReminderPrefKey, isStillScheduled);
-
-        if (!mounted) return;
-        setState(() => _dailyReminderEnabled = isStillScheduled);
-
-        if (!isStillScheduled) {
-          AppSnackBarService.success('یادآوری روزانه غیرفعال شد');
-        } else {
-          AppSnackBarService.error(
-            'غیرفعال‌سازی یادآوری روزانه انجام نشد\nاز تنظیمات تلفن اقدام کنید',
-          );
-        }
-      }
-    } finally {
-      if (mounted) setState(() => _isTogglingReminder = false);
-    }
-  }
-
-  Future<void> _showDeleteAllLocalDataDialog() async {
-    final confirmed = await showDeleteDataDialog(context);
-    if (confirmed == true) await _deleteAllLocalData();
-  }
-
-  Future<void> _deleteAllLocalData() async {
-    try {
-      await Get.find<IKeyedItemStorage<LikedItem>>().clear();
-      await Get.find<IKeyedItemStorage<SavedItem>>().clear();
-      await Get.find<IKeyedItemStorage<HighlightItem>>().clear();
-
-      final prefs = await SharedPreferences.getInstance();
-      await NotificationService.instance.cancelDailyReminder();
-      await prefs.clear();
-      await _loadSettings();
-
-      if (!mounted) return;
-      AppSnackBarService.success('تمام داده‌های محلی حذف شد');
-    } catch (e) {
-      if (!mounted) return;
-      AppSnackBarService.error('خطا در حذف داده‌ها: $e');
-    }
-  }
-
-  Future<void> _introduceToFriends() async {
-    try {
-      await SharePlus.instance.share(
-        ShareParams(
-          text:
-              '✨ اگر عاشق شعر و فال حافظی، این برنامه رو حتماً امتحان کن!\n\n'
-              '📖 مجموعه کامل غزل‌های حافظ\n'
-              '🔮 فال حافظ با رابط کاربری زیبا\n'
-              '⚡ سریع، سبک و کاملاً رایگان\n\n'
-              '👇 لینک دانلود:\n'
-              'https://github.com/Abolfazl-Dev-Code/hafez-poems/releases',
-          subject: 'معرفی به دوستان',
-        ),
-      );
-      if (!mounted) return;
-      AppSnackBarService.success('پنجره اشتراک‌گذاری باز شد');
-    } catch (e) {
-      if (!mounted) return;
-      AppSnackBarService.error('اشتراک‌گذاری انجام نشد');
-    }
-  }
-
-  Future<void> _openUrl(String url) async {
-    final uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      if (!mounted) return;
-      AppSnackBarService.error('امکان باز کردن لینک وجود ندارد');
-    }
-  }
-
-  void _openContactOptions() {
-    showContactOptions(
-      context: context,
-      onEmailTap: () => _openUrl('mailto:nashenaskhamosh@gmail.com'),
-      onTelegramTap: () => _openUrl('https://t.me/dotb1'),
-      onWebsiteTap: () =>
-          _openUrl('https://instagram.com/should_call_me_nostradamus'),
-    );
   }
 
   @override
@@ -303,7 +154,6 @@ class _SettingPageState extends State<SettingPage>
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
-    final previewColor = Color(_fontColorValue);
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -387,351 +237,33 @@ class _SettingPageState extends State<SettingPage>
               ),
               const SizedBox(height: 16),
               // ── تنظیمات مطالعه ────────────────────────────────────────
-              SectionCard(
-                title: 'تنظیمات مطالعه',
-                icon: Icons.text_fields_outlined,
-                children: [
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      'اندازه قلم: ${_fontSize.toStringAsFixed(0)}',
-                      style: textTheme.bodyMedium,
-                    ),
-                  ),
-                  SliderTheme(
-                    data: SliderTheme.of(context).copyWith(
-                      trackHeight: 2.5,
-                      thumbShape: const RoundSliderThumbShape(
-                        enabledThumbRadius: 7,
-                      ),
-                      overlayShape: const RoundSliderOverlayShape(
-                        overlayRadius: 14,
-                      ),
-                    ),
-                    child: Slider(
-                      value: _fontSize,
-                      min: 10,
-                      max: 25,
-                      divisions: 15,
-                      label: _fontSize.toStringAsFixed(0),
-                      onChanged: _saveFontSize,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      'فاصله خطوط مصرع‌ها: ${_lineHeight.toStringAsFixed(1)}',
-                      style: textTheme.bodyMedium,
-                    ),
-                  ),
-                  SliderTheme(
-                    data: SliderTheme.of(context).copyWith(
-                      trackHeight: 2.5,
-                      thumbShape: const RoundSliderThumbShape(
-                        enabledThumbRadius: 7,
-                      ),
-                      overlayShape: const RoundSliderOverlayShape(
-                        overlayRadius: 14,
-                      ),
-                    ),
-                    child: Slider(
-                      value: _lineHeight,
-                      min: 1.0,
-                      max: 2.2,
-                      divisions: 12,
-                      label: _lineHeight.toStringAsFixed(1),
-                      onChanged: _saveLineHeight,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      'انتخاب نوع قلم',
-                      style: textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHighest.withValues(
-                        alpha: 0.35,
-                      ),
-                      borderRadius: AppRadius.mdRadius,
-                      border: Border.all(
-                        color: theme.dividerColor.withValues(alpha: 0.8),
-                      ),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _fontFamily,
-                        isExpanded: true,
-                        borderRadius: AppRadius.lgRadius,
-                        dropdownColor: colorScheme.surface,
-                        icon: Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          color: colorScheme.onSurface.withValues(alpha: 0.7),
-                        ),
-                        alignment: Alignment.centerRight,
-                        items: fontOptions.map((font) {
-                          final value = font['value']!;
-                          final label = font['label']!;
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Directionality(
-                              textDirection: TextDirection.ltr,
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Text(
-                                        label,
-                                        textAlign: TextAlign.right,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontFamily: value,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          color: colorScheme.onSurface,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  if (_fontFamily == value) ...[
-                                    const SizedBox(width: 5),
-                                    Icon(
-                                      Icons.check_circle_rounded,
-                                      size: 18,
-                                      color: colorScheme.primary,
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                        selectedItemBuilder: (context) {
-                          return fontOptions.map((font) {
-                            return Align(
-                              alignment: Alignment.centerRight,
-                              child: Text(
-                                font['label']!,
-                                textAlign: TextAlign.right,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontFamily: font['value'],
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: colorScheme.onSurface,
-                                ),
-                              ),
-                            );
-                          }).toList();
-                        },
-                        onChanged: (value) {
-                          if (value != null) _saveFontFamily(value);
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      'رنگ قلم',
-                      style: textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: _fontColors.map((color) {
-                      final selected = color.toARGB32() == _fontColorValue;
-                      return GestureDetector(
-                        onTap: () => _saveFontColor(color),
-                        child: Container(
-                          width: 34,
-                          height: 34,
-                          decoration: BoxDecoration(
-                            color: color,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: selected
-                                  ? colorScheme.primary
-                                  : theme.dividerColor,
-                              width: selected ? 3 : 1.2,
-                            ),
-                          ),
-                          child: selected
-                              ? Icon(
-                                  Icons.check,
-                                  size: 18,
-                                  color: color.computeLuminance() > 0.5
-                                      ? Colors.black
-                                      : Colors.white,
-                                )
-                              : null,
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHighest.withValues(
-                        alpha: 0.45,
-                      ),
-                      borderRadius: AppRadius.mdRadius,
-                    ),
-                    child: Text(
-                      'الا یا ایها الساقی ادر کاساً و ناولها',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: _fontSize,
-                        height: _lineHeight,
-                        fontFamily: _fontFamily,
-                        color: previewColor,
-                      ),
-                    ),
-                  ),
-                ],
+              SettingsReadingSection(
+                fontSize: _fontSize,
+                lineHeight: _lineHeight,
+                fontFamily: _fontFamily,
+                fontColorValue: _fontColorValue,
+                fontOptions: fontOptions,
+                fontColors: _fontColors,
+                onFontSizeChanged: _saveFontSize,
+                onLineHeightChanged: _saveLineHeight,
+                onFontFamilyChanged: _saveFontFamily,
+                onFontColorChanged: _saveFontColor,
               ),
 
               // ── یادآوری ───────────────────────────────────────────────
-              SectionCard(
-                title: 'یادآوری خواندن اشعار حافظ',
-                icon: Icons.notifications_active_rounded,
-                children: [
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    value: _dailyReminderEnabled,
-                    onChanged: _isTogglingReminder ? null : _toggleReminder,
-                    title: Text(
-                      'فعال‌سازی اعلان‌ها',
-                      style: textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    subtitle: const Text(
-                      'این گزینه برای ارسال یادآوری روزانه خواندن اشعار است.',
-                    ),
-                  ),
-                  if (_dailyReminderEnabled) ...[
-                    const Divider(height: 1),
-                    InkWell(
-                      borderRadius: AppRadius.mdRadius,
-                      onTap: _pickReminderTime,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: AppSpacing.md,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.access_time_rounded,
-                                  size: 20,
-                                  color: colorScheme.primary,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'زمان یادآوری',
-                                  style: textTheme.bodyMedium,
-                                ),
-                              ],
-                            ),
-                            Text(
-                              _reminderTimeText,
-                              style: textTheme.titleMedium?.copyWith(
-                                color: colorScheme.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
+              SettingsReminderSection(
+                dailyReminderEnabled: _dailyReminderEnabled,
+                isTogglingReminder: _isTogglingReminder,
+                reminderTimeText: _reminderTimeText,
+                onToggle: _toggleReminder,
+                onPickTime: _pickReminderTime,
               ),
-              // ── مدیریت داده‌ها ─────────────────────────────────────────
-              SectionCard(
-                title: 'مدیریت داده‌ها',
-                icon: Icons.storage_rounded,
-                children: [
-                  SettingTile(
-                    title: 'حذف تمامی داده‌های محلی',
-                    subtitle:
-                        'علاقه‌مندی‌‌ها، ذخیره‌ها، برگزیده‌‌ها و تمامی گزینه‌های درون بخش تنظیمات پاک می‌شوند.',
-                    titleColor: colorScheme.error,
-                    trailing: Icon(
-                      Icons.delete_forever_rounded,
-                      color: colorScheme.error,
-                    ),
-                    onTap: _showDeleteAllLocalDataDialog,
-                  ),
-                ],
-              ),
-
-              // ── درباره برنامه ──────────────────────────────────────────
-              SectionCard(
-                title: 'درباره برنامه',
-                icon: Icons.android,
-                children: [
-                  SettingTile(title: 'نسخه برنامه', subtitle: _appVersion),
-                  SettingTile(
-                    title: 'راه‌های ارتباطی',
-                    subtitle: 'ایمیل و شبکه‌های ارتباطی',
-                    trailing: const Icon(Icons.chevron_left_rounded),
-                    onTap: _openContactOptions,
-                  ),
-                  SettingTile(
-                    title: 'درباره ما',
-                    trailing: const Icon(Icons.chevron_left_rounded),
-                    onTap: () => showAboutDialogCustom(
-                      context: context,
-                      appVersion: _appVersion,
-                    ),
-                  ),
-                  SettingTile(
-                    title: 'حریم خصوصی',
-                    trailing: const Icon(Icons.chevron_left_rounded),
-                    onTap: () => showPrivacyDialog(context),
-                  ),
-                ],
-              ),
-              // ── اشتراک‌گذاری و حمایت ──────────────────────────────────
-              SectionCard(
-                title: 'اشتراک‌گذاری و حمایت',
-                icon: Icons.share_rounded,
-                children: [
-                  SettingTile(
-                    title: 'معرفی به دوستان',
-                    trailing: const Icon(Icons.ios_share_rounded),
-                    onTap: _introduceToFriends,
-                  ),
-                  SettingTile(
-                    title: 'امتیاز دادن به برنامه',
-                    subtitle: 'این گزینه پس از انتشار برنامه فعال می‌شود.',
-                    enabled: false,
-                    trailing: const Icon(Icons.lock_outline),
-                  ),
-                ],
+              // ── مدیریت داده‌ها / درباره برنامه / اشتراک‌گذاری ──────────
+              SettingsMoreSections(
+                appVersion: _appVersion,
+                onDeleteAllLocalData: _showDeleteAllLocalDataDialog,
+                onOpenContactOptions: _openContactOptions,
+                onIntroduceToFriends: _introduceToFriends,
               ),
             ],
           ),

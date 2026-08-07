@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:video_player/video_player.dart';
 import 'package:hafez_poems/theme/text_style.dart';
+import 'package:hafez_poems/homeScreenUnit/carouselUnit/carousel_flip_media.dart';
+import 'package:hafez_poems/homeScreenUnit/carouselUnit/carousel_refresh_button.dart';
+import 'package:hafez_poems/homeScreenUnit/carouselUnit/carousel_category_label.dart';
+part 'carousel_video_controller.dart';
 
 class CarouselScreenWidget extends StatefulWidget {
   final String initialGhazal;
@@ -83,6 +87,34 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
     }
   }
 
+  void _setVideoController(VideoPlayerController? controller) {
+    setState(() => _videoController = controller);
+  }
+
+  void _setFlipFinishedState() {
+    setState(() {
+      _showVideo = false;
+      _isRefreshing = false;
+    });
+  }
+
+  void _setRefreshState({
+    required bool isRefreshing,
+    required bool showVideo,
+    required bool videoPlaying,
+  }) {
+    setState(() {
+      _turns += 1;
+      _isRefreshing = isRefreshing;
+      _showVideo = showVideo;
+      _videoPlaying = videoPlaying;
+    });
+  }
+
+  void _setRefreshing(bool value) {
+    setState(() => _isRefreshing = value);
+  }
+
   @override
   void dispose() {
     _completionTimer?.cancel();
@@ -106,117 +138,6 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
       debugPrint('MESRA[${l.length}]: ${l.codeUnits}');
     }
     return lines.join('\n');
-  }
-
-  Future<void> _initFlipVideo(bool isDark) async {
-    if (_isInitializingVideo) return;
-    _isInitializingVideo = true;
-    try {
-      _videoController?.removeListener(_onVideoTick);
-      await _videoController?.dispose();
-      _videoController = null;
-
-      final asset = isDark ? _flipVideoDark : _flipVideoLight;
-      final controller = VideoPlayerController.asset(asset);
-      await controller.initialize();
-      await controller.setVolume(0);
-      controller.addListener(_onVideoTick);
-      if (!mounted) {
-        controller.dispose();
-        return;
-      }
-      setState(() => _videoController = controller);
-    } catch (e) {
-      debugPrint('Hafez flip video failed to load: $e');
-    } finally {
-      _isInitializingVideo = false;
-    }
-  }
-
-  void _onVideoTick() {
-    if (!_videoPlaying || !_showVideo) return;
-    final controller = _videoController;
-    if (controller == null) return;
-    final value = controller.value;
-    if (!value.isInitialized || value.duration == Duration.zero) return;
-
-    if (!value.isPlaying && value.position >= value.duration) {
-      _videoPlaying = false;
-      _onFlipFinished();
-    }
-  }
-
-  void _onFlipFinished() {
-    _completionTimer?.cancel();
-    _completionTimer = null;
-    if (!mounted || !_isRefreshing) return;
-
-    widget.onChangeGhazal();
-    setState(() {
-      _showVideo = false;
-      _isRefreshing = false;
-    });
-    _videoController?.seekTo(Duration.zero);
-  }
-
-  Future<void> _handleRefreshTap() async {
-    if (_isRefreshing) return;
-    if (_videoController == null && _videoInitFuture != null) {
-      await _videoInitFuture!.timeout(
-        const Duration(milliseconds: 1200),
-        onTimeout: () {},
-      );
-    }
-
-    final controller = _videoController;
-    final videoReady = controller != null && controller.value.isInitialized;
-
-    setState(() {
-      _turns += 1;
-      _isRefreshing = true;
-      _showVideo = videoReady;
-      _videoPlaying = false;
-    });
-
-    if (!videoReady) {
-      await Future.delayed(const Duration(milliseconds: 600));
-      if (!mounted) return;
-      widget.onChangeGhazal();
-      setState(() => _isRefreshing = false);
-      return;
-    }
-
-    await controller.seekTo(Duration.zero);
-    await Future.delayed(const Duration(milliseconds: 100));
-    _videoPlaying = true;
-    await controller.play();
-
-    final duration = controller.value.duration;
-    _completionTimer?.cancel();
-    _completionTimer = Timer(
-      duration + const Duration(milliseconds: 500),
-      _onFlipFinished,
-    );
-  }
-
-  Widget _buildFlipVideo(VideoPlayerController controller) {
-    return ClipRRect(
-      key: const ValueKey('hafez_flip_video'),
-      borderRadius: const BorderRadius.only(
-        bottomLeft: Radius.circular(15),
-        topLeft: Radius.circular(15),
-      ),
-      child: SizedBox.expand(
-        child: FittedBox(
-          fit: BoxFit.cover,
-          child: SizedBox(
-            width: controller.value.size.width,
-            height: controller.value.size.height,
-            child: VideoPlayer(controller),
-          ),
-        ),
-      ),
-    );
   }
 
   @override
@@ -251,28 +172,12 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
             top: 0,
             left: 0,
             bottom: 0,
-            child: SizedBox(
-              width: 145,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 220),
-                switchInCurve: Curves.easeOut,
-                switchOutCurve: Curves.easeIn,
-                child: isVideoVisible
-                    ? _buildFlipVideo(_videoController!)
-                    : ClipRRect(
-                        key: const ValueKey('hafez_static_image'),
-                        borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(15),
-                          topLeft: Radius.circular(15),
-                        ),
-                        child: SizedBox.expand(
-                          child: Image.asset(
-                            isDark ? widget.darkImagePath : widget.imagePath,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-              ),
+            child: CarouselFlipMedia(
+              isVideoVisible: isVideoVisible,
+              videoController: _videoController,
+              isDark: isDark,
+              imagePath: widget.imagePath,
+              darkImagePath: widget.darkImagePath,
             ),
           ),
           Positioned(
@@ -324,88 +229,16 @@ class _CarouselScreenWidgetState extends State<CarouselScreenWidget> {
               textDirection: TextDirection.rtl,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: AppRadius.pillRadius,
-                    onTap: _isRefreshing ? null : _handleRefreshTap,
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 200),
-                      opacity: _isRefreshing ? 0.55 : 1.0,
-                      child: Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          color: colorScheme.primary,
-                          borderRadius: AppRadius.pillRadius,
-                          boxShadow: [
-                            BoxShadow(
-                              color: colorScheme.primary.withValues(
-                                alpha: isDark ? 0.28 : 0.22,
-                              ),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        alignment: Alignment.center,
-                        child: AnimatedRotation(
-                          turns: _turns,
-                          duration: const Duration(milliseconds: 600),
-                          curve: Curves.easeInOutCubic,
-                          child: Icon(
-                            Icons.refresh,
-                            size: 22,
-                            color: colorScheme.onPrimary,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                CarouselRefreshButton(
+                  isRefreshing: _isRefreshing,
+                  isDark: isDark,
+                  turns: _turns,
+                  onTap: _handleRefreshTap,
                 ),
                 const SizedBox(width: 8),
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 320),
-                  switchInCurve: Curves.easeOut,
-                  switchOutCurve: Curves.easeIn,
-                  transitionBuilder: (child, animation) {
-                    final slide = Tween<Offset>(
-                      begin: const Offset(0, 0.06),
-                      end: Offset.zero,
-                    ).animate(animation);
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(position: slide, child: child),
-                    );
-                  },
-                  child: Column(
-                    key: ValueKey(
-                      '$_displayedCategoryLabel$_displayedGhazalNumber',
-                    ),
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'دیوان حافظ',
-                        textAlign: TextAlign.right,
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: colorScheme.onSurface,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 11,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '$_displayedCategoryLabel $_displayedGhazalNumber',
-                        textAlign: TextAlign.right,
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: colorScheme.onSurface.withValues(alpha: 0.55),
-                          fontWeight: FontWeight.w400,
-                          fontSize: 9,
-                        ),
-                      ),
-                    ],
-                  ),
+                CarouselCategoryLabel(
+                  categoryLabel: _displayedCategoryLabel,
+                  ghazalNumber: _displayedGhazalNumber,
                 ),
               ],
             ),

@@ -187,11 +187,12 @@ class _StreakMotivationCardState extends State<StreakMotivationCard> {
                 ? Padding(
                     padding: const EdgeInsets.only(top: AppSpacing.lg),
                     child: Text(
-                      // textAlign: TextAlign.right,
-                      'روزشمار نشان میده چند روز پشت‌سرهم برنامه را باز کردی.\n'
-                      'هر روزی که وارد برنامه بشی، یک روز به این عدد اضافه میشه.\n'
-                      'اگر حتی یک روز وارد برنامه نشی، شمارنده از صفر شروع میکنه.\n'
-                      'بیشترین روزهایی که وارد برنامه بشی. به عنوان رکوردت ثبت میشه.',
+                      textAlign: TextAlign.right,
+
+                      'روزشمار نشان می‌دهد چند روز پشت‌سرهم برنامه را باز کرده‌ای.\n'
+                      'هر روزی که وارد برنامه شوی، یک روز به این عدد اضافه می‌شود.\n'
+                      'اگر حتی یک روز وارد برنامه نشوی، شمارنده از صفر شروع می‌شود.\n'
+                      'رکورد، بیشترین تعداد روزهای متوالی است که تاکنون ثبت کرده‌ای.',
                       style: theme.textTheme.bodySmall?.copyWith(
                         height: 1.7,
                         fontSize: 15,

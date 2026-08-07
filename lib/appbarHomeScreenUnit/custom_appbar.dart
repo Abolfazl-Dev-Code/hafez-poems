@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/appbarHomeScreenUnit/searchUnit/search_binding.dart';
 import 'package:hafez_poems/theme/app_shadows.dart';
 import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
@@ -12,7 +13,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
 
   const CustomAppBar({super.key, this.title = "اشعار حافظ"});
-  static const Duration _navTapDelay = Duration(milliseconds: 150);
+  static const Duration _navTapDelay = Duration(milliseconds: 0);
 
   @override
   Widget build(BuildContext context) {
@@ -52,16 +53,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             Align(
               alignment: Alignment.centerRight,
               child: Padding(
-                padding: const EdgeInsets.only(right: AppSpacing.md),
+                padding: const EdgeInsets.only(right: AppSpacing.sm),
                 child: AnimatedAppIcon(
                   asset: AppIcons.search,
-                  size: 27,
+                  size: 26.5,
+                  animateOnTap: false,
                   color: colorScheme.onSurface,
                   strokeWidth: 15,
                   tapDelay: _navTapDelay,
                   onTap: () {
                     Get.to(
-                      () => SearchScreen(),
+                      () => const SearchScreen(),
+                      binding: SearchBinding(),
                       transition: Transition.downToUp,
                     );
                   },
@@ -71,10 +74,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
-                padding: EdgeInsetsGeometry.only(left: 9),
+                padding: EdgeInsetsGeometry.only(left: AppSpacing.sm),
                 child: AnimatedAppIcon(
                   asset: AppIcons.person,
                   size: 28,
+                  animateOnTap: false,
                   color: colorScheme.onSurface,
                   strokeWidth: 15,
                   tapDelay: _navTapDelay,
