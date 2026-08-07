@@ -10,6 +10,7 @@ import 'package:hafez_poems/navbarHomeScreenUnit/bottomNavBar/user_actions_saver
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_category_resolver.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_screen.dart';
+import 'package:hafez_poems/theme/text_style.dart';
 
 class HighlightsTab extends StatefulWidget {
   const HighlightsTab({super.key});
@@ -50,8 +51,11 @@ class _HighlightsTabState extends State<HighlightsTab> with SelectionMixin {
           });
 
           if (items.isEmpty) {
-            return const Center(
-              child: Text('هنوز هیچ مصرعی را برگزیده‌ نکرده‌اید.'),
+            return Center(
+              child: Text(
+                'هنوز هیچ مصرعی را برنگزیده‌اید. \n برای برگزیدن یک مصرع و دیدن تنظیمات بیشتر \n در صفحه اشعار روی یک مصرع نگه دارید.',
+                textAlign: TextAlign.center,
+              ),
             );
           }
 

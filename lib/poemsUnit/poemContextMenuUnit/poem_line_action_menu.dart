@@ -57,7 +57,7 @@ class ActionMenu extends StatelessWidget {
       ),
       MenuItemData(
         icon: Icons.play_circle_fill_rounded,
-        label: 'از اینجا بخوان',
+        label: 'از این مصرع بخوان',
         onTap: onPlayFromHere,
       ),
     ];

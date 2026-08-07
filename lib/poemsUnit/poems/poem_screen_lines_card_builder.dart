@@ -29,15 +29,15 @@ extension _PoemScreenLinesCardBuilder on _PoemScreenState {
                         Icon(
                           Icons.touch_app_outlined,
                           size: 16,
-                          color: colorScheme.onSurface.withValues(alpha: 0.55),
+                          color: colorScheme.onSurface.withValues(alpha: 0.35),
                         ),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
-                            'برای برگزیدن یک مصرع، روی آن نگه دارید',
+                            'برای دیدن تنظیمات بیشتر، روی یک مصرع نگه دارید',
                             style: textTheme.bodySmall?.copyWith(
                               color: colorScheme.onSurface.withValues(
-                                alpha: 0.55,
+                                alpha: 0.35,
                               ),
                             ),
                           ),
