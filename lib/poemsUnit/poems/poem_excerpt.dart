@@ -1,4 +1,4 @@
-part of 'poem_cache_services.dart';
+part of 'poemScreenCacheService/poem_cache_services.dart';
 
 class PoemExcerpt {
   final String id;
@@ -18,7 +18,9 @@ extension PoemExcerptExtraction<T> on BasePoemCacheService<T> {
   List<PoemExcerpt> randomExcerpts({int count = 5}) {
     final valid =
         _map.values
-            .where((item) => hasFullTextOf(item) && textOf(item).trim().isNotEmpty)
+            .where(
+              (item) => hasFullTextOf(item) && textOf(item).trim().isNotEmpty,
+            )
             .toList()
           ..shuffle(Random());
     final result = <PoemExcerpt>[];

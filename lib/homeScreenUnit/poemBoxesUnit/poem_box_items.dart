@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:hafez_poems/homeScreenUnit/poemBoxesUnit/action_item.dart';
 import 'package:hafez_poems/models/poem_list_config.dart';
 import 'package:hafez_poems/poemsUnit/poems/persian_numbers.dart';
-import 'package:hafez_poems/poemsUnit/poems/poem_cache_services.dart';
+import 'package:hafez_poems/poemsUnit/poems/poemScreenCacheService/poem_cache_services.dart';
 import 'package:hafez_poems/poemsUnit/PoemsListUnit/poem_list_sheet.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_local_services.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_screen.dart';
@@ -29,9 +29,8 @@ List<ActionItem> buildPoemBoxActionItems(
             items: Get.find<GhazalCacheService>().cachedGhazalsRx,
             isIndexing: Get.find<GhazalCacheService>().isIndexing,
             loadingProgress: Get.find<GhazalCacheService>().loadingProgress,
-            prefetch: (id) => Get.find<GhazalCacheService>()
-                .getGhazalDetail(id)
-                .then((_) {}),
+            prefetch: (id) =>
+                Get.find<GhazalCacheService>().getGhazalDetail(id).then((_) {}),
             onRetry: Get.find<GhazalCacheService>().preload,
             buildArgs: (item) => PoemScreenArgs(
               category: 'ghazal',

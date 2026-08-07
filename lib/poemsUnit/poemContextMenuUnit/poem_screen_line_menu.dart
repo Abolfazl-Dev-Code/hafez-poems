@@ -1,4 +1,4 @@
-part of 'poem_screen.dart';
+part of '../poems/poem_screen.dart';
 
 extension _PoemScreenLineMenu on _PoemScreenState {
   Future<void> _showLineMenu(int index, LongPressStartDetails details) async {

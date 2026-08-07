@@ -11,15 +11,16 @@ import 'package:hafez_poems/models/robaeyat_model.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:math';
-import 'poem_local_services.dart';
+import '../poem_local_services.dart';
 
-part 'poem_excerpt.dart';
+part '../poem_excerpt.dart';
 part 'ghazal_cache_service.dart';
 part 'ghataat_cache_service.dart';
 part 'robaeyat_cache_service.dart';
 part 'montasab_cache_service.dart';
 part 'ghasayed_cache_service.dart';
 part 'other_poem_cache_service.dart';
+
 // ══════════════════════════════════════════════════════════
 //  BASE
 // ══════════════════════════════════════════════════════════

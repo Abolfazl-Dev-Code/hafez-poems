@@ -1,4 +1,4 @@
-part of 'poem_screen.dart';
+part of '../poem_screen.dart';
 
 extension _PoemScreenAppBarBuilder on _PoemScreenState {
   PreferredSizeWidget _buildAppBar(
@@ -75,52 +75,21 @@ extension _PoemScreenAppBarBuilder on _PoemScreenState {
           : [
               Padding(
                 padding: const EdgeInsets.only(left: AppSpacing.xs),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    AppBarToggleIcon(
-                      isActive: _isLiked,
-                      activeIcon: Icons.favorite,
-                      inactiveIcon: Icons.favorite_border,
-                      activeColor: Colors.red.shade400,
-                      inactiveColor: colorScheme.onSurface,
-                      onTap: _toggleLike,
-                    ),
-                    AppBarToggleIcon(
-                      isActive: _isSaved,
-                      activeIcon: Icons.bookmark,
-                      inactiveIcon: Icons.bookmark_border,
-                      activeColor: Colors.greenAccent,
-                      inactiveColor: colorScheme.onSurface,
-                      onTap: _toggleSave,
-                    ),
-                    IconButton(
-                      icon: ColorFiltered(
-                        colorFilter: ColorFilter.mode(
-                          colorScheme.onSurface,
-                          BlendMode.srcIn,
-                        ),
-                        child: Lottie.asset(
-                          AppIcons.share,
-                          height: 20,
-                          controller: _shareController,
-                          repeat: false,
-                          onLoaded: (composition) {
-                            _shareController.duration = composition.duration;
-                          },
-                        ),
-                      ),
-                      onPressed: _isTextLoading
-                          ? null
-                          : () {
-                              _shareController
-                                ..reset()
-                                ..forward();
-
-                              _sharePoem();
-                            },
-                    ),
-                  ],
+                child: AppBarMoreMenu(
+                  isLiked: _isLiked,
+                  isSaved: _isSaved,
+                  onLike: _toggleLike,
+                  onSave: _toggleSave,
+                  onShare: () {
+                    if (!_isTextLoading) {
+                      _shareController
+                        ..reset()
+                        ..forward();
+                      _sharePoem();
+                    }
+                  },
+                  colorScheme: colorScheme,
+                  textTheme: textTheme,
                 ),
               ),
             ],

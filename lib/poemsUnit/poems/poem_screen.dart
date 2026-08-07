@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:hafez_poems/poemsUnit/poems/poemScreenAppbar/app_bar_more_menu.dart';
 import 'package:hafez_poems/theme/app_spacing.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/theme/color_style.dart';
@@ -15,20 +16,17 @@ import 'package:hafez_poems/poemsUnit/poemContextMenuUnit/poem_selected_text.dar
 import 'package:hafez_poems/poemsUnit/verseShareUnit/verse_share_sheet.dart';
 import 'package:hafez_poems/poemsUnit/verseSyncUnit/active_verse_indicator_widget.dart';
 import 'package:hafez_poems/poemsUnit/verseSyncUnit/verse_sync_controller.dart';
-import 'package:hafez_poems/theme/app_icons.dart';
-import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 import 'package:hafez_poems/core/data/contracts/i_read_status_storage.dart';
-import 'poem_screen_app_bar_toggle_icon.dart';
 import 'share_mode_option_tile.dart';
 export 'poem_screen_args.dart';
 import 'poem_screen_args.dart';
 part 'poem_screen_scroll.dart';
-part 'poem_screen_line_menu.dart';
+part '../poemContextMenuUnit/poem_screen_line_menu.dart';
 part 'poem_screen_actions.dart';
-part 'poem_screen_app_bar_builder.dart';
-part 'poem_screen_lines_card_builder.dart';
+part 'poemScreenAppbar/poem_screen_app_bar_builder.dart';
+part '../poemContextMenuUnit/poem_screen_lines_card_builder.dart';
 
 class PoemScreen extends StatefulWidget {
   final PoemScreenArgs args;

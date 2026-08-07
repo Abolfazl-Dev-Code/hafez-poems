@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:hafez_poems/poemsUnit/poems/poem_cache_services.dart';
+import 'package:hafez_poems/poemsUnit/poems/poemScreenCacheService/poem_cache_services.dart';
 import 'package:hafez_poems/poemsUnit/poems/poem_local_services.dart';
 
 class PoemCategoryResolver {
