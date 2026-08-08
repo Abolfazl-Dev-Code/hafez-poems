@@ -29,16 +29,7 @@ extension _PoemScreenActions on _PoemScreenState {
       );
 
       if (!mounted) return;
-      _setFlashingLineIndex(targetIndex);
-      await Future.delayed(const Duration(milliseconds: 600));
-      if (!mounted) return;
-      _setFlashingLineIndex(null);
-      await Future.delayed(const Duration(milliseconds: 400));
-      if (!mounted) return;
-      _setFlashingLineIndex(targetIndex);
-      await Future.delayed(const Duration(milliseconds: 600));
-      if (!mounted) return;
-      _setFlashingLineIndex(null);
+      await _flashLineTwice(targetIndex);
     });
   }
 

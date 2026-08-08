@@ -64,6 +64,19 @@ extension _PoemScreenScroll on _PoemScreenState {
     );
   }
 
+  Future<void> _flashLineTwice(int index) async {
+    _setFlashingLineIndex(index);
+    await Future.delayed(const Duration(milliseconds: 600));
+    if (!mounted) return;
+    _setFlashingLineIndex(null);
+    await Future.delayed(const Duration(milliseconds: 400));
+    if (!mounted) return;
+    _setFlashingLineIndex(index);
+    await Future.delayed(const Duration(milliseconds: 600));
+    if (!mounted) return;
+    _setFlashingLineIndex(null);
+  }
+
   void _pauseAutoScroll() {
     _resumeAutoScrollTimer?.cancel();
     _userIsInteractingWithScroll = true;

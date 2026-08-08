@@ -25,6 +25,7 @@ import 'poem_screen_args.dart';
 part 'poem_screen_scroll.dart';
 part '../poemContextMenuUnit/poem_screen_line_menu.dart';
 part 'poem_screen_actions.dart';
+part 'poem_read_marker.dart';
 part 'poemScreenAppbar/poem_screen_app_bar_builder.dart';
 part 'poem_screen_card_builder.dart';
 
@@ -76,6 +77,7 @@ class _PoemScreenState extends State<PoemScreen>
   final ValueNotifier<bool> _isLiked = ValueNotifier(false);
   final ValueNotifier<bool> _isSaved = ValueNotifier(false);
   int? _selectedLineIndex;
+  int? _readUpToLineIndex;
   final Set<int> _highlightedLineIndexes = {};
   bool _isMultiLineSelecting = false;
   final Set<int> _selectedShareLines = {};

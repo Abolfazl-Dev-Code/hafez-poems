@@ -45,6 +45,7 @@ extension _PoemScreenLinesCardBuilder on _PoemScreenState {
                       ],
                     ),
                   ),
+                _buildReadUpToHereBanner(theme, colorScheme, textTheme),
                 ...List.generate(_poemLines.length, (i) {
                   final isActive =
                       _verseSyncCtrl.hasSyncData && activeOrder == i;

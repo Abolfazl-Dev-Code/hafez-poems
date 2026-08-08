@@ -23,8 +23,10 @@ class PoemLineContextMenuController {
     required Offset targetOffset,
     required LineWidgetBuilder lineBuilder,
     required bool isHighlighted,
+    required bool isReadMarker,
     required VoidCallback onCopy,
     required VoidCallback onToggleHighlight,
+    required VoidCallback onToggleReadMarker,
     required VoidCallback onShareAsImage,
     required VoidCallback onPlayFromHere,
     required VoidCallback onClosed,
@@ -53,6 +55,7 @@ class PoemLineContextMenuController {
           targetSize: targetSize,
           lineBuilder: lineBuilder,
           isHighlighted: isHighlighted,
+          isReadMarker: isReadMarker,
           showBelow: showBelow,
           menuGap: menuGap,
           menuHeight: menuHeight,
@@ -62,6 +65,10 @@ class PoemLineContextMenuController {
           },
           onToggleHighlight: () {
             onToggleHighlight();
+            hide();
+          },
+          onToggleReadMarker: () {
+            onToggleReadMarker();
             hide();
           },
           onShareAsImage: () async {

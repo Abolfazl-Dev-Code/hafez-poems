@@ -10,23 +10,27 @@ class ActionMenu extends StatelessWidget {
   const ActionMenu({
     super.key,
     required this.isHighlighted,
+    required this.isReadMarker,
     required this.fadeValue,
     required this.isDark,
     required this.onCopy,
     required this.onToggleHighlight,
+    required this.onToggleReadMarker,
     required this.onShareAsImage,
     required this.onPlayFromHere,
   });
 
   final bool isHighlighted;
+  final bool isReadMarker;
   final double fadeValue;
   final bool isDark;
   final VoidCallback onCopy;
   final VoidCallback onToggleHighlight;
+  final VoidCallback onToggleReadMarker;
   final VoidCallback onShareAsImage;
   final VoidCallback onPlayFromHere;
 
-  static const int itemCount = 4;
+  static const int itemCount = 5;
   static const double itemHeight = 46;
   static const double dividerHeight = 1;
 
@@ -89,6 +93,17 @@ class ActionMenu extends StatelessWidget {
         ),
         label: isHighlighted ? 'حذف برگزیده' : 'برگزیدن مصرع',
         onTap: onToggleHighlight,
+      ),
+      MenuItemData(
+        iconBuilder: (color) => Icon(
+          isReadMarker
+              ? Icons.bookmark_remove_outlined
+              : Icons.bookmark_add_outlined,
+          size: 18,
+          color: color,
+        ),
+        label: isReadMarker ? 'حذف خوانده شده' : 'تا اینجا خوانده‌ام',
+        onTap: onToggleReadMarker,
       ),
       MenuItemData(
         iconBuilder: (color) =>

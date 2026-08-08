@@ -7,11 +7,13 @@ class _PoemLineContextMenuOverlay extends StatefulWidget {
     required this.targetSize,
     required this.lineBuilder,
     required this.isHighlighted,
+    required this.isReadMarker,
     required this.showBelow,
     required this.menuGap,
     required this.menuHeight,
     required this.onCopy,
     required this.onToggleHighlight,
+    required this.onToggleReadMarker,
     required this.onShareAsImage,
     required this.onPlayFromHere,
     required this.onDismiss,
@@ -21,6 +23,7 @@ class _PoemLineContextMenuOverlay extends StatefulWidget {
   final Size targetSize;
   final LineWidgetBuilder lineBuilder;
   final bool isHighlighted;
+  final bool isReadMarker;
   final bool showBelow;
 
   final double menuGap;
@@ -28,6 +31,7 @@ class _PoemLineContextMenuOverlay extends StatefulWidget {
 
   final VoidCallback onCopy;
   final VoidCallback onToggleHighlight;
+  final VoidCallback onToggleReadMarker;
   final VoidCallback onShareAsImage;
   final VoidCallback onPlayFromHere;
   final VoidCallback onDismiss;
@@ -151,10 +155,12 @@ class _PoemLineContextMenuOverlayState
                         : Alignment.bottomCenter,
                     child: ActionMenu(
                       isHighlighted: widget.isHighlighted,
+                      isReadMarker: widget.isReadMarker,
                       fadeValue: _fade.value,
                       isDark: isDark,
                       onCopy: widget.onCopy,
                       onToggleHighlight: widget.onToggleHighlight,
+                      onToggleReadMarker: widget.onToggleReadMarker,
                       onShareAsImage: widget.onShareAsImage,
                       onPlayFromHere: widget.onPlayFromHere,
                     ),

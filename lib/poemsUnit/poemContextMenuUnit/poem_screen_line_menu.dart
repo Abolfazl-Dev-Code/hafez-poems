@@ -19,6 +19,7 @@ extension _PoemScreenLineMenu on _PoemScreenState {
       targetSize: targetSize,
       targetOffset: targetOffset,
       isHighlighted: _highlightedLineIndexes.contains(index),
+      isReadMarker: _readUpToLineIndex == index,
       lineBuilder: (ctx) => PoemSelectedText(
         text: _poemLines[index],
         isSelected: _selectedShareLines.contains(index),
@@ -36,6 +37,7 @@ extension _PoemScreenLineMenu on _PoemScreenState {
         _selectedLineIndex = index;
         _toggleHighlight();
       },
+      onToggleReadMarker: () => _toggleReadUpToHere(index),
       onShareAsImage: () => _showShareModeSheet(index),
       onClosed: () {
         if (!mounted) return;
