@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:hafez_poems/models/search_result.dart';
 import 'package:hafez_poems/poemsUnit/poems/poemScreenCacheService/poem_cache_services.dart';
+import 'search_logic.dart';
 
 class SearchController extends GetxController {
   final searchText = ''.obs;
@@ -78,108 +79,90 @@ class SearchController extends GetxController {
       }
     }
 
-    addScored(
-      ghazalCache.searchWithScore(query),
-      (g) => SearchResult(
-        id: g.id,
-        title: g.title,
-        text: g.text,
-        audioUrl: g.audioUrl,
-        type: SearchResultType.ghazal,
-      ),
-    );
+    final type = selectedType.value;
 
-    addScored(
-      ghataatCache.searchWithScore(query),
-      (g) => SearchResult(
-        id: g.id,
-        title: g.title,
-        text: g.text,
-        audioUrl: '',
-        type: SearchResultType.ghataat,
-      ),
-    );
+    if (type == null || type == SearchResultType.ghazal) {
+      addScored(
+        ghazalCache.searchWithScore(query),
+        (g) => SearchResult(
+          id: g.id,
+          title: g.title,
+          text: g.text,
+          audioUrl: g.audioUrl,
+          type: SearchResultType.ghazal,
+        ),
+      );
+    }
 
-    addScored(
-      ghasayedCache.searchWithScore(query),
-      (g) => SearchResult(
-        id: g.id,
-        title: g.title,
-        text: g.text,
-        audioUrl: '',
-        type: SearchResultType.qasaid,
-      ),
-    );
+    if (type == null || type == SearchResultType.ghataat) {
+      addScored(
+        ghataatCache.searchWithScore(query),
+        (g) => SearchResult(
+          id: g.id,
+          title: g.title,
+          text: g.text,
+          audioUrl: '',
+          type: SearchResultType.ghataat,
+        ),
+      );
+    }
 
-    addScored(
-      robaeyatCache.searchWithScore(query),
-      (g) => SearchResult(
-        id: g.id,
-        title: g.title,
-        text: g.text,
-        audioUrl: '',
-        type: SearchResultType.robaeyat,
-      ),
-    );
+    if (type == null || type == SearchResultType.qasaid) {
+      addScored(
+        ghasayedCache.searchWithScore(query),
+        (g) => SearchResult(
+          id: g.id,
+          title: g.title,
+          text: g.text,
+          audioUrl: '',
+          type: SearchResultType.qasaid,
+        ),
+      );
+    }
 
-    addScored(
-      montasabCache.searchWithScore(query),
-      (g) => SearchResult(
-        id: g.id,
-        title: g.title,
-        text: g.text,
-        audioUrl: '',
-        type: SearchResultType.montasab,
-      ),
-    );
+    if (type == null || type == SearchResultType.robaeyat) {
+      addScored(
+        robaeyatCache.searchWithScore(query),
+        (g) => SearchResult(
+          id: g.id,
+          title: g.title,
+          text: g.text,
+          audioUrl: '',
+          type: SearchResultType.robaeyat,
+        ),
+      );
+    }
 
-    addScored(
-      otherPoemCache.searchWithScore(query),
-      (o) => SearchResult(
-        id: o.id,
-        title: o.title,
-        text: o.text,
-        audioUrl: '',
-        type: SearchResultType.other,
-      ),
-    );
+    if (type == null || type == SearchResultType.montasab) {
+      addScored(
+        montasabCache.searchWithScore(query),
+        (g) => SearchResult(
+          id: g.id,
+          title: g.title,
+          text: g.text,
+          audioUrl: '',
+          type: SearchResultType.montasab,
+        ),
+      );
+    }
 
-    final filtered = selectedType.value != null
-        ? scoredList.where((e) => e.key.type == selectedType.value).toList()
-        : scoredList;
+    if (type == null || type == SearchResultType.other) {
+      addScored(
+        otherPoemCache.searchWithScore(query),
+        (o) => SearchResult(
+          id: o.id,
+          title: o.title,
+          text: o.text,
+          audioUrl: '',
+          type: SearchResultType.other,
+        ),
+      );
+    }
 
-    filtered.sort((a, b) => b.value.compareTo(a.value));
+    scoredList.sort((a, b) => b.value.compareTo(a.value));
 
-    results.value = filtered.map((e) => e.key).take(_maxResults).toList();
+    results.value = scoredList.map((e) => e.key).take(_maxResults).toList();
   }
 }
 
-String normalize(String text) {
-  return text
-      .replaceAll('۰', '0')
-      .replaceAll('٠', '0')
-      .replaceAll('۱', '1')
-      .replaceAll('١', '1')
-      .replaceAll('۲', '2')
-      .replaceAll('٢', '2')
-      .replaceAll('۳', '3')
-      .replaceAll('٣', '3')
-      .replaceAll('۴', '4')
-      .replaceAll('٤', '4')
-      .replaceAll('۵', '5')
-      .replaceAll('٥', '5')
-      .replaceAll('۶', '6')
-      .replaceAll('٦', '6')
-      .replaceAll('۷', '7')
-      .replaceAll('٧', '7')
-      .replaceAll('۸', '8')
-      .replaceAll('٨', '8')
-      .replaceAll('۹', '9')
-      .replaceAll('٩', '9')
-      .replaceAll('\u064a', '\u06cc')
-      .replaceAll('\u0643', '\u06a9')
-      .replaceAll('\u200c', ' ')
-      .replaceAll(RegExp(r'\s+'), ' ')
-      .trim()
-      .toLowerCase();
-}
+String normalize(String text) => normalizeText(text);

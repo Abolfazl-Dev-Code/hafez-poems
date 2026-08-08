@@ -3,8 +3,8 @@ import 'more_menu_item.dart';
 import 'staggered_menu_item.dart';
 
 class MoreMenuContent extends StatelessWidget {
-  final bool isLiked;
-  final bool isSaved;
+  final ValueNotifier<bool> isLiked;
+  final ValueNotifier<bool> isSaved;
   final ColorScheme colorScheme;
   final TextTheme textTheme;
   final VoidCallback onLike;
@@ -55,6 +55,7 @@ class MoreMenuContent extends StatelessWidget {
               onTap: onShare,
             ),
           ),
+
           Divider(
             height: 0.5,
             thickness: 0.5,
@@ -62,20 +63,27 @@ class MoreMenuContent extends StatelessWidget {
             endIndent: 10,
             color: colorScheme.outlineVariant,
           ),
-          StaggeredMenuItem(
-            delay: 85,
-            child: MoreMenuItem(
-              icon: isLiked ? Icons.favorite : Icons.favorite_border,
-              label: isLiked
-                  ? 'حذف از علاقه‌مندی‌ها'
-                  : 'افزودن به علاقه‌مندی‌ها',
-              isActive: isLiked,
-              activeColor: Colors.red.shade400,
-              colorScheme: colorScheme,
-              textTheme: textTheme,
-              onTap: onLike,
-            ),
+
+          ValueListenableBuilder<bool>(
+            valueListenable: isLiked,
+            builder: (context, liked, _) {
+              return StaggeredMenuItem(
+                delay: 85,
+                child: MoreMenuItem(
+                  icon: liked ? Icons.favorite : Icons.favorite_border,
+                  label: liked
+                      ? 'حذف از علاقه‌مندی‌ها'
+                      : 'افزودن به علاقه‌مندی‌ها',
+                  isActive: liked,
+                  activeColor: Colors.red.shade400,
+                  colorScheme: colorScheme,
+                  textTheme: textTheme,
+                  onTap: onLike,
+                ),
+              );
+            },
           ),
+
           Divider(
             height: 0.5,
             thickness: 0.5,
@@ -83,17 +91,23 @@ class MoreMenuContent extends StatelessWidget {
             endIndent: 10,
             color: colorScheme.outlineVariant,
           ),
-          StaggeredMenuItem(
-            delay: 130,
-            child: MoreMenuItem(
-              icon: isSaved ? Icons.bookmark : Icons.bookmark_border,
-              label: isSaved ? 'حذف از ذخیره' : 'ذخیره برای بعد',
-              isActive: isSaved,
-              activeColor: Colors.greenAccent.shade400,
-              colorScheme: colorScheme,
-              textTheme: textTheme,
-              onTap: onSave,
-            ),
+
+          ValueListenableBuilder<bool>(
+            valueListenable: isSaved,
+            builder: (context, saved, _) {
+              return StaggeredMenuItem(
+                delay: 130,
+                child: MoreMenuItem(
+                  icon: saved ? Icons.bookmark : Icons.bookmark_border,
+                  label: saved ? 'حذف از ذخیره' : 'ذخیره برای بعد',
+                  isActive: saved,
+                  activeColor: Colors.greenAccent.shade400,
+                  colorScheme: colorScheme,
+                  textTheme: textTheme,
+                  onTap: onSave,
+                ),
+              );
+            },
           ),
         ],
       ),

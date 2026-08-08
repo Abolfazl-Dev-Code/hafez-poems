@@ -43,8 +43,9 @@ extension _PoemScreenActions on _PoemScreenState {
   }
 
   void _loadInitialActionsState() {
-    _isLiked = _actionController.isLiked(_args.id, _args.category);
-    _isSaved = _actionController.isSaved(_args.id, _args.category);
+    _isLiked.value = _actionController.isLiked(_args.id, _args.category);
+    _isSaved.value = _actionController.isSaved(_args.id, _args.category);
+
     _highlightedLineIndexes.addAll(
       _actionController.getHighlightedLineIndexes(_args.id, _args.category),
     );

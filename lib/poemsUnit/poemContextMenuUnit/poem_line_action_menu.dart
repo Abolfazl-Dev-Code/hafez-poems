@@ -1,8 +1,10 @@
+import 'package:hafez_poems/theme/app_icons.dart';
 import 'package:hafez_poems/theme/text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:hafez_poems/theme/app_radius.dart';
 import 'package:hafez_poems/poemsUnit/poemContextMenuUnit/menu_item_data.dart';
 import 'package:hafez_poems/theme/color_style.dart';
+import 'package:lottie/lottie.dart';
 
 class ActionMenu extends StatelessWidget {
   const ActionMenu({
@@ -42,21 +44,61 @@ class ActionMenu extends StatelessWidget {
     final shadow = isDark ? AppColors.darkShadow : AppColors.shadow;
 
     final items = <MenuItemData>[
-      MenuItemData(icon: Icons.copy_rounded, label: 'کپی مصرع', onTap: onCopy),
       MenuItemData(
-        icon: isHighlighted
-            ? Icons.highlight_remove_rounded
-            : Icons.highlight_rounded,
+        iconBuilder: (color) =>
+            Icon(Icons.content_copy_rounded, size: 18, color: color),
+        label: 'کپی مصرع',
+        onTap: onCopy,
+      ),
+      MenuItemData(
+        iconBuilder: (color) => ClipRect(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: Stack(
+              children: [
+                for (final offset in const [
+                  Offset(0, 0),
+                  Offset(0.6, 0),
+                  Offset(0, 0),
+                  Offset(0.6, 0),
+                ])
+                  Transform.translate(
+                    offset: offset,
+                    child: Transform.scale(
+                      scale: 2.6,
+                      child: Lottie.asset(
+                        AppIcons.highlight,
+                        fit: BoxFit.contain,
+                        animate: false,
+                        repeat: false,
+                        delegates: LottieDelegates(
+                          values: [
+                            ValueDelegate.color(const ['**'], value: color),
+                            ValueDelegate.strokeWidth(const [
+                              '**',
+                            ], value: 54.0),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
         label: isHighlighted ? 'حذف برگزیده' : 'برگزیدن مصرع',
         onTap: onToggleHighlight,
       ),
       MenuItemData(
-        icon: Icons.image_rounded,
+        iconBuilder: (color) =>
+            Icon(Icons.share_outlined, size: 18, color: color),
         label: 'اشتراک گذاری مصرع دلخواه',
         onTap: onShareAsImage,
       ),
       MenuItemData(
-        icon: Icons.play_circle_fill_rounded,
+        iconBuilder: (color) =>
+            Icon(Icons.play_circle_outline_outlined, size: 18, color: color),
         label: 'از این مصرع بخوان',
         onTap: onPlayFromHere,
       ),
@@ -107,7 +149,7 @@ class ActionMenu extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          Icon(item.icon, size: 20, color: iconColor),
+                          item.iconBuilder(iconColor),
                           const SizedBox(width: 12),
                           Text(
                             item.label,

@@ -26,7 +26,7 @@ part 'poem_screen_scroll.dart';
 part '../poemContextMenuUnit/poem_screen_line_menu.dart';
 part 'poem_screen_actions.dart';
 part 'poemScreenAppbar/poem_screen_app_bar_builder.dart';
-part '../poemContextMenuUnit/poem_screen_lines_card_builder.dart';
+part 'poem_screen_card_builder.dart';
 
 class PoemScreen extends StatefulWidget {
   final PoemScreenArgs args;
@@ -73,8 +73,8 @@ class _PoemScreenState extends State<PoemScreen>
   String _fontFamily = 'Vazir';
   Color _fontColor = Colors.black;
   final UserActionsSaver _actionController = UserActionsSaver();
-  bool _isLiked = false;
-  bool _isSaved = false;
+  final ValueNotifier<bool> _isLiked = ValueNotifier(false);
+  final ValueNotifier<bool> _isSaved = ValueNotifier(false);
   int? _selectedLineIndex;
   final Set<int> _highlightedLineIndexes = {};
   bool _isMultiLineSelecting = false;
@@ -102,7 +102,10 @@ class _PoemScreenState extends State<PoemScreen>
     _scheduleMarkAsRead();
     _initText();
     _scheduleMeasureBottomOverlay();
-    _shareController = AnimationController(vsync: this);
+    _shareController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
   }
 
   void _updateOverlayHeight(double height) {
@@ -151,11 +154,11 @@ class _PoemScreenState extends State<PoemScreen>
   }
 
   void _setIsLiked(bool value) {
-    setState(() => _isLiked = value);
+    _isLiked.value = value;
   }
 
   void _setIsSaved(bool value) {
-    setState(() => _isSaved = value);
+    _isSaved.value = value;
   }
 
   void _updateHighlightedLines() {
@@ -241,6 +244,8 @@ class _PoemScreenState extends State<PoemScreen>
     _audioCtrl.dispose();
     _verseSyncCtrl.dispose();
     _shareController.dispose();
+    _isLiked.dispose();
+    _isSaved.dispose();
     super.dispose();
   }
 
@@ -302,7 +307,7 @@ class _PoemScreenState extends State<PoemScreen>
                         physics: _isContextMenuOpen
                             ? const NeverScrollableScrollPhysics()
                             : const AlwaysScrollableScrollPhysics(),
-                        padding: EdgeInsets.fromLTRB(12, 0, 12, bottomPadding),
+                        padding: EdgeInsets.fromLTRB(12, 10, 12, bottomPadding),
                         child: _buildPoemLinesCard(
                           theme,
                           colorScheme,

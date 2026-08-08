@@ -34,7 +34,7 @@ class PoemLineContextMenuController {
     _overlayKey = GlobalKey<_PoemLineContextMenuOverlayState>();
 
     final media = MediaQuery.of(context);
-    const menuGap = 0.0;
+    const menuGap = -5.0;
     final menuHeight = ActionMenu.estimatedHeight();
     final topSpace = targetOffset.dy - media.padding.top;
     final bottomSpace =
@@ -96,4 +96,3 @@ class PoemLineContextMenuController {
     _entry = null;
   }
 }
-

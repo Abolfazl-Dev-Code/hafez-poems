@@ -9,7 +9,7 @@ extension _PoemScreenAppBarBuilder on _PoemScreenState {
     return AppBar(
       toolbarHeight: 50,
       automaticallyImplyLeading: false,
-      leadingWidth: 70,
+      leadingWidth: 75,
       leading: _isMultiLineSelecting
           ? null
           : Center(
@@ -74,7 +74,7 @@ extension _PoemScreenAppBarBuilder on _PoemScreenState {
             ]
           : [
               Padding(
-                padding: const EdgeInsets.only(left: AppSpacing.xs),
+                padding: const EdgeInsets.only(left: AppSpacing.lg),
                 child: AppBarMoreMenu(
                   isLiked: _isLiked,
                   isSaved: _isSaved,

@@ -1,12 +1,55 @@
+final _digitAndLetterMap = <String, String>{
+  '۰': '0', '٠': '0',
+  '۱': '1', '١': '1',
+  '۲': '2', '٢': '2',
+  '۳': '3', '٣': '3',
+  '۴': '4', '٤': '4',
+  '۵': '5', '٥': '5',
+  '۶': '6', '٦': '6',
+  '۷': '7', '٧': '7',
+  '۸': '8', '٨': '8',
+  '۹': '9', '٩': '9',
+  '\u064a': '\u06cc',
+  '\u0643': '\u06a9',
+};
+
+final _digitRegex = RegExp(r'\d+');
+
+String normalizeText(String text) {
+  final buffer = StringBuffer();
+  var pendingSpace = false;
+  var hasContent = false;
+
+  for (final rune in text.runes) {
+    final ch = String.fromCharCode(rune);
+    if (ch == '\u200c' || ch.trim().isEmpty) {
+      if (hasContent) pendingSpace = true;
+      continue;
+    }
+    if (pendingSpace) {
+      buffer.write(' ');
+      pendingSpace = false;
+    }
+    buffer.write(_digitAndLetterMap[ch] ?? ch);
+    hasContent = true;
+  }
+
+  return buffer.toString().toLowerCase();
+}
+
 class IndexedPoem<T> {
   final T original;
   final String normalizedTitle;
   final String normalizedText;
+  final String searchable;
+  final List<String> titleWords;
 
   const IndexedPoem({
     required this.original,
     required this.normalizedTitle,
     required this.normalizedText,
+    required this.searchable,
+    required this.titleWords,
   });
 }
 
@@ -38,11 +81,17 @@ class PoemSearchIndex<T> {
     }
   }
 
-  IndexedPoem<T> _toIndexed(T item) => IndexedPoem(
-    original: item,
-    normalizedTitle: _normalize(titleOf(item)),
-    normalizedText: _normalize(textOf(item)),
-  );
+  IndexedPoem<T> _toIndexed(T item) {
+    final normalizedTitle = normalizeText(titleOf(item));
+    final normalizedText = normalizeText(textOf(item));
+    return IndexedPoem(
+      original: item,
+      normalizedTitle: normalizedTitle,
+      normalizedText: normalizedText,
+      searchable: '$normalizedTitle $normalizedText',
+      titleWords: normalizedTitle.split(' '),
+    );
+  }
 
   List<MapEntry<T, int>> searchWithScore(String normalizedQuery) {
     if (normalizedQuery.trim().isEmpty) return [];
@@ -58,8 +107,7 @@ class PoemSearchIndex<T> {
     final result = <MapEntry<T, int>>[];
 
     for (final e in _entries) {
-      final searchable = '${e.normalizedTitle} ${e.normalizedText}';
-      if (!tokens.every((token) => searchable.contains(token))) continue;
+      if (!tokens.every((token) => e.searchable.contains(token))) continue;
 
       final score = _scoreEntry(e, normalizedQuery, tokens);
       result.add(MapEntry(e.original, score));
@@ -82,11 +130,11 @@ class PoemSearchIndex<T> {
     if (title == normalizedQuery) return 100;
     if (title.startsWith(normalizedQuery)) return 95;
     // اگر کوئری شامل عدد بود، تطابق دقیق‌تر عددی را اولویت بده
-    final numberMatch = RegExp(r'\d+').firstMatch(normalizedQuery);
+    final numberMatch = _digitRegex.firstMatch(normalizedQuery);
     if (numberMatch != null) {
       final queryNumber = numberMatch.group(0)!;
 
-      final titleNumberMatch = RegExp(r'\d+').firstMatch(title);
+      final titleNumberMatch = _digitRegex.firstMatch(title);
 
       if (titleNumberMatch != null) {
         final titleNumber = titleNumberMatch.group(0)!;
@@ -107,8 +155,7 @@ class PoemSearchIndex<T> {
       return 85;
     }
 
-    final titleWords = title.split(' ');
-    if (titleWords.any((w) => w.startsWith(normalizedQuery))) return 60;
+    if (e.titleWords.any((w) => w.startsWith(normalizedQuery))) return 60;
 
     int matchedTokens = 0;
     for (final token in tokens) {
@@ -118,32 +165,4 @@ class PoemSearchIndex<T> {
 
     return 10 + (ratio * 45).round();
   }
-
-  String _normalize(String text) => text
-      .replaceAll('۰', '0')
-      .replaceAll('٠', '0')
-      .replaceAll('۱', '1')
-      .replaceAll('١', '1')
-      .replaceAll('۲', '2')
-      .replaceAll('٢', '2')
-      .replaceAll('۳', '3')
-      .replaceAll('٣', '3')
-      .replaceAll('۴', '4')
-      .replaceAll('٤', '4')
-      .replaceAll('۵', '5')
-      .replaceAll('٥', '5')
-      .replaceAll('۶', '6')
-      .replaceAll('٦', '6')
-      .replaceAll('۷', '7')
-      .replaceAll('٧', '7')
-      .replaceAll('۸', '8')
-      .replaceAll('٨', '8')
-      .replaceAll('۹', '9')
-      .replaceAll('٩', '9')
-      .replaceAll('\u064a', '\u06cc')
-      .replaceAll('\u0643', '\u06a9')
-      .replaceAll('\u200c', ' ')
-      .replaceAll(RegExp(r'\s+'), ' ')
-      .trim()
-      .toLowerCase();
 }

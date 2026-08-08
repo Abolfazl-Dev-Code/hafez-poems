@@ -22,30 +22,30 @@ class MoreMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isActive
+    final iconColor = isActive
         ? (activeColor ?? colorScheme.primary)
         : colorScheme.onSurfaceVariant;
 
     return Material(
-      color: isActive
-          ? (activeColor ?? colorScheme.primary).withValues(alpha: 0.12)
-          : Colors.transparent,
+      color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Row(
+            textDirection: TextDirection.rtl,
             children: [
-              Icon(icon, size: 18, color: color),
-              const SizedBox(width: 10),
+              Icon(icon, size: 20, color: iconColor),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   label,
+                  textAlign: TextAlign.right,
                   style: textTheme.bodyMedium?.copyWith(
-                    color: isActive
-                        ? (activeColor ?? colorScheme.primary)
-                        : colorScheme.onSurface,
+                    color: colorScheme.onSurface,
                     fontSize: 14,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),

@@ -1,4 +1,4 @@
-part of '../poems/poem_screen.dart';
+part of 'poem_screen.dart';
 
 extension _PoemScreenLinesCardBuilder on _PoemScreenState {
   Widget _buildPoemLinesCard(

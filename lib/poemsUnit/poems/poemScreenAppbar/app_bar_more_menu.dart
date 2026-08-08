@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'more_menu_content.dart';
 
 class AppBarMoreMenu extends StatefulWidget {
-  final bool isLiked;
-  final bool isSaved;
+  final ValueNotifier<bool> isLiked;
+  final ValueNotifier<bool> isSaved;
   final VoidCallback onLike;
   final VoidCallback onSave;
   final VoidCallback onShare;
@@ -100,7 +100,7 @@ class _AppBarMoreMenuState extends State<AppBarMoreMenu>
             CompositedTransformFollower(
               link: _layerLink,
               showWhenUnlinked: false,
-              offset: const Offset(-164, 44),
+              offset: const Offset(5, 44),
               child: Material(
                 color: Colors.transparent,
                 child: FadeTransition(
@@ -113,8 +113,14 @@ class _AppBarMoreMenuState extends State<AppBarMoreMenu>
                       isSaved: widget.isSaved,
                       colorScheme: widget.colorScheme,
                       textTheme: widget.textTheme,
-                      onLike: widget.onLike,
-                      onSave: widget.onSave,
+                      onLike: () {
+                        widget.onLike();
+                        _overlayEntry?.markNeedsBuild();
+                      },
+                      onSave: () {
+                        widget.onSave();
+                        _overlayEntry?.markNeedsBuild();
+                      },
                       onShare: () {
                         _close();
                         widget.onShare();
@@ -155,7 +161,7 @@ class _AppBarMoreMenuState extends State<AppBarMoreMenu>
               curve: Curves.easeOut,
               child: Icon(
                 Icons.more_horiz,
-                size: 22,
+                size: 29,
                 color: widget.colorScheme.onSurface,
               ),
             ),
