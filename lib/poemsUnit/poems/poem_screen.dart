@@ -104,10 +104,30 @@ class _PoemScreenState extends State<PoemScreen>
     _scheduleMarkAsRead();
     _initText();
     _scheduleMeasureBottomOverlay();
+    _loadReadProgress();
     _shareController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
+  }
+
+  Future<void> _loadReadProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedIndex = prefs.getInt('progress_poem_${_args.id}');
+
+    if (savedIndex != null && savedIndex != -1) {
+      setState(() {
+        _readUpToLineIndex = savedIndex;
+      });
+    }
+  }
+
+  Future<void> toggleReadUpToHere(int index) async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _readUpToLineIndex = _readUpToLineIndex == index ? null : index;
+    });
+    await prefs.setInt('progress_poem_${_args.id}', _readUpToLineIndex ?? -1);
   }
 
   void _updateOverlayHeight(double height) {

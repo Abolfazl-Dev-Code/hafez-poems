@@ -1,17 +1,14 @@
 part of 'poem_screen.dart';
 
 extension _PoemScreenReadMarker on _PoemScreenState {
-  void _toggleReadUpToHere(int index) {
-    setState(() {
-      _readUpToLineIndex = _readUpToLineIndex == index ? null : index;
-    });
-  }
-
   Future<void> _goToReadMarker() async {
     final index = _readUpToLineIndex;
     if (index == null) return;
     _pauseAutoScroll();
-    await _scrollToLineIndex(index, duration: const Duration(milliseconds: 500));
+    await _scrollToLineIndex(
+      index,
+      duration: const Duration(milliseconds: 500),
+    );
     if (!mounted) return;
     await _flashLineTwice(index);
     if (!mounted) return;
@@ -48,11 +45,7 @@ extension _PoemScreenReadMarker on _PoemScreenState {
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.bookmark_rounded,
-                  size: 16,
-                  color: AppColors.accent,
-                ),
+                Icon(Icons.bookmark_rounded, size: 16, color: AppColors.accent),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(

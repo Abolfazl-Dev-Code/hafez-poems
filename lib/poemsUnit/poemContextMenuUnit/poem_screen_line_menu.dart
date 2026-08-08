@@ -37,7 +37,7 @@ extension _PoemScreenLineMenu on _PoemScreenState {
         _selectedLineIndex = index;
         _toggleHighlight();
       },
-      onToggleReadMarker: () => _toggleReadUpToHere(index),
+      onToggleReadMarker: () => toggleReadUpToHere(index),
       onShareAsImage: () => _showShareModeSheet(index),
       onClosed: () {
         if (!mounted) return;

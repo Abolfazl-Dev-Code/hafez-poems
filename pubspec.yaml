@@ -1,7 +1,7 @@
 name: hafez_poems
 description: "Poems of Hafez"
 publish_to: "none"
-version: 2.7.29+15
+version: 2.7.31+15
 
 environment:
   sdk: ^3.12.2
